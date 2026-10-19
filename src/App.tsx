@@ -40,8 +40,19 @@ export const App: React.FC = () => {
   const [showMoreMenu, setShowMoreMenu] = useState<boolean>(false);
   const [showStreakModal, setShowStreakModal] = useState<boolean>(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState<boolean>(false);
+  const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
   const activeInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Track window scroll to morph the sticky top bar into the iOS 26 Translate compact header
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 24);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Hide the bottom menu bar when an input is focused so the iOS keyboard covers it cleanly
   useEffect(() => {
@@ -123,6 +134,11 @@ export const App: React.FC = () => {
   if (!session || !progress) {
     return (
       <>
+        {/* 8px solid black fixed top strip forces iOS WebKit to sample #000000 for the status bar instead of applying system frosted-glass blur */}
+        <div
+          aria-hidden="true"
+          className="fixed top-0 inset-x-0 h-[8px] bg-black z-60 pointer-events-none"
+        />
         <IosInstallBanner />
         <AuthView
           onAuthenticated={(newSession) => {
@@ -149,6 +165,12 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-black text-white">
+      {/* 8px solid black fixed element at top:0 forces iOS status bar to adopt solid #000000 instead of system frosted blur */}
+      <div
+        aria-hidden="true"
+        className="fixed top-0 inset-x-0 h-[8px] bg-black z-60 pointer-events-none"
+      />
+
       <IosInstallBanner />
       {showStreakModal && (
         <StreakStatsModal
@@ -158,9 +180,13 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* Top Header: Full edge-to-edge real estate with pt-safe padding */}
-      <header className="pt-safe px-4 sm:px-6 pt-3 pb-2 max-w-5xl w-full mx-auto">
-        <div className="flex items-center justify-between mb-3">
+      {/* Sticky Top Toolbar: Circular Liquid Glass Buttons + Centered Inline Title on Scroll (1:1 with iOS 26 Translate) */}
+      <div
+        className={`sticky top-0 z-40 pt-safe transition-all duration-200 ${
+          isScrolled ? 'tr-sticky-header-scrolled' : 'bg-transparent'
+        }`}
+      >
+        <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 pt-2.5 pb-2.5 relative flex items-center justify-between">
           {/* Left Circular Liquid Glass Button (Quick Vocabulary Toggle) */}
           <button
             type="button"
@@ -181,13 +207,24 @@ export const App: React.FC = () => {
             />
           </button>
 
+          {/* Centered Compact Inline Title (Fades in when scrolled past the Large Title, just like iOS 26 Translate) */}
+          <div
+            className={`absolute left-1/2 -translate-x-1/2 text-[17px] font-semibold text-white tracking-tight pointer-events-none transition-all duration-200 ${
+              isScrolled
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-1.5'
+            }`}
+          >
+            {TAB_TITLES[activeTab]}
+          </div>
+
           {/* Right Circular Controls: Tappable Streak Badge + ••• User Menu */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setShowStreakModal(true)}
               title="Tap to view streak history, calendar & leaderboard"
-              className="h-[46px] px-4 rounded-full flex items-center gap-2 text-[14px] font-bold cursor-pointer active:scale-95 transition-transform tr-circle-glass"
+              className="h-[46px] px-3.5 rounded-full flex items-center gap-1.5 text-[14px] font-bold cursor-pointer active:scale-95 transition-transform tr-circle-glass"
             >
               <Flame
                 className="w-4 h-4"
@@ -258,15 +295,21 @@ export const App: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Large Bold iOS Title */}
-        <h1 className="font-display text-[34px] sm:text-[38px] leading-[1.08] text-white tracking-tight">
+      {/* Large Bold iOS Title (Scrolls naturally underneath the sticky top bar and fades out) */}
+      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 pt-1 pb-2">
+        <h1
+          className={`font-display text-[34px] sm:text-[38px] leading-[1.08] text-white tracking-tight transition-opacity duration-150 ${
+            isScrolled ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
           {TAB_TITLES[activeTab]}
         </h1>
-      </header>
+      </div>
 
-      {/* Full-Bleed Main Content Area (full edge-to-edge screen real estate) */}
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-2 pb-28">
+      {/* Full-Bleed Main Content Area */}
+      <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-1 pb-28">
         {activeTab === 'table' && (
           <TableTrainerView
             progress={progress}
