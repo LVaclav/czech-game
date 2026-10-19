@@ -5,11 +5,11 @@ import {
   Check,
   CheckCircle2,
   Eye,
-  Lightbulb,
-  RotateCcw,
+  EyeOff,
 } from 'lucide-react';
 import {
   ActiveTableSession,
+  CefrLevel,
   FutureMode,
   PersonRowKey,
   TenseKey,
@@ -36,6 +36,13 @@ interface TableTrainerViewProps {
   onClearForcedVerb: () => void;
   activeInputRef: React.MutableRefObject<HTMLInputElement | null>;
 }
+
+const LEVEL_LABELS: Record<CefrLevel, string> = {
+  A1: 'A1 Basic',
+  A2: 'A2 Elementary',
+  B1: 'B1 Intermediate',
+  B2: 'B2 Advanced',
+};
 
 const TENSES: { key: TenseKey; titleCz: string; shortCz: string; titleEn: string }[] = [
   { key: 'past', titleCz: 'Minulý čas', shortCz: 'Minulý', titleEn: 'Past Tense' },
@@ -108,7 +115,7 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
   }));
   const [cellFeedback, setCellFeedback] = useState<Record<string, CellFeedback>>({});
   const [mobileTense, setMobileTense] = useState<TenseKey>('past');
-  const [showMnemonic, setShowMnemonic] = useState(false);
+  const [isSentenceRevealed, setIsSentenceRevealed] = useState(false);
   const [justCompletedWord, setJustCompletedWord] = useState(false);
 
   const cellInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -131,6 +138,7 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
       setInputs({});
       setCellFeedback({});
       setMobileTense('past');
+      setIsSentenceRevealed(false);
       setJustCompletedWord(false);
       onClearForcedVerb();
     }
@@ -320,10 +328,8 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
     setJustCompletedWord(false);
   };
 
-  const startNextWord = (rerollSameVerb = false) => {
-    const nextSel = rerollSameVerb
-      ? selectionInfo
-      : selectNextVerbForTable(progress, verb.id);
+  const startNextWord = () => {
+    const nextSel = selectNextVerbForTable(progress, verb.id);
 
     const newSession = createTableSessionForVerb(nextSel.verb);
     setSelectionInfo(nextSel);
@@ -332,7 +338,7 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
     setCellFeedback({});
     setMobileTense('past');
     setJustCompletedWord(false);
-    setShowMnemonic(false);
+    setIsSentenceRevealed(false);
 
     onUpdateProgress({
       ...progress,
@@ -344,97 +350,114 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
     });
   };
 
+  const levelBadge = verb.level ? LEVEL_LABELS[verb.level] : 'A1 Basic';
+
   return (
     <div className="space-y-4">
       {/* 1. Spacious Verb Header Card (Styled with iOS 26 Translate #18181B surface & Cyan accents) */}
       <div className="tr-card p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="space-y-2">
-            {/* Metadata Pills */}
-            <div className="flex flex-wrap items-center gap-2">
-              {selectionInfo.reason === 'relapsed' ? (
-                <span
-                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold"
-                  style={{
-                    backgroundColor: 'var(--tr-orange-soft)',
-                    color: 'var(--tr-orange)',
-                  }}
-                >
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  Re-Queued Priority ({selectionInfo.priorityScore})
-                </span>
-              ) : (
-                <span
-                  className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold"
-                  style={{
-                    backgroundColor: 'var(--tr-cyan-soft)',
-                    color: 'var(--tr-cyan)',
-                  }}
-                >
-                  Freq #{verb.frequencyRank}
-                </span>
-              )}
-
-              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/8 text-[#8E8E93]">
-                {verb.conjugationClass}
-              </span>
-
-              {verb.aspectPairInfinitive && (
-                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/8 text-white">
-                  Pair: <strong style={{ color: 'var(--tr-cyan)' }}>{verb.aspectPairInfinitive}</strong>
-                </span>
-              )}
-            </div>
-
-            {/* Czech Verb + Glowing Cyan English Translation */}
-            <div className="flex items-baseline gap-3.5 flex-wrap pt-0.5">
-              <h2 className="font-display text-3xl sm:text-4xl text-white tracking-tight">
-                {verb.infinitive}
-              </h2>
+        <div className="space-y-2.5">
+          {/* Metadata Pills */}
+          <div className="flex flex-wrap items-center gap-2">
+            {selectionInfo.reason === 'relapsed' ? (
               <span
-                className="font-display text-2xl sm:text-3xl"
-                style={{ color: 'var(--tr-cyan)' }}
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold"
+                style={{
+                  backgroundColor: 'var(--tr-orange-soft)',
+                  color: 'var(--tr-orange)',
+                }}
               >
-                — {verb.english}
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Re-Queued Priority ({selectionInfo.priorityScore})
               </span>
-            </div>
+            ) : (
+              <span
+                className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold"
+                style={{
+                  backgroundColor: 'var(--tr-cyan-soft)',
+                  color: 'var(--tr-cyan)',
+                }}
+              >
+                {levelBadge} • #{verb.frequencyRank}
+              </span>
+            )}
 
-            <p className="text-xs sm:text-sm text-[#8E8E93]">
-              “{verb.exampleCz}” <span className="text-[#545458]">({verb.exampleEn})</span>
-            </p>
+            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/8 text-[#8E8E93]">
+              {verb.conjugationClass}
+            </span>
+
+            {verb.aspectPairInfinitive && (
+              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/8 text-white">
+                Pair:{' '}
+                <strong style={{ color: 'var(--tr-cyan)' }}>
+                  {verb.aspectPairInfinitive}
+                </strong>
+              </span>
+            )}
           </div>
 
-          {/* Right Controls: Pattern Tip + Reroll Genders */}
-          <div className="flex items-center gap-2 self-start">
-            <button
-              type="button"
-              onClick={() => setShowMnemonic((prev) => !prev)}
-              className="h-10 px-4 rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer tr-circle-glass"
-              style={{
-                color: showMnemonic ? 'var(--tr-cyan)' : '#ffffff',
-              }}
+          {/* Czech Verb + Glowing Cyan English Translation */}
+          <div className="flex items-baseline gap-3.5 flex-wrap pt-0.5">
+            <h2 className="font-display text-3xl sm:text-4xl text-white tracking-tight">
+              {verb.infinitive}
+            </h2>
+            <span
+              className="font-display text-2xl sm:text-3xl"
+              style={{ color: 'var(--tr-cyan)' }}
             >
-              <Lightbulb className="w-4 h-4" />
-              <span>Pattern Tip</span>
-            </button>
+              — {verb.english}
+            </span>
+          </div>
 
+          {/* Example Sentence: Blurred by default, tap to reveal/hide */}
+          <div className="pt-1">
             <button
               type="button"
-              onClick={() => startNextWord(true)}
-              title="Reset table with new random genders"
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white cursor-pointer tr-circle-glass"
+              onClick={() => setIsSentenceRevealed((prev) => !prev)}
+              className="group relative inline-flex items-center gap-2.5 text-left px-3.5 py-2 rounded-2xl bg-black/55 border border-white/8 hover:border-white/15 transition-all cursor-pointer max-w-full"
+              title={
+                isSentenceRevealed
+                  ? 'Tap to blur example sentence'
+                  : 'Tap to reveal example sentence'
+              }
             >
-              <RotateCcw className="w-4 h-4" />
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#8E8E93] shrink-0 flex items-center gap-1">
+                {isSentenceRevealed ? (
+                  <EyeOff
+                    className="w-3.5 h-3.5"
+                    style={{ color: 'var(--tr-cyan)' }}
+                  />
+                ) : (
+                  <Eye
+                    className="w-3.5 h-3.5"
+                    style={{ color: 'var(--tr-cyan)' }}
+                  />
+                )}
+                <span>Example:</span>
+              </span>
+
+              <span
+                className={`text-xs sm:text-sm text-[#D1D1D6] transition-all duration-200 ${
+                  isSentenceRevealed
+                    ? 'blur-none select-text'
+                    : 'blur-[5px] select-none opacity-80'
+                }`}
+              >
+                “{verb.exampleCz}”{' '}
+                <span className="text-[#8E8E93]">({verb.exampleEn})</span>
+              </span>
+
+              {!isSentenceRevealed && (
+                <span
+                  className="text-[11px] font-semibold shrink-0 ml-1"
+                  style={{ color: 'var(--tr-cyan)' }}
+                >
+                  Tap to reveal
+                </span>
+              )}
             </button>
           </div>
         </div>
-
-        {showMnemonic && (
-          <div className="mt-4 p-4 rounded-2xl bg-black/50 text-xs sm:text-sm text-white/90 leading-relaxed">
-            <strong style={{ color: 'var(--tr-cyan)' }}>Grammar & Stem Tip:</strong>{' '}
-            {verb.mnemonicTip}
-          </div>
-        )}
 
         {/* 18-Cell Progress Track */}
         <div className="mt-5 pt-4 tr-hairline-t flex items-center justify-between gap-4">
@@ -499,7 +522,7 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
 
           <button
             type="button"
-            onClick={() => startNextWord(false)}
+            onClick={() => startNextWord()}
             className="w-full sm:w-auto px-6 py-3 text-sm flex items-center justify-center gap-2 cursor-pointer shrink-0 tr-btn-cyan"
           >
             <span>Next Word</span>

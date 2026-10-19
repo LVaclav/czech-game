@@ -29,9 +29,12 @@ export interface PastForms {
   oni: string[];
 }
 
+export type CefrLevel = 'A1' | 'A2' | 'B1' | 'B2';
+
 export interface VerbEntry {
   id: string;
   frequencyRank: number;
+  level?: CefrLevel;
   infinitive: string;
   aspect: 'impf' | 'pf' | 'biaspectual';
   aspectPairInfinitive: string | null; // e.g. "udělat" for "dělat"

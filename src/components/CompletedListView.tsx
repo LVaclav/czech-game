@@ -6,13 +6,36 @@ import {
   RotateCcw,
   Trophy,
 } from 'lucide-react';
-import { UserProgressBlob } from '../types';
+import { CefrLevel, UserProgressBlob } from '../types';
 import { ALL_VERBS, VERB_MAP } from '../lib/priorityQueue';
 
 interface CompletedListViewProps {
   progress: UserProgressBlob;
   onPracticeVerbInTable: (verbId: string) => void;
 }
+
+const TIERS: { level: CefrLevel; title: string; subtitle: string }[] = [
+  {
+    level: 'A1',
+    title: 'Tier 1 • A1 Basic (Verbs #1–25)',
+    subtitle: 'Core survival verbs & regular -at / -it / -ovat patterns',
+  },
+  {
+    level: 'A2',
+    title: 'Tier 2 • A2 Elementary (Verbs #26–50)',
+    subtitle: 'Modals, daily routines & first reflexive (se) verbs',
+  },
+  {
+    level: 'B1',
+    title: 'Tier 3 • B1 Intermediate (Verbs #51–75)',
+    subtitle: 'Dative reflexives (si), aspect pairs & stem alternations',
+  },
+  {
+    level: 'B2',
+    title: 'Tier 4 • B2 Advanced (Verbs #76–100)',
+    subtitle: 'Complex irregular stems, motion verbs & abstract discourse',
+  },
+];
 
 export const CompletedListView: React.FC<CompletedListViewProps> = ({
   progress,
@@ -45,7 +68,7 @@ export const CompletedListView: React.FC<CompletedListViewProps> = ({
               Mastered Verbs ({completedRecords.length} / {ALL_VERBS.length})
             </h2>
             <p className="text-[14px] text-[#8E8E93]">
-              Every verb below is active in your Flashcard pool. Tap any verb to drill its 18-cell table.
+              Sourced from the Czech National Corpus (SYN2020) & Charles University ÚJOP CEFR A1–B2 progression.
             </p>
           </div>
         </div>
@@ -82,6 +105,9 @@ export const CompletedListView: React.FC<CompletedListViewProps> = ({
                         / {verb.aspectPairInfinitive}
                       </span>
                     )}
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-black text-[#8E8E93] border border-white/10">
+                      {verb.level || 'A1'} • #{verb.frequencyRank}
+                    </span>
                     {rec.inMatrixQueue ? (
                       <span
                         className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full"
@@ -148,31 +174,57 @@ export const CompletedListView: React.FC<CompletedListViewProps> = ({
         </div>
       )}
 
-      {/* Upcoming Corpus */}
+      {/* Upcoming Corpus Organized by Progressive CEFR Tiers (A1 -> A2 -> B1 -> B2) */}
       {uncompletedVerbs.length > 0 && (
-        <div className="tr-card p-5 sm:p-6 space-y-3.5">
-          <div className="flex items-center justify-between">
-            <h3 className="text-[13px] font-bold uppercase tracking-wider text-[#8E8E93]">
-              Upcoming in Corpus ({uncompletedVerbs.length} remaining)
-            </h3>
-            <span className="text-[12px] text-[#8E8E93]">Tap any verb to jump ahead</span>
-          </div>
+        <div className="space-y-4">
+          {TIERS.map((tier) => {
+            const tierVerbs = ALL_VERBS.filter((v) => (v.level || 'A1') === tier.level);
+            const remainingInTier = tierVerbs.filter(
+              (v) => !progress.verbs[v.id]?.completed
+            );
+            const masteredInTier = tierVerbs.length - remainingInTier.length;
 
-          <div className="flex flex-wrap gap-2">
-            {uncompletedVerbs.map((verb) => (
-              <button
-                key={verb.id}
-                type="button"
-                onClick={() => onPracticeVerbInTable(verb.id)}
-                className="px-3.5 py-2 rounded-2xl text-[13px] font-medium bg-black border border-white/10 hover:border-[#00E5E5]/50 transition-colors flex items-center gap-2 cursor-pointer"
-              >
-                <span className="text-[#8E8E93] text-[11px]">#{verb.frequencyRank}</span>
-                <span className="font-bold text-white">{verb.infinitive}</span>
-                <span style={{ color: 'var(--tr-cyan)' }}>({verb.english})</span>
-                <ChevronRight className="w-3.5 h-3.5 text-[#545458]" />
-              </button>
-            ))}
-          </div>
+            if (remainingInTier.length === 0) return null;
+
+            return (
+              <div key={tier.level} className="tr-card p-5 sm:p-6 space-y-3.5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h3 className="text-[14px] font-bold text-white">
+                      {tier.title}
+                    </h3>
+                    <p className="text-[12px] text-[#8E8E93]">{tier.subtitle}</p>
+                  </div>
+                  <span
+                    className="text-[12px] font-bold px-3 py-1 rounded-full bg-black border border-white/10"
+                    style={{ color: 'var(--tr-cyan)' }}
+                  >
+                    {masteredInTier}/{tierVerbs.length} mastered
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {remainingInTier.map((verb) => (
+                    <button
+                      key={verb.id}
+                      type="button"
+                      onClick={() => onPracticeVerbInTable(verb.id)}
+                      className="px-3.5 py-2 rounded-2xl text-[13px] font-medium bg-black border border-white/10 hover:border-[#00E5E5]/50 transition-colors flex items-center gap-2 cursor-pointer"
+                    >
+                      <span className="text-[#8E8E93] text-[11px]">
+                        #{verb.frequencyRank}
+                      </span>
+                      <span className="font-bold text-white">{verb.infinitive}</span>
+                      <span style={{ color: 'var(--tr-cyan)' }}>
+                        ({verb.english})
+                      </span>
+                      <ChevronRight className="w-3.5 h-3.5 text-[#545458]" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

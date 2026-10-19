@@ -129,8 +129,8 @@ function ensurePwaIcons() {
 
 function verifyVerbCorpus() {
   const verbs = verbsData as VerbEntry[];
-  if (verbs.length < 25) {
-    throw new Error(`Expected at least 25 high-frequency verbs, found ${verbs.length}`);
+  if (verbs.length < 100) {
+    throw new Error(`Expected at least 100 progressive Czech verbs, found ${verbs.length}`);
   }
 
   const seenIds = new Set<string>();
@@ -251,10 +251,10 @@ function verifyPriorityRelapseAndAuth() {
     throw new Error('Expected "byt" to be marked completed and removed from matrix queue');
   }
 
-  // Next verb for table should now be 'chtit' (#3)
+  // Next verb for table should now be 'delat' (#3 model regular -at verb)
   const nextPick = selectNextVerbForTable(progress);
-  if (nextPick.verb.id !== 'chtit') {
-    throw new Error(`Expected next unseen verb to be "chtit", got ${nextPick.verb.id}`);
+  if (nextPick.verb.id !== 'delat') {
+    throw new Error(`Expected next unseen verb to be "delat", got ${nextPick.verb.id}`);
   }
 
   // Miss 'byt' twice in a row in Flashcards -> should stay in completedVerbs AND jump to top of Table Trainer queue!
