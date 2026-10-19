@@ -458,36 +458,6 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
             </button>
           </div>
         </div>
-
-        {/* 18-Cell Progress Track */}
-        <div className="mt-5 pt-4 tr-hairline-t flex items-center justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex justify-between text-xs font-semibold mb-1.5">
-              <span className="text-[#8E8E93]">
-                3×2 Mastery Progress (Past • Present • Future)
-              </span>
-              <span
-                className="tabular-nums font-bold"
-                style={{
-                  color: isAll18Complete ? 'var(--tr-green)' : 'var(--tr-cyan)',
-                }}
-              >
-                {totalLocked} / 18 locked
-              </span>
-            </div>
-            <div className="w-full h-2 rounded-full bg-black overflow-hidden">
-              <div
-                className="h-full transition-all duration-300 rounded-full"
-                style={{
-                  width: `${Math.round((totalLocked / 18) * 100)}%`,
-                  backgroundColor: isAll18Complete
-                    ? 'var(--tr-green)'
-                    : 'var(--tr-cyan)',
-                }}
-              />
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* 2. Celebration Banner when all 18/18 cells are complete */}
@@ -850,22 +820,6 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
           );
         })}
       </div>
-
-      {/* 5. Bottom Check All 3 Tenses Bar */}
-      {!isAll18Complete && (
-        <div className="tr-card p-4 sm:px-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="text-xs sm:text-sm text-[#8E8E93]">
-            Correct cells lock in (<span style={{ color: 'var(--tr-green)' }}>✓</span>). Keep retrying remaining cells until all 3 tenses (18/18) are right!
-          </div>
-          <button
-            type="button"
-            onClick={() => validateCells(['past', 'present', 'future'])}
-            className="px-6 py-3 text-sm shrink-0 cursor-pointer tr-btn-cyan"
-          >
-            Check All 3 Tenses ({18 - totalLocked} left)
-          </button>
-        </div>
-      )}
     </div>
   );
 };
