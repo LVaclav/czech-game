@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="112" fill="#0F172A"/>
+  <rect x="28" y="28" width="456" height="456" rx="92" fill="url(#bg)" stroke="#334155" stroke-width="8"/>
+  <!-- Stylized Czech Flag Ribbon & Háček Checkmark -->
+  <path d="M128 164C128 146.327 142.327 132 160 132H352C369.673 132 384 146.327 384 164V256H128V164Z" fill="#F8FAFC"/>
+  <path d="M128 256H384V348C384 365.673 369.673 380 352 380H160C142.327 380 128 365.673 128 348V256Z" fill="#E11D48"/>
+  <path d="M128 148C128 139.163 135.163 132 144 132L264 256L144 380C135.163 380 128 372.837 128 364V148Z" fill="#2563EB"/>
+  <!-- Háček (ˇ) accent badge -->
+  <circle cx="368" cy="144" r="56" fill="#4F46E5" stroke="#0F172A" stroke-width="10"/>
+  <path d="M346 132L368 158L390 132" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="bg" x1="28" y1="28" x2="484" y2="484" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1E293B"/>
+      <stop offset="1" stop-color="#0F172A"/>
+    </linearGradient>
+  </defs>
+</svg>

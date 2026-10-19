@@ -1,0 +1,1460 @@
+[
+  {
+    "id": "byt",
+    "frequencyRank": 1,
+    "infinitive": "být",
+    "aspect": "impf",
+    "aspectPairInfinitive": null,
+    "english": "to be",
+    "conjugationClass": "nepravidelné (irregular)",
+    "reflexive": null,
+    "mnemonicTip": "Fundamental auxiliary verb: 'jsem, jsi, je, jsme, jste, jsou' in present; 'budu, budeš...' in future.",
+    "exampleCz": "Jsem doma, ale zítra budu v Praze.",
+    "exampleEn": "I am at home, but tomorrow I will be in Prague.",
+    "forms": {
+      "present": {
+        "ja": ["jsem"],
+        "ty": ["jsi"],
+        "thirdSg": ["je"],
+        "my": ["jsme"],
+        "vy": ["jste"],
+        "oni": ["jsou"]
+      },
+      "past": {
+        "ja_m": ["byl jsem"],
+        "ja_f": ["byla jsem"],
+        "ty_m": ["byl jsi"],
+        "ty_f": ["byla jsi"],
+        "on": ["byl"],
+        "ona": ["byla"],
+        "ono": ["bylo"],
+        "my": ["byli jsme"],
+        "vy": ["byli jste"],
+        "oni": ["byli"]
+      },
+      "futureImpf": {
+        "ja": ["budu"],
+        "ty": ["budeš"],
+        "thirdSg": ["bude"],
+        "my": ["budeme"],
+        "vy": ["budete"],
+        "oni": ["budou"]
+      }
+    }
+  },
+  {
+    "id": "mit",
+    "frequencyRank": 2,
+    "infinitive": "mít",
+    "aspect": "impf",
+    "aspectPairInfinitive": null,
+    "english": "to have",
+    "conjugationClass": "-á (5. třída, nepravidelné min. měl)",
+    "reflexive": null,
+    "mnemonicTip": "Present conjugates regularly like -at (mám, máš, má...), but Past uses stem 'měl-' (měl jsem).",
+    "exampleCz": "Mám čas dnes večer.",
+    "exampleEn": "I have time tonight.",
+    "forms": {
+      "present": {
+        "ja": ["mám"],
+        "ty": ["máš"],
+        "thirdSg": ["má"],
+        "my": ["máme"],
+        "vy": ["máte"],
+        "oni": ["mají"]
+      },
+      "past": {
+        "ja_m": ["měl jsem"],
+        "ja_f": ["měla jsem"],
+        "ty_m": ["měl jsi"],
+        "ty_f": ["měla jsi"],
+        "on": ["měl"],
+        "ona": ["měla"],
+        "ono": ["mělo"],
+        "my": ["měli jsme"],
+        "vy": ["měli jste"],
+        "oni": ["měli"]
+      },
+      "futureImpf": {
+        "ja": ["budu mít"],
+        "ty": ["budeš mít"],
+        "thirdSg": ["bude mít"],
+        "my": ["budeme mít"],
+        "vy": ["budete mít"],
+        "oni": ["budou mít"]
+      }
+    }
+  },
+  {
+    "id": "chtit",
+    "frequencyRank": 3,
+    "infinitive": "chtít",
+    "aspect": "impf",
+    "aspectPairInfinitive": null,
+    "english": "to want",
+    "conjugationClass": "nepravidelné (chci / chtějí)",
+    "reflexive": null,
+    "mnemonicTip": "Watch the stem shift: Já chci, Ty chceš, On chce, My chceme, Vy chcete, but Oni chtějí!",
+    "exampleCz": "Chci mluvit dobře česky.",
+    "exampleEn": "I want to speak Czech well.",
+    "forms": {
+      "present": {
+        "ja": ["chci"],
+        "ty": ["chceš"],
+        "thirdSg": ["chce"],
+        "my": ["chceme"],
+        "vy": ["chcete"],
+        "oni": ["chtějí"]
+      },
+      "past": {
+        "ja_m": ["chtěl jsem"],
+        "ja_f": ["chtěla jsem"],
+        "ty_m": ["chtěl jsi"],
+        "ty_f": ["chtěla jsi"],
+        "on": ["chtěl"],
+        "ona": ["chtěla"],
+        "ono": ["chtělo"],
+        "my": ["chtěli jsme"],
+        "vy": ["chtěli jste"],
+        "oni": ["chtěli"]
+      },
+      "futureImpf": {
+        "ja": ["budu chtít"],
+        "ty": ["budeš chtít"],
+        "thirdSg": ["bude chtít"],
+        "my": ["budeme chtít"],
+        "vy": ["budete chtít"],
+        "oni": ["budou chtít"]
+      }
+    }
+  },
+  {
+    "id": "moct",
+    "frequencyRank": 4,
+    "infinitive": "moct",
+    "aspect": "impf",
+    "aspectPairInfinitive": "pomoct",
+    "english": "can / to be able to",
+    "conjugationClass": "-e (1. třída, můžu/mohu)",
+    "reflexive": null,
+    "mnemonicTip": "Spoken Czech uses 'můžu / můžou' (bookish 'mohu / mohou'). Past masculine singular has no vowel before -l: 'mohl jsem'.",
+    "exampleCz": "Můžu ti pomoct?",
+    "exampleEn": "Can I help you?",
+    "forms": {
+      "present": {
+        "ja": ["můžu", "mohu"],
+        "ty": ["můžeš"],
+        "thirdSg": ["může"],
+        "my": ["můžeme"],
+        "vy": ["můžete"],
+        "oni": ["můžou", "mohou"]
+      },
+      "past": {
+        "ja_m": ["mohl jsem"],
+        "ja_f": ["mohla jsem"],
+        "ty_m": ["mohl jsi"],
+        "ty_f": ["mohla jsi"],
+        "on": ["mohl"],
+        "ona": ["mohla"],
+        "ono": ["mohlo"],
+        "my": ["mohli jsme"],
+        "vy": ["mohli jste"],
+        "oni": ["mohli"]
+      },
+      "futureImpf": {
+        "ja": ["budu moct", "budu moci"],
+        "ty": ["budeš moct", "budeš moci"],
+        "thirdSg": ["bude moct", "bude moci"],
+        "my": ["budeme moct", "budeme moci"],
+        "vy": ["budete moct", "budete moci"],
+        "oni": ["budou moct", "budou moci"]
+      },
+      "futurePf": {
+        "ja": ["pomůžu", "pomohu"],
+        "ty": ["pomůžeš"],
+        "thirdSg": ["pomůže"],
+        "my": ["pomůžeme"],
+        "vy": ["pomůžete"],
+        "oni": ["pomůžou", "pomohou"]
+      }
+    }
+  },
+  {
+    "id": "vedet",
+    "frequencyRank": 5,
+    "infinitive": "vědět",
+    "aspect": "impf",
+    "aspectPairInfinitive": "dozvědět se",
+    "english": "to know (facts/information)",
+    "conjugationClass": "nepravidelné (vím / vědí)",
+    "reflexive": null,
+    "mnemonicTip": "Like jíst: vím, víš, ví, víme, víte — but 3rd person plural is 'vědí' (or spoken 'ví').",
+    "exampleCz": "Nevím, kde je nádraží.",
+    "exampleEn": "I don't know where the train station is.",
+    "forms": {
+      "present": {
+        "ja": ["vím"],
+        "ty": ["víš"],
+        "thirdSg": ["ví"],
+        "my": ["víme"],
+        "vy": ["víte"],
+        "oni": ["vědí", "ví"]
+      },
+      "past": {
+        "ja_m": ["věděl jsem"],
+        "ja_f": ["věděla jsem"],
+        "ty_m": ["věděl jsi"],
+        "ty_f": ["věděla jsi"],
+        "on": ["věděl"],
+        "ona": ["věděla"],
+        "ono": ["vědělo"],
+        "my": ["věděli jsme"],
+        "vy": ["věděli jste"],
+        "oni": ["věděli"]
+      },
+      "futureImpf": {
+        "ja": ["budu vědět"],
+        "ty": ["budeš vědět"],
+        "thirdSg": ["bude vědět"],
+        "my": ["budeme vědět"],
+        "vy": ["budete vědět"],
+        "oni": ["budou vědět"]
+      }
+    }
+  },
+  {
+    "id": "muset",
+    "frequencyRank": 6,
+    "infinitive": "muset",
+    "aspect": "impf",
+    "aspectPairInfinitive": null,
+    "english": "must / to have to",
+    "conjugationClass": "-í (4. třída)",
+    "reflexive": null,
+    "mnemonicTip": "Conjugates on the -ím pattern (musím, musíš, musí...), while past keeps '-el' (musel jsem).",
+    "exampleCz": "Musím už jít domů.",
+    "exampleEn": "I have to go home now.",
+    "forms": {
+      "present": {
+        "ja": ["musím"],
+        "ty": ["musíš"],
+        "thirdSg": ["musí"],
+        "my": ["musíme"],
+        "vy": ["musíte"],
+        "oni": ["musí", "musejí"]
+      },
+      "past": {
+        "ja_m": ["musel jsem"],
+        "ja_f": ["musela jsem"],
+        "ty_m": ["musel jsi"],
+        "ty_f": ["musela jsi"],
+        "on": ["musel"],
+        "ona": ["musela"],
+        "ono": ["muselo"],
+        "my": ["museli jsme"],
+        "vy": ["museli jste"],
+        "oni": ["museli"]
+      },
+      "futureImpf": {
+        "ja": ["budu muset"],
+        "ty": ["budeš muset"],
+        "thirdSg": ["bude muset"],
+        "my": ["budeme muset"],
+        "vy": ["budete muset"],
+        "oni": ["budou muset"]
+      }
+    }
+  },
+  {
+    "id": "davat",
+    "frequencyRank": 7,
+    "infinitive": "dávat",
+    "aspect": "impf",
+    "aspectPairInfinitive": "dát",
+    "english": "to give",
+    "conjugationClass": "-á (5. třída)",
+    "reflexive": null,
+    "mnemonicTip": "Imperfective 'dávat' (dávám) = giving repeatedly/in progress; Perfective 'dát' (dám) = will give once.",
+    "exampleCz": "Dám si jednu kávu, prosím.",
+    "exampleEn": "I'll have (give myself) one coffee, please.",
+    "forms": {
+      "present": {
+        "ja": ["dávám"],
+        "ty": ["dáváš"],
+        "thirdSg": ["dává"],
+        "my": ["dáváme"],
+        "vy": ["dáváte"],
+        "oni": ["dávají"]
+      },
+      "past": {
+        "ja_m": ["dával jsem"],
+        "ja_f": ["dávala jsem"],
+        "ty_m": ["dával jsi"],
+        "ty_f": ["dávala jsi"],
+        "on": ["dával"],
+        "ona": ["dávala"],
+        "ono": ["dávalo"],
+        "my": ["dávali jsme"],
+        "vy": ["dávali jste"],
+        "oni": ["dávali"]
+      },
+      "futureImpf": {
+        "ja": ["budu dávat"],
+        "ty": ["budeš dávat"],
+        "thirdSg": ["bude dávat"],
+        "my": ["budeme dávat"],
+        "vy": ["budete dávat"],
+        "oni": ["budou dávat"]
+      },
+      "futurePf": {
+        "ja": ["dám"],
+        "ty": ["dáš"],
+        "thirdSg": ["dá"],
+        "my": ["dáme"],
+        "vy": ["dáte"],
+        "oni": ["dají"]
+      }
+    }
+  },
+  {
+    "id": "jit",
+    "frequencyRank": 8,
+    "infinitive": "jít",
+    "aspect": "impf",
+    "aspectPairInfinitive": "půjdu (motion future)",
+    "english": "to go (on foot)",
+    "conjugationClass": "-e (nepravidelné: jdu / šel / půjdu)",
+    "reflexive": null,
+    "mnemonicTip": "Three distinct stems! Present: jdu, jdeš... Past: šel jsem, šla jsem, šli jsme... Future: půjdu, půjdeš...",
+    "exampleCz": "Dnes jdu do práce pěšky, zítra půjdu taky.",
+    "exampleEn": "Today I'm walking to work, tomorrow I'll walk too.",
+    "forms": {
+      "present": {
+        "ja": ["jdu"],
+        "ty": ["jdeš"],
+        "thirdSg": ["jde"],
+        "my": ["jdeme"],
+        "vy": ["jdete"],
+        "oni": ["jdou"]
+      },
+      "past": {
+        "ja_m": ["šel jsem"],
+        "ja_f": ["šla jsem"],
+        "ty_m": ["šel jsi"],
+        "ty_f": ["šla jsi"],
+        "on": ["šel"],
+        "ona": ["šla"],
+        "ono": ["šlo"],
+        "my": ["šli jsme"],
+        "vy": ["šli jste"],
+        "oni": ["šli"]
+      },
+      "futureImpf": {
+        "ja": ["půjdu"],
+        "ty": ["půjdeš"],
+        "thirdSg": ["půjde"],
+        "my": ["půjdeme"],
+        "vy": ["půjdete"],
+        "oni": ["půjdou"]
+      },
+      "futurePf": {
+        "ja": ["půjdu"],
+        "ty": ["půjdeš"],
+        "thirdSg": ["půjde"],
+        "my": ["půjdeme"],
+        "vy": ["půjdete"],
+        "oni": ["půjdou"]
+      }
+    }
+  },
+  {
+    "id": "delat",
+    "frequencyRank": 9,
+    "infinitive": "dělat",
+    "aspect": "impf",
+    "aspectPairInfinitive": "udělat",
+    "english": "to do / to make",
+    "conjugationClass": "-á (5. třída)",
+    "reflexive": null,
+    "mnemonicTip": "Model -at verb: dělám, děláš, dělá, děláme, děláte, dělají. Perfective adds prefix 'u-' (udělám).",
+    "exampleCz": "Co děláš dnes večer?",
+    "exampleEn": "What are you doing tonight?",
+    "forms": {
+      "present": {
+        "ja": ["dělám"],
+        "ty": ["děláš"],
+        "thirdSg": ["dělá"],
+        "my": ["děláme"],
+        "vy": ["děláte"],
+        "oni": ["dělají"]
+      },
+      "past": {
+        "ja_m": ["dělal jsem"],
+        "ja_f": ["dělala jsem"],
+        "ty_m": ["dělal jsi"],
+        "ty_f": ["dělala jsi"],
+        "on": ["dělal"],
+        "ona": ["dělala"],
+        "ono": ["dělalo"],
+        "my": ["dělali jsme"],
+        "vy": ["dělali jste"],
+        "oni": ["dělali"]
+      },
+      "futureImpf": {
+        "ja": ["budu dělat"],
+        "ty": ["budeš dělat"],
+        "thirdSg": ["bude dělat"],
+        "my": ["budeme dělat"],
+        "vy": ["budete dělat"],
+        "oni": ["budou dělat"]
+      },
+      "futurePf": {
+        "ja": ["udělám"],
+        "ty": ["uděláš"],
+        "thirdSg": ["udělá"],
+        "my": ["uděláme"],
+        "vy": ["uděláte"],
+        "oni": ["udělají"]
+      }
+    }
+  },
+  {
+    "id": "rikat",
+    "frequencyRank": 10,
+    "infinitive": "říkat",
+    "aspect": "impf",
+    "aspectPairInfinitive": "říct",
+    "english": "to say / to tell",
+    "conjugationClass": "-á (5. třída) / pf. -ne (řeknu)",
+    "reflexive": null,
+    "mnemonicTip": "Imperfective 'říkat' is regular (-ám). Perfective 'říct' shortens the stem vowel to 'řeknu, řekneš...'",
+    "exampleCz": "Co říkal? Zítra ti to řeknu.",
+    "exampleEn": "What was he saying? Tomorrow I will tell you.",
+    "forms": {
+      "present": {
+        "ja": ["říkám"],
+        "ty": ["říkáš"],
+        "thirdSg": ["říká"],
+        "my": ["říkáme"],
+        "vy": ["říkáte"],
+        "oni": ["říkají"]
+      },
+      "past": {
+        "ja_m": ["říkal jsem"],
+        "ja_f": ["říkala jsem"],
+        "ty_m": ["říkal jsi"],
+        "ty_f": ["říkala jsi"],
+        "on": ["říkal"],
+        "ona": ["říkala"],
+        "ono": ["říkalo"],
+        "my": ["říkali jsme"],
+        "vy": ["říkali jste"],
+        "oni": ["říkali"]
+      },
+      "futureImpf": {
+        "ja": ["budu říkat"],
+        "ty": ["budeš říkat"],
+        "thirdSg": ["bude říkat"],
+        "my": ["budeme říkat"],
+        "vy": ["budete říkat"],
+        "oni": ["budou říkat"]
+      },
+      "futurePf": {
+        "ja": ["řeknu"],
+        "ty": ["řekneš"],
+        "thirdSg": ["řekne"],
+        "my": ["řekneme"],
+        "vy": ["řeknete"],
+        "oni": ["řeknou"]
+      }
+    }
+  },
+  {
+    "id": "videt",
+    "frequencyRank": 11,
+    "infinitive": "vidět",
+    "aspect": "impf",
+    "aspectPairInfinitive": "uvidět",
+    "english": "to see",
+    "conjugationClass": "-í (4. třída)",
+    "reflexive": null,
+    "mnemonicTip": "Present uses -ím (vidím, vidíš, vidí..., oni vidí). Past keeps -ěl (viděl jsem).",
+    "exampleCz": "Vidím tě! Uvidíme, co se stane.",
+    "exampleEn": "I see you! We'll see what happens.",
+    "forms": {
+      "present": {
+        "ja": ["vidím"],
+        "ty": ["vidíš"],
+        "thirdSg": ["vidí"],
+        "my": ["vidíme"],
+        "vy": ["vidíte"],
+        "oni": ["vidí"]
+      },
+      "past": {
+        "ja_m": ["viděl jsem"],
+        "ja_f": ["viděla jsem"],
+        "ty_m": ["viděl jsi"],
+        "ty_f": ["viděla jsi"],
+        "on": ["viděl"],
+        "ona": ["viděla"],
+        "ono": ["vidělo"],
+        "my": ["viděli jsme"],
+        "vy": ["viděli jste"],
+        "oni": ["viděli"]
+      },
+      "futureImpf": {
+        "ja": ["budu vidět"],
+        "ty": ["budeš vidět"],
+        "thirdSg": ["bude vidět"],
+        "my": ["budeme vidět"],
+        "vy": ["budete vidět"],
+        "oni": ["budou vidět"]
+      },
+      "futurePf": {
+        "ja": ["uvidím"],
+        "ty": ["uvidíš"],
+        "thirdSg": ["uvidí"],
+        "my": ["uvidíme"],
+        "vy": ["uvidíte"],
+        "oni": ["uvidí"]
+      }
+    }
+  },
+  {
+    "id": "myslet",
+    "frequencyRank": 12,
+    "infinitive": "myslet",
+    "aspect": "impf",
+    "aspectPairInfinitive": "pomyslet",
+    "english": "to think",
+    "conjugationClass": "-í (4. třída)",
+    "reflexive": null,
+    "mnemonicTip": "Like muset & vidět: Present has -ím (myslím, myslíš, myslí), Past has -el (myslel jsem).",
+    "exampleCz": "Myslím, že máš pravdu.",
+    "exampleEn": "I think that you are right.",
+    "forms": {
+      "present": {
+        "ja": ["myslím"],
+        "ty": ["myslíš"],
+        "thirdSg": ["myslí"],
+        "my": ["myslíme"],
+        "vy": ["myslíte"],
+        "oni": ["myslí", "myslejí"]
+      },
+      "past": {
+        "ja_m": ["myslel jsem"],
+        "ja_f": ["myslela jsem"],
+        "ty_m": ["myslel jsi"],
+        "ty_f": ["myslela jsi"],
+        "on": ["myslel"],
+        "ona": ["myslela"],
+        "ono": ["myslelo"],
+        "my": ["mysleli jsme"],
+        "vy": ["mysleli jste"],
+        "oni": ["mysleli"]
+      },
+      "futureImpf": {
+        "ja": ["budu myslet"],
+        "ty": ["budeš myslet"],
+        "thirdSg": ["bude myslet"],
+        "my": ["budeme myslet"],
+        "vy": ["budete myslet"],
+        "oni": ["budou myslet"]
+      },
+      "futurePf": {
+        "ja": ["pomyslím"],
+        "ty": ["pomyslíš"],
+        "thirdSg": ["pomyslí"],
+        "my": ["pomyslíme"],
+        "vy": ["pomyslíte"],
+        "oni": ["pomyslí"]
+      }
+    }
+  },
+  {
+    "id": "pracovat",
+    "frequencyRank": 13,
+    "infinitive": "pracovat",
+    "aspect": "impf",
+    "aspectPairInfinitive": null,
+    "english": "to work",
+    "conjugationClass": "-uje (3. třída)",
+    "reflexive": null,
+    "mnemonicTip": "-ovat verbs drop '-ovat' and add '-uju' (formal '-uji') in Present, and '-ujou' (formal '-ují') for Oni.",
+    "exampleCz": "Pracuju v centru Prahy.",
+    "exampleEn": "I work in the center of Prague.",
+    "forms": {
+      "present": {
+        "ja": ["pracuju", "pracuji"],
+        "ty": ["pracuješ"],
+        "thirdSg": ["pracuje"],
+        "my": ["pracujeme"],
+        "vy": ["pracujete"],
+        "oni": ["pracujou", "pracují"]
+      },
+      "past": {
+        "ja_m": ["pracoval jsem"],
+        "ja_f": ["pracovala jsem"],
+        "ty_m": ["pracoval jsi"],
+        "ty_f": ["pracovala jsi"],
+        "on": ["pracoval"],
+        "ona": ["pracovala"],
+        "ono": ["pracovalo"],
+        "my": ["pracovali jsme"],
+        "vy": ["pracovali jste"],
+        "oni": ["pracovali"]
+      },
+      "futureImpf": {
+        "ja": ["budu pracovat"],
+        "ty": ["budeš pracovat"],
+        "thirdSg": ["bude pracovat"],
+        "my": ["budeme pracovat"],
+        "vy": ["budete pracovat"],
+        "oni": ["budou pracovat"]
+      }
+    }
+  },
+  {
+    "id": "psat",
+    "frequencyRank": 14,
+    "infinitive": "psát",
+    "aspect": "impf",
+    "aspectPairInfinitive": "napsat",
+    "english": "to write",
+    "conjugationClass": "-e (3. třída: píšu / píši)",
+    "reflexive": null,
+    "mnemonicTip": "In Present (and pf. Future 'napsat'), stem gains a long 'í' and 's' shifts to 'š': píšu, píšeš, píše...",
+    "exampleCz": "Píšu zprávu kamarádovi.",
+    "exampleEn": "I am writing a message to a friend.",
+    "forms": {
+      "present": {
+        "ja": ["píšu", "píši"],
+        "ty": ["píšeš"],
+        "thirdSg": ["píše"],
+        "my": ["píšeme"],
+        "vy": ["píšete"],
+        "oni": ["píšou", "píší"]
+      },
+      "past": {
+        "ja_m": ["psal jsem"],
+        "ja_f": ["psala jsem"],
+        "ty_m": ["psal jsi"],
+        "ty_f": ["psala jsi"],
+        "on": ["psal"],
+        "ona": ["psala"],
+        "ono": ["psalo"],
+        "my": ["psali jsme"],
+        "vy": ["psali jste"],
+        "oni": ["psali"]
+      },
+      "futureImpf": {
+        "ja": ["budu psát"],
+        "ty": ["budeš psát"],
+        "thirdSg": ["bude psát"],
+        "my": ["budeme psát"],
+        "vy": ["budete psát"],
+        "oni": ["budou psát"]
+      },
+      "futurePf": {
+        "ja": ["napíšu", "napíši"],
+        "ty": ["napíšeš"],
+        "thirdSg": ["napíše"],
+        "my": ["napíšeme"],
+        "vy": ["napíšete"],
+        "oni": ["napíšou", "napíší"]
+      }
+    }
+  },
+  {
+    "id": "cist",
+    "frequencyRank": 15,
+    "infinitive": "číst",
+    "aspect": "impf",
+    "aspectPairInfinitive": "přečíst",
+    "english": "to read",
+    "conjugationClass": "-e (1. třída: čtu / četl)",
+    "reflexive": null,
+    "mnemonicTip": "Present stem is 'čt-': čtu, čteš, čte, čteme, čtete, čtou. Past inserts 'e': četl jsem, četla jsem.",
+    "exampleCz": "Rád čtu české knihy.",
+    "exampleEn": "I like reading Czech books.",
+    "forms": {
+      "present": {
+        "ja": ["čtu"],
+        "ty": ["čteš"],
+        "thirdSg": ["čte"],
+        "my": ["čteme"],
+        "vy": ["čtete"],
+        "oni": ["čtou"]
+      },
+      "past": {
+        "ja_m": ["četl jsem"],
+        "ja_f": ["četla jsem"],
+        "ty_m": ["četl jsi"],
+        "ty_f": ["četla jsi"],
+        "on": ["četl"],
+        "ona": ["četla"],
+        "ono": ["četlo"],
+        "my": ["četli jsme"],
+        "vy": ["četli jste"],
+        "oni": ["četli"]
+      },
+      "futureImpf": {
+        "ja": ["budu číst"],
+        "ty": ["budeš číst"],
+        "thirdSg": ["bude číst"],
+        "my": ["budeme číst"],
+        "vy": ["budete číst"],
+        "oni": ["budou číst"]
+      },
+      "futurePf": {
+        "ja": ["přečtu"],
+        "ty": ["přečteš"],
+        "thirdSg": ["přečte"],
+        "my": ["přečteme"],
+        "vy": ["přečtete"],
+        "oni": ["přečtou"]
+      }
+    }
+  },
+  {
+    "id": "rozumet",
+    "frequencyRank": 16,
+    "infinitive": "rozumět",
+    "aspect": "impf",
+    "aspectPairInfinitive": "porozumět",
+    "english": "to understand",
+    "conjugationClass": "-í (4. třída)",
+    "reflexive": null,
+    "mnemonicTip": "Takes the Dative case! Conjugates with -ím (rozumím, rozumíš, rozumí...; oni rozumějí / rozumí).",
+    "exampleCz": "Rozumím ti velmi dobře.",
+    "exampleEn": "I understand you very well.",
+    "forms": {
+      "present": {
+        "ja": ["rozumím"],
+        "ty": ["rozumíš"],
+        "thirdSg": ["rozumí"],
+        "my": ["rozumíme"],
+        "vy": ["rozumíte"],
+        "oni": ["rozumějí", "rozumí"]
+      },
+      "past": {
+        "ja_m": ["rozuměl jsem"],
+        "ja_f": ["rozuměla jsem"],
+        "ty_m": ["rozuměl jsi"],
+        "ty_f": ["rozuměla jsi"],
+        "on": ["rozuměl"],
+        "ona": ["rozuměla"],
+        "ono": ["rozumělo"],
+        "my": ["rozuměli jsme"],
+        "vy": ["rozuměli jste"],
+        "oni": ["rozuměli"]
+      },
+      "futureImpf": {
+        "ja": ["budu rozumět"],
+        "ty": ["budeš rozumět"],
+        "thirdSg": ["bude rozumět"],
+        "my": ["budeme rozumět"],
+        "vy": ["budete rozumět"],
+        "oni": ["budou rozumět"]
+      },
+      "futurePf": {
+        "ja": ["porozumím"],
+        "ty": ["porozumíš"],
+        "thirdSg": ["porozumí"],
+        "my": ["porozumíme"],
+        "vy": ["porozumíte"],
+        "oni": ["porozumějí", "porozumí"]
+      }
+    }
+  },
+  {
+    "id": "mluvit",
+    "frequencyRank": 17,
+    "infinitive": "mluvit",
+    "aspect": "impf",
+    "aspectPairInfinitive": "promluvit",
+    "english": "to speak / to talk",
+    "conjugationClass": "-í (4. třída)",
+    "reflexive": null,
+    "mnemonicTip": "Model -it verb: mluvím, mluvíš, mluví, mluvíme, mluvíte, mluví.",
+    "exampleCz": "Mluvíte anglicky nebo česky?",
+    "exampleEn": "Do you speak English or Czech?",
+    "forms": {
+      "present": {
+        "ja": ["mluvím"],
+        "ty": ["mluvíš"],
+        "thirdSg": ["mluví"],
+        "my": ["mluvíme"],
+        "vy": ["mluvíte"],
+        "oni": ["mluví"]
+      },
+      "past": {
+        "ja_m": ["mluvil jsem"],
+        "ja_f": ["mluvila jsem"],
+        "ty_m": ["mluvil jsi"],
+        "ty_f": ["mluvila jsi"],
+        "on": ["mluvil"],
+        "ona": ["mluvila"],
+        "ono": ["mluvilo"],
+        "my": ["mluvili jsme"],
+        "vy": ["mluvili jste"],
+        "oni": ["mluvili"]
+      },
+      "futureImpf": {
+        "ja": ["budu mluvit"],
+        "ty": ["budeš mluvit"],
+        "thirdSg": ["bude mluvit"],
+        "my": ["budeme mluvit"],
+        "vy": ["budete mluvit"],
+        "oni": ["budou mluvit"]
+      },
+      "futurePf": {
+        "ja": ["promluvím"],
+        "ty": ["promluvíš"],
+        "thirdSg": ["promluví"],
+        "my": ["promluvíme"],
+        "vy": ["promluvíte"],
+        "oni": ["promluví"]
+      }
+    }
+  },
+  {
+    "id": "kupovat",
+    "frequencyRank": 18,
+    "infinitive": "kupovat",
+    "aspect": "impf",
+    "aspectPairInfinitive": "koupit",
+    "english": "to buy",
+    "conjugationClass": "-uje (3. třída) / pf. -í (koupím)",
+    "reflexive": null,
+    "mnemonicTip": "Imperfective 'kupovat' -> kupuju (short 'u'). Perfective 'koupit' -> koupím (diphthong 'ou', -ím class).",
+    "exampleCz": "Každé ráno kupuju čerstvý chléb.",
+    "exampleEn": "Every morning I buy fresh bread.",
+    "forms": {
+      "present": {
+        "ja": ["kupuju", "kupuji"],
+        "ty": ["kupuješ"],
+        "thirdSg": ["kupuje"],
+        "my": ["kupujeme"],
+        "vy": ["kupujete"],
+        "oni": ["kupujou", "kupují"]
+      },
+      "past": {
+        "ja_m": ["kupoval jsem"],
+        "ja_f": ["kupovala jsem"],
+        "ty_m": ["kupoval jsi"],
+        "ty_f": ["kupovala jsi"],
+        "on": ["kupoval"],
+        "ona": ["kupovala"],
+        "ono": ["kupovalo"],
+        "my": ["kupovali jsme"],
+        "vy": ["kupovali jste"],
+        "oni": ["kupovali"]
+      },
+      "futureImpf": {
+        "ja": ["budu kupovat"],
+        "ty": ["budeš kupovat"],
+        "thirdSg": ["bude kupovat"],
+        "my": ["budeme kupovat"],
+        "vy": ["budete kupovat"],
+        "oni": ["budou kupovat"]
+      },
+      "futurePf": {
+        "ja": ["koupím"],
+        "ty": ["koupíš"],
+        "thirdSg": ["koupí"],
+        "my": ["koupíme"],
+        "vy": ["koupíte"],
+        "oni": ["koupí"]
+      }
+    }
+  },
+  {
+    "id": "ucit-se",
+    "frequencyRank": 19,
+    "infinitive": "učit se",
+    "aspect": "impf",
+    "aspectPairInfinitive": "naučit se",
+    "english": "to learn / to study",
+    "conjugationClass": "-í (4. třída, zvratné 'se')",
+    "reflexive": "se",
+    "mnemonicTip": "Reflexive 'se' takes 2nd position! Past: 'učil jsem se' (or Ty: 'učil ses' / 'učil jsi se'). Future: 'budu se učit'.",
+    "exampleCz": "Učím se česky každý den.",
+    "exampleEn": "I study Czech every day.",
+    "forms": {
+      "present": {
+        "ja": ["učím se"],
+        "ty": ["učíš se"],
+        "thirdSg": ["učí se"],
+        "my": ["učíme se"],
+        "vy": ["učíte se"],
+        "oni": ["učí se"]
+      },
+      "past": {
+        "ja_m": ["učil jsem se"],
+        "ja_f": ["učila jsem se"],
+        "ty_m": ["učil ses", "učil jsi se"],
+        "ty_f": ["učila ses", "učila jsi se"],
+        "on": ["učil se"],
+        "ona": ["učila se"],
+        "ono": ["učilo se"],
+        "my": ["učili jsme se"],
+        "vy": ["učili jste se"],
+        "oni": ["učili se"]
+      },
+      "futureImpf": {
+        "ja": ["budu se učit"],
+        "ty": ["budeš se učit"],
+        "thirdSg": ["bude se učit"],
+        "my": ["budeme se učit"],
+        "vy": ["budete se učit"],
+        "oni": ["budou se učit"]
+      },
+      "futurePf": {
+        "ja": ["naučím se"],
+        "ty": ["naučíš se"],
+        "thirdSg": ["naučí se"],
+        "my": ["naučíme se"],
+        "vy": ["naučíte se"],
+        "oni": ["naučí se"]
+      }
+    }
+  },
+  {
+    "id": "ptat-se",
+    "frequencyRank": 20,
+    "infinitive": "ptát se",
+    "aspect": "impf",
+    "aspectPairInfinitive": "zeptat se",
+    "english": "to ask",
+    "conjugationClass": "-á (5. třída, zvratné 'se')",
+    "reflexive": "se",
+    "mnemonicTip": "Present: ptám se, ptáš se... In Past, 'jsem/jsme/jste' comes before 'se': 'ptal jsem se', 'ptali jsme se'.",
+    "exampleCz": "Ptám se na cestu k hradu.",
+    "exampleEn": "I am asking for directions to the castle.",
+    "forms": {
+      "present": {
+        "ja": ["ptám se"],
+        "ty": ["ptáš se"],
+        "thirdSg": ["ptá se"],
+        "my": ["ptáme se"],
+        "vy": ["ptáte se"],
+        "oni": ["ptají se"]
+      },
+      "past": {
+        "ja_m": ["ptal jsem se"],
+        "ja_f": ["ptala jsem se"],
+        "ty_m": ["ptal ses", "ptal jsi se"],
+        "ty_f": ["ptala ses", "ptala jsi se"],
+        "on": ["ptal se"],
+        "ona": ["ptala se"],
+        "ono": ["ptalo se"],
+        "my": ["ptali jsme se"],
+        "vy": ["ptali jste se"],
+        "oni": ["ptali se"]
+      },
+      "futureImpf": {
+        "ja": ["budu se ptát"],
+        "ty": ["budeš se ptát"],
+        "thirdSg": ["bude se ptát"],
+        "my": ["budeme se ptát"],
+        "vy": ["budete se ptát"],
+        "oni": ["budou se ptát"]
+      },
+      "futurePf": {
+        "ja": ["zeptám se"],
+        "ty": ["zeptáš se"],
+        "thirdSg": ["zeptá se"],
+        "my": ["zeptáme se"],
+        "vy": ["zeptáte se"],
+        "oni": ["zeptají se"]
+      }
+    }
+  },
+  {
+    "id": "jist",
+    "frequencyRank": 21,
+    "infinitive": "jíst",
+    "aspect": "impf",
+    "aspectPairInfinitive": "sníst",
+    "english": "to eat",
+    "conjugationClass": "nepravidelné (jím / jedí / jedl)",
+    "reflexive": null,
+    "mnemonicTip": "Present: jím, jíš, jí, jíme, jíte, jedí. Past stem is 'jedl-': jedl jsem, jedla jsem, jedli jsme.",
+    "exampleCz": "Ráno obvykle jím vajíčka.",
+    "exampleEn": "In the morning I usually eat eggs.",
+    "forms": {
+      "present": {
+        "ja": ["jím"],
+        "ty": ["jíš"],
+        "thirdSg": ["jí"],
+        "my": ["jíme"],
+        "vy": ["jíte"],
+        "oni": ["jedí", "jí"]
+      },
+      "past": {
+        "ja_m": ["jedl jsem"],
+        "ja_f": ["jedla jsem"],
+        "ty_m": ["jedl jsi"],
+        "ty_f": ["jedla jsi"],
+        "on": ["jedl"],
+        "ona": ["jedla"],
+        "ono": ["jedlo"],
+        "my": ["jedli jsme"],
+        "vy": ["jedli jste"],
+        "oni": ["jedli"]
+      },
+      "futureImpf": {
+        "ja": ["budu jíst"],
+        "ty": ["budeš jíst"],
+        "thirdSg": ["bude jíst"],
+        "my": ["budeme jíst"],
+        "vy": ["budete jíst"],
+        "oni": ["budou jíst"]
+      },
+      "futurePf": {
+        "ja": ["sním"],
+        "ty": ["sníš"],
+        "thirdSg": ["sní"],
+        "my": ["sníme"],
+        "vy": ["sníte"],
+        "oni": ["snědí", "sní"]
+      }
+    }
+  },
+  {
+    "id": "pit",
+    "frequencyRank": 22,
+    "infinitive": "pít",
+    "aspect": "impf",
+    "aspectPairInfinitive": "vypít",
+    "english": "to drink",
+    "conjugationClass": "-je (3. třída: piju / piji)",
+    "reflexive": null,
+    "mnemonicTip": "Stem becomes 'pij-' in Present: piju (piji), piješ, pije, pijeme, pijete, pijou (pijí). Past uses short 'i': pil jsem.",
+    "exampleCz": "Piju vodu s citronem.",
+    "exampleEn": "I drink water with lemon.",
+    "forms": {
+      "present": {
+        "ja": ["piju", "piji"],
+        "ty": ["piješ"],
+        "thirdSg": ["pije"],
+        "my": ["pijeme"],
+        "vy": ["pijete"],
+        "oni": ["pijou", "pijí"]
+      },
+      "past": {
+        "ja_m": ["pil jsem"],
+        "ja_f": ["pila jsem"],
+        "ty_m": ["pil jsi"],
+        "ty_f": ["pila jsi"],
+        "on": ["pil"],
+        "ona": ["pila"],
+        "ono": ["pilo"],
+        "my": ["pili jsme"],
+        "vy": ["pili jste"],
+        "oni": ["pili"]
+      },
+      "futureImpf": {
+        "ja": ["budu pít"],
+        "ty": ["budeš pít"],
+        "thirdSg": ["bude pít"],
+        "my": ["budeme pít"],
+        "vy": ["budete pít"],
+        "oni": ["budou pít"]
+      },
+      "futurePf": {
+        "ja": ["vypiju", "vypiji"],
+        "ty": ["vypiješ"],
+        "thirdSg": ["vypije"],
+        "my": ["vypijeme"],
+        "vy": ["vypijete"],
+        "oni": ["vypijou", "vypijí"]
+      }
+    }
+  },
+  {
+    "id": "spat",
+    "frequencyRank": 23,
+    "infinitive": "spát",
+    "aspect": "impf",
+    "aspectPairInfinitive": null,
+    "english": "to sleep",
+    "conjugationClass": "-í (4. třída: spím)",
+    "reflexive": null,
+    "mnemonicTip": "Don't confuse with psát (píšu)! 'spát' conjugates with -ím: spím, spíš, spí, spíme, spíte, spí.",
+    "exampleCz": "Dnes jsem spal osm hodin.",
+    "exampleEn": "Today I slept for eight hours.",
+    "forms": {
+      "present": {
+        "ja": ["spím"],
+        "ty": ["spíš"],
+        "thirdSg": ["spí"],
+        "my": ["spíme"],
+        "vy": ["spíte"],
+        "oni": ["spí"]
+      },
+      "past": {
+        "ja_m": ["spal jsem"],
+        "ja_f": ["spala jsem"],
+        "ty_m": ["spal jsi"],
+        "ty_f": ["spala jsi"],
+        "on": ["spal"],
+        "ona": ["spala"],
+        "ono": ["spalo"],
+        "my": ["spali jsme"],
+        "vy": ["spali jste"],
+        "oni": ["spali"]
+      },
+      "futureImpf": {
+        "ja": ["budu spát"],
+        "ty": ["budeš spát"],
+        "thirdSg": ["bude spát"],
+        "my": ["budeme spát"],
+        "vy": ["budete spát"],
+        "oni": ["budou spát"]
+      }
+    }
+  },
+  {
+    "id": "bydlet",
+    "frequencyRank": 24,
+    "infinitive": "bydlet",
+    "aspect": "impf",
+    "aspectPairInfinitive": null,
+    "english": "to live / to reside",
+    "conjugationClass": "-í (4. třída: bydlím)",
+    "reflexive": null,
+    "mnemonicTip": "Present: bydlím, bydlíš, bydlí... Past: bydlel jsem, bydlela jsem, bydleli jsme.",
+    "exampleCz": "Kde teď bydlíš?",
+    "exampleEn": "Where do you live now?",
+    "forms": {
+      "present": {
+        "ja": ["bydlím"],
+        "ty": ["bydlíš"],
+        "thirdSg": ["bydlí"],
+        "my": ["bydlíme"],
+        "vy": ["bydlíte"],
+        "oni": ["bydlí"]
+      },
+      "past": {
+        "ja_m": ["bydlel jsem"],
+        "ja_f": ["bydlela jsem"],
+        "ty_m": ["bydlel jsi"],
+        "ty_f": ["bydlela jsi"],
+        "on": ["bydlel"],
+        "ona": ["bydlela"],
+        "ono": ["bydlelo"],
+        "my": ["bydleli jsme"],
+        "vy": ["bydleli jste"],
+        "oni": ["bydleli"]
+      },
+      "futureImpf": {
+        "ja": ["budu bydlet"],
+        "ty": ["budeš bydlet"],
+        "thirdSg": ["bude bydlet"],
+        "my": ["budeme bydlet"],
+        "vy": ["budete bydlet"],
+        "oni": ["budou bydlet"]
+      }
+    }
+  },
+  {
+    "id": "znat",
+    "frequencyRank": 25,
+    "infinitive": "znát",
+    "aspect": "impf",
+    "aspectPairInfinitive": "poznat",
+    "english": "to know (a person or place)",
+    "conjugationClass": "-á (5. třída: znám)",
+    "reflexive": null,
+    "mnemonicTip": "Regular -á present: znám, znáš, zná, známe, znáte, znají. Past shortens the 'á' to 'a': znal jsem.",
+    "exampleCz": "Znáš dobře Prahu?",
+    "exampleEn": "Do you know Prague well?",
+    "forms": {
+      "present": {
+        "ja": ["znám"],
+        "ty": ["znáš"],
+        "thirdSg": ["zná"],
+        "my": ["známe"],
+        "vy": ["znáte"],
+        "oni": ["znají"]
+      },
+      "past": {
+        "ja_m": ["znal jsem"],
+        "ja_f": ["znala jsem"],
+        "ty_m": ["znal jsi"],
+        "ty_f": ["znala jsi"],
+        "on": ["znal"],
+        "ona": ["znala"],
+        "ono": ["znalo"],
+        "my": ["znali jsme"],
+        "vy": ["znali jste"],
+        "oni": ["znali"]
+      },
+      "futureImpf": {
+        "ja": ["budu znát"],
+        "ty": ["budeš znát"],
+        "thirdSg": ["bude znát"],
+        "my": ["budeme znát"],
+        "vy": ["budete znát"],
+        "oni": ["budou znát"]
+      },
+      "futurePf": {
+        "ja": ["poznám"],
+        "ty": ["poznáš"],
+        "thirdSg": ["pozná"],
+        "my": ["poznáme"],
+        "vy": ["poznáte"],
+        "oni": ["poznají"]
+      }
+    }
+  },
+  {
+    "id": "hledat",
+    "frequencyRank": 26,
+    "infinitive": "hledat",
+    "aspect": "impf",
+    "aspectPairInfinitive": "najít",
+    "english": "to look for / to search",
+    "conjugationClass": "-á (5. třída) / pf. najdu",
+    "reflexive": null,
+    "mnemonicTip": "Imperfective 'hledat' = looking for (hledám). Its completed pair is 'najít' = to find (najdu, najdeš, najde...).",
+    "exampleCz": "Hledám klíče, snad je brzy najdu.",
+    "exampleEn": "I'm looking for my keys, hopefully I'll find them soon.",
+    "forms": {
+      "present": {
+        "ja": ["hledám"],
+        "ty": ["hledáš"],
+        "thirdSg": ["hledá"],
+        "my": ["hledáme"],
+        "vy": ["hledáte"],
+        "oni": ["hledají"]
+      },
+      "past": {
+        "ja_m": ["hledal jsem"],
+        "ja_f": ["hledala jsem"],
+        "ty_m": ["hledal jsi"],
+        "ty_f": ["hledala jsi"],
+        "on": ["hledal"],
+        "ona": ["hledala"],
+        "ono": ["hledalo"],
+        "my": ["hledali jsme"],
+        "vy": ["hledali jste"],
+        "oni": ["hledali"]
+      },
+      "futureImpf": {
+        "ja": ["budu hledat"],
+        "ty": ["budeš hledat"],
+        "thirdSg": ["bude hledat"],
+        "my": ["budeme hledat"],
+        "vy": ["budete hledat"],
+        "oni": ["budou hledat"]
+      },
+      "futurePf": {
+        "ja": ["najdu"],
+        "ty": ["najdeš"],
+        "thirdSg": ["najde"],
+        "my": ["najdeme"],
+        "vy": ["najdete"],
+        "oni": ["najdou"]
+      }
+    }
+  },
+  {
+    "id": "cekat",
+    "frequencyRank": 27,
+    "infinitive": "čekat",
+    "aspect": "impf",
+    "aspectPairInfinitive": "počkat",
+    "english": "to wait",
+    "conjugationClass": "-á (5. třída)",
+    "reflexive": null,
+    "mnemonicTip": "Regular -at verb: čekám, čekáš, čeká... Perfective adds prefix 'po-' (počkám, počkáš...).",
+    "exampleCz": "Čekám na tramvaj už deset minut.",
+    "exampleEn": "I've been waiting for the tram for ten minutes.",
+    "forms": {
+      "present": {
+        "ja": ["čekám"],
+        "ty": ["čekáš"],
+        "thirdSg": ["čeká"],
+        "my": ["čekáme"],
+        "vy": ["čekáte"],
+        "oni": ["čekají"]
+      },
+      "past": {
+        "ja_m": ["čekal jsem"],
+        "ja_f": ["čekala jsem"],
+        "ty_m": ["čekal jsi"],
+        "ty_f": ["čekala jsi"],
+        "on": ["čekal"],
+        "ona": ["čekala"],
+        "ono": ["čekalo"],
+        "my": ["čekali jsme"],
+        "vy": ["čekali jste"],
+        "oni": ["čekali"]
+      },
+      "futureImpf": {
+        "ja": ["budu čekat"],
+        "ty": ["budeš čekat"],
+        "thirdSg": ["bude čekat"],
+        "my": ["budeme čekat"],
+        "vy": ["budete čekat"],
+        "oni": ["budou čekat"]
+      },
+      "futurePf": {
+        "ja": ["počkám"],
+        "ty": ["počkáš"],
+        "thirdSg": ["počká"],
+        "my": ["počkáme"],
+        "vy": ["počkáte"],
+        "oni": ["počkají"]
+      }
+    }
+  },
+  {
+    "id": "platit",
+    "frequencyRank": 28,
+    "infinitive": "platit",
+    "aspect": "impf",
+    "aspectPairInfinitive": "zaplatit",
+    "english": "to pay",
+    "conjugationClass": "-í (4. třída)",
+    "reflexive": null,
+    "mnemonicTip": "Regular -it verb: platím, platíš, platí... Perfective 'zaplatit' -> zaplatím.",
+    "exampleCz": "Zaplatím kartou, prosím.",
+    "exampleEn": "I will pay by card, please.",
+    "forms": {
+      "present": {
+        "ja": ["platím"],
+        "ty": ["platíš"],
+        "thirdSg": ["platí"],
+        "my": ["platíme"],
+        "vy": ["platíte"],
+        "oni": ["platí"]
+      },
+      "past": {
+        "ja_m": ["platil jsem"],
+        "ja_f": ["platila jsem"],
+        "ty_m": ["platil jsi"],
+        "ty_f": ["platila jsi"],
+        "on": ["platil"],
+        "ona": ["platila"],
+        "ono": ["platilo"],
+        "my": ["platili jsme"],
+        "vy": ["platili jste"],
+        "oni": ["platili"]
+      },
+      "futureImpf": {
+        "ja": ["budu platit"],
+        "ty": ["budeš platit"],
+        "thirdSg": ["bude platit"],
+        "my": ["budeme platit"],
+        "vy": ["budete platit"],
+        "oni": ["budou platit"]
+      },
+      "futurePf": {
+        "ja": ["zaplatím"],
+        "ty": ["zaplatíš"],
+        "thirdSg": ["zaplatí"],
+        "my": ["zaplatíme"],
+        "vy": ["zaplatíte"],
+        "oni": ["zaplatí"]
+      }
+    }
+  },
+  {
+    "id": "varit",
+    "frequencyRank": 29,
+    "infinitive": "vařit",
+    "aspect": "impf",
+    "aspectPairInfinitive": "uvařit",
+    "english": "to cook / to boil",
+    "conjugationClass": "-í (4. třída)",
+    "reflexive": null,
+    "mnemonicTip": "Regular -it verb with ř: vařím, vaříš, vaří, vaříme, vaříte, vaří. Perfective: uvařím.",
+    "exampleCz": "O víkendu rád vařím večeři.",
+    "exampleEn": "On the weekend I like cooking dinner.",
+    "forms": {
+      "present": {
+        "ja": ["vařím"],
+        "ty": ["vaříš"],
+        "thirdSg": ["vaří"],
+        "my": ["vaříme"],
+        "vy": ["vaříte"],
+        "oni": ["vaří"]
+      },
+      "past": {
+        "ja_m": ["vařil jsem"],
+        "ja_f": ["vařila jsem"],
+        "ty_m": ["vařil jsi"],
+        "ty_f": ["vařila jsi"],
+        "on": ["vařil"],
+        "ona": ["vařila"],
+        "ono": ["vařilo"],
+        "my": ["vařili jsme"],
+        "vy": ["vařili jste"],
+        "oni": ["vařili"]
+      },
+      "futureImpf": {
+        "ja": ["budu vařit"],
+        "ty": ["budeš vařit"],
+        "thirdSg": ["bude vařit"],
+        "my": ["budeme vařit"],
+        "vy": ["budete vařit"],
+        "oni": ["budou vařit"]
+      },
+      "futurePf": {
+        "ja": ["uvařím"],
+        "ty": ["uvaříš"],
+        "thirdSg": ["uvaří"],
+        "my": ["uvaříme"],
+        "vy": ["uvaříte"],
+        "oni": ["uvaří"]
+      }
+    }
+  },
+  {
+    "id": "cestovat",
+    "frequencyRank": 30,
+    "infinitive": "cestovat",
+    "aspect": "impf",
+    "aspectPairInfinitive": null,
+    "english": "to travel",
+    "conjugationClass": "-uje (3. třída)",
+    "reflexive": null,
+    "mnemonicTip": "Like pracovat & kupovat: drop '-ovat' and add '-uju' / '-uji' (cestuju, cestuješ, cestuje...).",
+    "exampleCz": "V létě budeme cestovat vlakem.",
+    "exampleEn": "In summer we will travel by train.",
+    "forms": {
+      "present": {
+        "ja": ["cestuju", "cestuji"],
+        "ty": ["cestuješ"],
+        "thirdSg": ["cestuje"],
+        "my": ["cestujeme"],
+        "vy": ["cestujete"],
+        "oni": ["cestujou", "cestují"]
+      },
+      "past": {
+        "ja_m": ["cestoval jsem"],
+        "ja_f": ["cestovala jsem"],
+        "ty_m": ["cestoval jsi"],
+        "ty_f": ["cestovala jsi"],
+        "on": ["cestoval"],
+        "ona": ["cestovala"],
+        "ono": ["cestovalo"],
+        "my": ["cestovali jsme"],
+        "vy": ["cestovali jste"],
+        "oni": ["cestovali"]
+      },
+      "futureImpf": {
+        "ja": ["budu cestovat"],
+        "ty": ["budeš cestovat"],
+        "thirdSg": ["bude cestovat"],
+        "my": ["budeme cestovat"],
+        "vy": ["budete cestovat"],
+        "oni": ["budou cestovat"]
+      }
+    }
+  }
+]
