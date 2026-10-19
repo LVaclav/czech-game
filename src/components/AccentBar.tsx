@@ -65,12 +65,19 @@ export const AccentBar: React.FC<AccentBarProps> = ({ activeInputRef }) => {
 
   return (
     <div
-      className="w-full bg-slate-900/95 backdrop-blur-md border-t border-slate-800/80 px-2 py-1.5 select-none"
+      className="w-full border-t px-2 py-1.5 select-none transition-colors"
+      style={{
+        backgroundColor: 'var(--bg-surface)',
+        borderColor: 'var(--border-subtle)',
+      }}
       aria-label="Czech diacritic characters"
     >
       <div className="max-w-5xl mx-auto flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
-        <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider px-1.5 shrink-0 hidden sm:inline">
-          Háčky & Čárky
+        <span
+          className="text-[10px] font-bold uppercase tracking-widest px-2 shrink-0 hidden sm:inline"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          Háčky
         </span>
         {CZECH_ACCENTS.map((char) => (
           <button
@@ -78,11 +85,15 @@ export const AccentBar: React.FC<AccentBarProps> = ({ activeInputRef }) => {
             type="button"
             tabIndex={-1}
             onPointerDown={(e) => {
-              // Prevent focus loss on iOS Safari & desktop
               e.preventDefault();
               handleInsert(char);
             }}
-            className="min-w-[34px] h-9 px-2 rounded-lg bg-slate-800 hover:bg-indigo-600/80 active:bg-indigo-500 active:scale-95 text-slate-100 font-semibold text-base flex items-center justify-center transition-all border border-slate-700/70 shadow-xs shrink-0 cursor-pointer"
+            className="min-w-[34px] h-9 px-2 rounded-xl font-semibold text-base flex items-center justify-center transition-all border active:scale-95 shrink-0 cursor-pointer"
+            style={{
+              backgroundColor: 'var(--bg-subtle)',
+              borderColor: 'var(--border-subtle)',
+              color: 'var(--text-primary)',
+            }}
           >
             {char}
           </button>

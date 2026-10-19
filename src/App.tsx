@@ -1,14 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Award,
-  Cloud,
-  CloudOff,
   Flame,
   Grid,
   Layers,
   LogOut,
-  Smartphone,
-  User,
+  Palette,
 } from 'lucide-react';
 import { AuthUserSession, UserProgressBlob } from './types';
 import {
@@ -18,20 +15,26 @@ import {
   loadLocalProgress,
   syncUserProgress,
 } from './lib/api';
+import {
+  applyTheme,
+  getSavedTheme,
+  THEME_OPTIONS,
+  ThemeId,
+} from './lib/theme';
 import { VERB_MAP } from './lib/priorityQueue';
 import { AuthView } from './components/AuthView';
 import { TableTrainerView } from './components/TableTrainerView';
 import { FlashcardView } from './components/FlashcardView';
 import { CompletedListView } from './components/CompletedListView';
 import { AccentBar } from './components/AccentBar';
-import {
-  IosInstallBanner,
-  isRunningStandalonePwa,
-} from './components/IosInstallBanner';
+import { IosInstallBanner } from './components/IosInstallBanner';
 
 type ActiveTab = 'table' | 'flashcards' | 'completed';
 
 export const App: React.FC = () => {
+  const [theme, setTheme] = useState<ThemeId>(() => getSavedTheme());
+  const [showThemeMenu, setShowThemeMenu] = useState(false);
+
   const [session, setSession] = useState<AuthUserSession | null>(() =>
     getSavedSession()
   );
@@ -42,10 +45,12 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('table');
   const [forcedVerbId, setForcedVerbId] = useState<string | null>(null);
   const [cloudSynced, setCloudSynced] = useState<boolean>(false);
-  const [showPwaModal, setShowPwaModal] = useState<boolean>(false);
-  const [isStandalone] = useState<boolean>(() => isRunningStandalonePwa());
 
   const activeInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
 
   // Sync user's progress with Netlify Blobs when session becomes active
   useEffect(() => {
@@ -96,17 +101,14 @@ export const App: React.FC = () => {
   if (!session || !progress) {
     return (
       <>
-        <IosInstallBanner
-          forceOpen={showPwaModal}
-          onCloseForceOpen={() => setShowPwaModal(false)}
-        />
+        <IosInstallBanner />
         <AuthView
           onAuthenticated={(newSession) => {
             setSession(newSession);
             setProgress(loadLocalProgress(newSession.username));
           }}
-          onOpenPwaInstructions={() => setShowPwaModal(true)}
-          showInstallButton={!isStandalone}
+          currentTheme={theme}
+          onSelectTheme={setTheme}
         />
       </>
     );
@@ -119,135 +121,233 @@ export const App: React.FC = () => {
     (v) => v.completed && v.inMatrixQueue && VERB_MAP[v.verbId]
   ).length;
 
-  return (
-    <div className="min-h-[100dvh] flex flex-col bg-slate-950 text-slate-100">
-      {/* Save as PWA Pop-up Modal (triggers automatically in browser + reopenable from header) */}
-      <IosInstallBanner
-        forceOpen={showPwaModal}
-        onCloseForceOpen={() => setShowPwaModal(false)}
-      />
+  const activeThemeMeta =
+    THEME_OPTIONS.find((t) => t.id === theme) || THEME_OPTIONS[0];
 
-      {/* Top Navigation & User Bar (respects iPhone safe-area-inset-top) */}
-      <header className="sticky top-0 z-30 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 pt-safe">
-        <div className="max-w-5xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-2">
-          {/* App Brand */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 via-indigo-600 to-rose-600 flex items-center justify-center shadow-sm shrink-0">
-              <span className="text-xs font-black text-white">ČJ</span>
-            </div>
-            <div>
-              <h1 className="text-sm sm:text-base font-extrabold text-white leading-tight">
-                Čeština
-              </h1>
-              <p className="text-[10px] text-slate-400 hidden sm:block">
-                3×2 Verb Conjugation & Priority Flashcards
-              </p>
-            </div>
+  return (
+    <div className="min-h-[100dvh] flex flex-col">
+      {/* Save as PWA Pop-up Modal (triggers automatically in browser, no top-bar icon) */}
+      <IosInstallBanner />
+
+      {/* Clean Editorial Header Bar */}
+      <header
+        className="sticky top-0 z-30 backdrop-blur-md border-b pt-safe transition-colors"
+        style={{
+          backgroundColor: 'color-mix(in srgb, var(--bg-surface) 88%, transparent)',
+          borderColor: 'var(--border-subtle)',
+        }}
+      >
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-15 flex items-center justify-between gap-3">
+          {/* Brand Title */}
+          <div className="flex items-baseline gap-2.5">
+            <span
+              className="font-display text-2xl sm:text-3xl tracking-tight leading-none"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Čeština
+            </span>
+            <span
+              className="text-[11px] font-semibold uppercase tracking-widest hidden sm:inline"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              Slovesa
+            </span>
           </div>
 
-          {/* Desktop Navigation Tabs */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
-            <button
-              type="button"
-              onClick={() => setActiveTab('table')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                activeTab === 'table'
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Grid className="w-3.5 h-3.5" />
-              <span>3×2 Table Trainer</span>
-              {relapsedCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/30 text-amber-200">
-                  {relapsedCount}!
-                </span>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('flashcards')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                activeTab === 'flashcards'
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Flashcards</span>
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-800 text-slate-300">
-                {completedCount}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('completed')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                activeTab === 'completed'
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Award className="w-3.5 h-3.5" />
-              <span>My Words</span>
-            </button>
+          {/* Desktop Navigation Pills */}
+          <nav
+            className="hidden md:flex items-center gap-1 p-1 rounded-2xl border theme-subtle"
+          >
+            {[
+              {
+                id: 'table' as const,
+                label: '3×2 Matrix',
+                icon: Grid,
+                badge: relapsedCount > 0 ? `${relapsedCount}!` : null,
+                isWarn: relapsedCount > 0,
+              },
+              {
+                id: 'flashcards' as const,
+                label: 'Flashcards',
+                icon: Layers,
+                badge: completedCount > 0 ? String(completedCount) : null,
+                isWarn: false,
+              },
+              {
+                id: 'completed' as const,
+                label: 'Vocabulary',
+                icon: Award,
+                badge: null,
+                isWarn: false,
+              },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveTab(item.id)}
+                  className="px-4 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
+                  style={
+                    isActive
+                      ? {
+                          backgroundColor: 'var(--bg-surface)',
+                          color: 'var(--text-primary)',
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+                        }
+                      : { color: 'var(--text-secondary)' }
+                  }
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{item.label}</span>
+                  {item.badge && (
+                    <span
+                      className="px-1.5 py-0.2 rounded-full text-[10px] font-extrabold"
+                      style={
+                        item.isWarn
+                          ? {
+                              backgroundColor: 'var(--warn-bg)',
+                              color: 'var(--warn-text)',
+                              border: '1px solid var(--warn-border)',
+                            }
+                          : {
+                              backgroundColor: 'var(--accent-soft)',
+                              color: 'var(--accent-primary)',
+                            }
+                      }
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </nav>
 
-          {/* Right Stats, Save as PWA Button & Multi-User Controls */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {!isStandalone && (
+          {/* Right Controls: Style Switcher + Streak + User */}
+          <div className="flex items-center gap-2">
+            {/* Live Style Switcher Dropdown */}
+            <div className="relative">
               <button
                 type="button"
-                onClick={() => setShowPwaModal(true)}
-                title="How to save as full-screen Home Screen app (PWA)"
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/40 text-xs font-bold text-indigo-300 transition-colors cursor-pointer"
+                onClick={() => setShowThemeMenu((prev) => !prev)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer theme-subtle"
+                style={{ color: 'var(--text-primary)' }}
+                title="Switch Visual Theme"
               >
-                <Smartphone className="w-3.5 h-3.5 text-indigo-400" />
-                <span className="hidden sm:inline">Save as App</span>
-                <span className="sm:hidden">PWA</span>
+                <span
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: activeThemeMeta.swatchAccent }}
+                />
+                <Palette className="w-3.5 h-3.5 sm:hidden" />
+                <span className="hidden sm:inline">{activeThemeMeta.shortName}</span>
               </button>
-            )}
 
-            <div
-              title="Daily streak & tables completed today"
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-amber-300"
-            >
-              <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" />
-              <span>{progress.stats.currentStreak}d</span>
-              <span className="text-slate-600 hidden sm:inline">•</span>
-              <span className="text-slate-300 hidden sm:inline">
-                {progress.stats.tablesCompletedToday} today
-              </span>
+              {showThemeMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowThemeMenu(false)}
+                  />
+                  <div
+                    className="absolute right-0 mt-2 w-60 rounded-2xl p-2 border z-50 space-y-1 theme-surface"
+                  >
+                    <div
+                      className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      Visual Style
+                    </div>
+                    {THEME_OPTIONS.map((opt) => {
+                      const selected = opt.id === theme;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => {
+                            setTheme(opt.id);
+                            setShowThemeMenu(false);
+                          }}
+                          className="w-full text-left px-3 py-2 rounded-xl flex items-center justify-between gap-2 transition-all cursor-pointer"
+                          style={{
+                            backgroundColor: selected
+                              ? 'var(--accent-soft)'
+                              : 'transparent',
+                            color: 'var(--text-primary)',
+                          }}
+                        >
+                          <div>
+                            <div className="text-xs font-bold">{opt.name}</div>
+                            <div
+                              className="text-[10px]"
+                              style={{ color: 'var(--text-secondary)' }}
+                            >
+                              {opt.tagline}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <span
+                              className="w-3.5 h-3.5 rounded-full border border-black/15"
+                              style={{ backgroundColor: opt.swatchBg }}
+                            />
+                            <span
+                              className="w-3.5 h-3.5 rounded-full"
+                              style={{ backgroundColor: opt.swatchAccent }}
+                            />
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
 
-            <div className="flex items-center gap-1.5 pl-1.5 sm:pl-2 border-l border-slate-800">
+            {/* Streak Pill */}
+            <div
+              title={`${progress.stats.currentStreak} day streak • ${progress.stats.tablesCompletedToday} tables today`}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-bold theme-subtle"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              <Flame
+                className="w-3.5 h-3.5"
+                style={{ color: 'var(--accent-primary)' }}
+              />
+              <span>{progress.stats.currentStreak}d</span>
+            </div>
+
+            {/* User & Logout */}
+            <div className="flex items-center gap-1 pl-1">
               <span
                 title={
                   cloudSynced
-                    ? `Synced to Netlify Blobs (progress:${session.username})`
-                    : `Saved locally on device (${session.username})`
+                    ? `Synced to cloud (${session.username})`
+                    : `Saved on device (${session.username})`
                 }
-                className="inline-flex items-center gap-1 text-xs font-semibold text-slate-300 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800"
+                className="text-xs font-semibold px-2 py-1 rounded-lg hidden sm:inline-flex items-center gap-1.5"
+                style={{ color: 'var(--text-secondary)' }}
               >
-                <User className="w-3.5 h-3.5 text-indigo-400" />
-                <span className="max-w-[75px] truncate">{session.displayName}</span>
-                {cloudSynced ? (
-                  <Cloud className="w-3 h-3 text-emerald-400 ml-0.5" />
-                ) : (
-                  <CloudOff className="w-3 h-3 text-slate-500 ml-0.5" />
-                )}
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{
+                    backgroundColor: cloudSynced
+                      ? 'var(--success-text)'
+                      : 'var(--text-muted)',
+                  }}
+                />
+                <span className="max-w-[80px] truncate">{session.displayName}</span>
               </span>
 
               <button
                 type="button"
                 onClick={handleLogout}
-                title="Switch User / Log Out"
-                className="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-950/60 text-slate-400 hover:text-rose-300 border border-slate-800 transition-colors cursor-pointer"
+                title={`Log out (${session.displayName})`}
+                className="p-1.5 rounded-xl border transition-colors cursor-pointer theme-subtle"
+                style={{ color: 'var(--text-secondary)' }}
                 aria-label="Log Out"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -255,7 +355,7 @@ export const App: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 pt-4 pb-36 md:pb-24">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 pt-5 pb-36 md:pb-24">
         {activeTab === 'table' && (
           <TableTrainerView
             progress={progress}
@@ -283,43 +383,72 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* Bottom Sticky Dock: Czech AccentBar (on typing tabs) + Mobile Tab Bar */}
-      <div className="fixed bottom-0 inset-x-0 z-30 flex flex-col pb-safe bg-slate-950/95 backdrop-blur-md">
+      {/* Bottom Sticky Dock: Czech AccentBar + Mobile Navigation */}
+      <div
+        className="fixed bottom-0 inset-x-0 z-30 flex flex-col pb-safe backdrop-blur-md"
+        style={{
+          backgroundColor: 'color-mix(in srgb, var(--bg-surface) 92%, transparent)',
+        }}
+      >
         {(activeTab === 'table' || activeTab === 'flashcards') && (
           <AccentBar activeInputRef={activeInputRef} />
         )}
 
         {/* Mobile Bottom Tab Bar */}
-        <nav className="md:hidden grid grid-cols-3 border-t border-slate-800/90 bg-slate-950 px-2 py-1.5">
+        <nav
+          className="md:hidden grid grid-cols-3 border-t px-2 py-1.5"
+          style={{ borderColor: 'var(--border-subtle)' }}
+        >
           <button
             type="button"
             onClick={() => setActiveTab('table')}
-            className={`flex flex-col items-center justify-center py-1 rounded-xl text-[11px] font-bold transition-colors cursor-pointer ${
-              activeTab === 'table' ? 'text-indigo-400' : 'text-slate-400'
-            }`}
+            className="flex flex-col items-center justify-center py-1 rounded-xl text-[11px] font-bold transition-colors cursor-pointer"
+            style={{
+              color:
+                activeTab === 'table'
+                  ? 'var(--accent-primary)'
+                  : 'var(--text-muted)',
+            }}
           >
             <div className="relative">
               <Grid className="w-5 h-5 mb-0.5" />
               {relapsedCount > 0 && (
-                <span className="-top-1 -right-2.5 absolute px-1 rounded-full text-[9px] bg-amber-500 text-slate-950 font-black">
+                <span
+                  className="-top-1 -right-2.5 absolute px-1 rounded-full text-[9px] font-black"
+                  style={{
+                    backgroundColor: 'var(--warn-bg)',
+                    color: 'var(--warn-text)',
+                    border: '1px solid var(--warn-border)',
+                  }}
+                >
                   {relapsedCount}
                 </span>
               )}
             </div>
-            <span>3×2 Trainer</span>
+            <span>3×2 Matrix</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('flashcards')}
-            className={`flex flex-col items-center justify-center py-1 rounded-xl text-[11px] font-bold transition-colors cursor-pointer ${
-              activeTab === 'flashcards' ? 'text-indigo-400' : 'text-slate-400'
-            }`}
+            className="flex flex-col items-center justify-center py-1 rounded-xl text-[11px] font-bold transition-colors cursor-pointer"
+            style={{
+              color:
+                activeTab === 'flashcards'
+                  ? 'var(--accent-primary)'
+                  : 'var(--text-muted)',
+            }}
           >
             <div className="relative">
               <Layers className="w-5 h-5 mb-0.5" />
               {completedCount > 0 && (
-                <span className="-top-1 -right-3 absolute px-1 rounded-full text-[9px] bg-slate-800 text-slate-200 border border-slate-700">
+                <span
+                  className="-top-1 -right-3 absolute px-1 rounded-full text-[9px] font-bold"
+                  style={{
+                    backgroundColor: 'var(--accent-soft)',
+                    color: 'var(--accent-primary)',
+                  }}
+                >
                   {completedCount}
                 </span>
               )}
@@ -330,12 +459,16 @@ export const App: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('completed')}
-            className={`flex flex-col items-center justify-center py-1 rounded-xl text-[11px] font-bold transition-colors cursor-pointer ${
-              activeTab === 'completed' ? 'text-indigo-400' : 'text-slate-400'
-            }`}
+            className="flex flex-col items-center justify-center py-1 rounded-xl text-[11px] font-bold transition-colors cursor-pointer"
+            style={{
+              color:
+                activeTab === 'completed'
+                  ? 'var(--accent-primary)'
+                  : 'var(--text-muted)',
+            }}
           >
             <Award className="w-5 h-5 mb-0.5" />
-            <span>My Words ({completedCount})</span>
+            <span>Words ({completedCount})</span>
           </button>
         </nav>
       </div>

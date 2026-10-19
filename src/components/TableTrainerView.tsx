@@ -5,11 +5,8 @@ import {
   Check,
   CheckCircle2,
   Eye,
-  Flame,
-  HelpCircle,
   Lightbulb,
   RotateCcw,
-  Sparkles,
 } from 'lucide-react';
 import {
   ActiveTableSession,
@@ -41,9 +38,9 @@ interface TableTrainerViewProps {
 }
 
 const TENSES: { key: TenseKey; titleCz: string; titleEn: string }[] = [
-  { key: 'past', titleCz: 'Minulý čas', titleEn: 'Past Tense' },
-  { key: 'present', titleCz: 'Přítomný čas', titleEn: 'Present Tense' },
-  { key: 'future', titleCz: 'Budoucí čas', titleEn: 'Future Tense' },
+  { key: 'past', titleCz: 'Minulý čas', titleEn: 'Past' },
+  { key: 'present', titleCz: 'Přítomný čas', titleEn: 'Present' },
+  { key: 'future', titleCz: 'Budoucí čas', titleEn: 'Future' },
 ];
 
 /**
@@ -120,7 +117,6 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
   const totalLocked = Object.keys(session.lockedCells).length;
   const isAll18Complete = totalLocked === 18;
 
-  // Handle jumping to a specific verb from CompletedListView
   useEffect(() => {
     if (forcedVerbId && VERB_MAP[forcedVerbId]) {
       const targetVerb = VERB_MAP[forcedVerbId];
@@ -190,10 +186,6 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
     }
   };
 
-  /**
-   * Validates either a single tense table (6 cells) or all 3 tenses (18 cells).
-   * Correct cells lock in (`✅`), wrong cells remain editable (`❌`) until all 18/18 are right.
-   */
   const validateCells = (targetTenses: TenseKey[]) => {
     const nextLocked = { ...session.lockedCells };
     const nextInputs = { ...inputs };
@@ -216,7 +208,6 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
         );
 
         if (res.isValid) {
-          // Lock the cell with the user's valid form (or canonical form)
           nextLocked[cellKey] = userVal.trim() || res.canonicalAnswer;
           nextInputs[cellKey] = nextLocked[cellKey];
           delete nextFeedback[cellKey];
@@ -244,14 +235,12 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
     const lockedCountNow = Object.keys(nextLocked).length;
 
     if (lockedCountNow === 18) {
-      // All 3 tenses (18/18) mastered!
       setJustCompletedWord(true);
       const completedProgress = recordTableCompletion(progress, verb.id);
       onUpdateProgress(completedProgress);
       return;
     }
 
-    // Persist partial active session
     onUpdateProgress({
       ...progress,
       updatedAt: new Date().toISOString(),
@@ -261,7 +250,6 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
       },
     });
 
-    // If the current mobile tense just reached 6/6, auto-advance mobile tab to next incomplete tense
     const currentTenseLocked = ORDERED_PERSONS.filter((p) =>
       Boolean(nextLocked[`${mobileTense}:${p}`])
     ).length;
@@ -301,7 +289,7 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
       [cellKey]: {
         status: 'error',
         revealedAnswer: expected,
-        hint: `Expected: "${expected}" — type it in to lock the cell!`,
+        hint: expected,
       },
     }));
 
@@ -316,7 +304,6 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
 
   const handleToggleFutureMode = (nextMode: FutureMode) => {
     if (!verb.forms.futurePf || nextMode === session.futureMode) return;
-    // Clear any unlocked/locked future cells if user switches future aspect mode mid-word
     const nextLocked = { ...session.lockedCells };
     const nextInputs = { ...inputs };
     for (const p of ORDERED_PERSONS) {
@@ -358,72 +345,96 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
   };
 
   return (
-    <div className="space-y-4 pb-6">
-      {/* Verb Header Card */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <div className="flex flex-wrap items-center gap-2 mb-1.5">
+    <div className="space-y-5 pb-6">
+      {/* Editorial Verb Hero Card */}
+      <div className="rounded-3xl p-5 sm:p-7 border theme-surface transition-all">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-2">
+            {/* Top Metadata Pills */}
+            <div className="flex flex-wrap items-center gap-2">
               {selectionInfo.reason === 'relapsed' ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider"
+                  style={{
+                    backgroundColor: 'var(--warn-bg)',
+                    color: 'var(--warn-text)',
+                    border: '1px solid var(--warn-border)',
+                  }}
+                >
                   <AlertTriangle className="w-3 h-3" />
-                  Re-Queued Priority ({selectionInfo.priorityScore})
-                </span>
-              ) : selectionInfo.reason === 'new' ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  <Sparkles className="w-3 h-3" />
-                  Freq #{verb.frequencyRank} • New Verb
+                  Priority Review ({selectionInfo.priorityScore})
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  <Flame className="w-3 h-3" />
-                  Mastery Review
+                <span
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider"
+                  style={{
+                    backgroundColor: 'var(--accent-soft)',
+                    color: 'var(--accent-primary)',
+                  }}
+                >
+                  No. {verb.frequencyRank}
                 </span>
               )}
 
-              <span className="text-xs text-slate-400 font-medium px-2 py-0.5 rounded-md bg-slate-800/80">
+              <span
+                className="text-xs font-medium px-2.5 py-0.5 rounded-full border theme-subtle"
+                style={{ color: 'var(--text-secondary)' }}
+              >
                 {verb.conjugationClass}
               </span>
+
               {verb.aspectPairInfinitive && (
-                <span className="text-xs text-slate-300 font-medium px-2 py-0.5 rounded-md bg-slate-800/80 border border-slate-700">
-                  Pair: <strong className="text-indigo-300">{verb.aspectPairInfinitive}</strong>
+                <span
+                  className="text-xs font-medium px-2.5 py-0.5 rounded-full border theme-subtle"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  Perfective: <strong style={{ color: 'var(--text-primary)' }}>{verb.aspectPairInfinitive}</strong>
                 </span>
               )}
             </div>
 
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            {/* Expressive Verb Infinitive & Translation */}
+            <div className="flex items-baseline gap-3.5 flex-wrap pt-0.5">
+              <h2
+                className="font-display text-4xl sm:text-5xl font-normal tracking-tight leading-none"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {verb.infinitive}
               </h2>
-              <span className="text-base sm:text-lg font-medium text-slate-300">
-                — {verb.english}
+              <span
+                className="text-lg sm:text-xl font-medium"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                {verb.english}
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-1 italic">
-              “{verb.exampleCz}” <span className="not-italic text-slate-500">({verb.exampleEn})</span>
+
+            <p className="text-xs sm:text-sm italic pt-0.5" style={{ color: 'var(--text-muted)' }}>
+              “{verb.exampleCz}” — <span className="not-italic">{verb.exampleEn}</span>
             </p>
           </div>
 
-          {/* Right actions: Progress pill + Hint toggle + Reroll */}
+          {/* Right Controls: Tip + Reroll + 18-Cell Counter */}
           <div className="flex items-center gap-2 self-start">
             <button
               type="button"
               onClick={() => setShowMnemonic((prev) => !prev)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all cursor-pointer ${
-                showMnemonic
-                  ? 'bg-amber-500/20 border-amber-500/50 text-amber-200'
-                  : 'bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white'
-              }`}
+              className="px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-1.5 border transition-all cursor-pointer theme-subtle"
+              style={{
+                color: showMnemonic ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                borderColor: showMnemonic ? 'var(--accent-border)' : 'var(--border-subtle)',
+              }}
             >
-              <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
-              <span>Pattern Tip</span>
+              <Lightbulb className="w-3.5 h-3.5" />
+              <span>Grammar Tip</span>
             </button>
 
             <button
               type="button"
               onClick={() => startNextWord(true)}
-              title="Reset this table with new random genders"
-              className="p-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 cursor-pointer"
+              title="Reset table with new random genders"
+              className="p-2 rounded-2xl border transition-all cursor-pointer theme-subtle"
+              style={{ color: 'var(--text-secondary)' }}
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -431,51 +442,76 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
         </div>
 
         {showMnemonic && (
-          <div className="mt-3 p-3 rounded-xl bg-amber-950/40 border border-amber-500/30 text-xs text-amber-100 leading-relaxed">
-            <strong className="text-amber-300">Grammar & Stem Tip:</strong> {verb.mnemonicTip}
+          <div
+            className="mt-4 p-3.5 rounded-2xl border text-xs sm:text-sm leading-relaxed"
+            style={{
+              backgroundColor: 'var(--accent-soft)',
+              borderColor: 'var(--accent-border)',
+              color: 'var(--text-primary)',
+            }}
+          >
+            <strong>Stem & Pattern Note:</strong> {verb.mnemonicTip}
           </div>
         )}
 
-        {/* Overall 18-cell mastery bar */}
-        <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between gap-4">
+        {/* Clean Progress Track */}
+        <div
+          className="mt-5 pt-4 border-t flex items-center justify-between gap-4"
+          style={{ borderColor: 'var(--border-subtle)' }}
+        >
           <div className="flex-1">
-            <div className="flex justify-between text-xs font-semibold mb-1">
-              <span className="text-slate-400">
-                3×2 Mastery Progress (Past • Present • Future)
+            <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider mb-1.5">
+              <span style={{ color: 'var(--text-muted)' }}>
+                3×2 Mastery (Minulý • Přítomný • Budoucí)
               </span>
-              <span className={isAll18Complete ? 'text-emerald-400 font-bold' : 'text-indigo-300'}>
-                {totalLocked} / 18 cells locked
+              <span
+                style={{
+                  color: isAll18Complete
+                    ? 'var(--success-text)'
+                    : 'var(--accent-primary)',
+                }}
+              >
+                {totalLocked} / 18 Locked
               </span>
             </div>
-            <div className="w-full h-2 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
+            <div
+              className="w-full h-2 rounded-full overflow-hidden"
+              style={{ backgroundColor: 'var(--bg-subtle)' }}
+            >
               <div
-                className={`h-full transition-all duration-300 ${
-                  isAll18Complete
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
-                    : 'bg-gradient-to-r from-indigo-600 to-blue-500'
-                }`}
-                style={{ width: `${Math.round((totalLocked / 18) * 100)}%` }}
+                className="h-full transition-all duration-300 rounded-full"
+                style={{
+                  width: `${Math.round((totalLocked / 18) * 100)}%`,
+                  backgroundColor: isAll18Complete
+                    ? 'var(--success-text)'
+                    : 'var(--accent-primary)',
+                }}
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Celebration Banner when all 18/18 cells are correct */}
+      {/* Mastery Banner when all 18/18 cells are complete */}
       {isAll18Complete && (
-        <div className="bg-gradient-to-r from-emerald-950/90 via-teal-950/90 to-slate-900 border border-emerald-500/50 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 shrink-0">
-              <CheckCircle2 className="w-6 h-6" />
-            </div>
+        <div
+          className="rounded-3xl p-5 border flex flex-col sm:flex-row items-center justify-between gap-4"
+          style={{
+            backgroundColor: 'var(--success-bg)',
+            borderColor: 'var(--success-border)',
+            color: 'var(--success-text)',
+          }}
+        >
+          <div className="flex items-center gap-3.5">
+            <CheckCircle2 className="w-7 h-7 shrink-0" />
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-white">
-                Výborně! All 18/18 forms of “{verb.infinitive}” mastered!
+              <h3 className="text-base sm:text-lg font-bold">
+                Výborně! All 18 forms of “{verb.infinitive}” mastered.
               </h3>
-              <p className="text-xs text-emerald-200/80">
+              <p className="text-xs opacity-85">
                 {justCompletedWord
-                  ? 'Saved to your Completed Words pool and cleared from high-priority queue.'
-                  : 'All 3 tenses are locked in.'}
+                  ? 'Added to your Vocabulary pool and cleared from high-priority queue.'
+                  : 'All 3 tenses are complete.'}
               </p>
             </div>
           </div>
@@ -483,16 +519,16 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
           <button
             type="button"
             onClick={() => startNextWord(false)}
-            className="w-full sm:w-auto px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 cursor-pointer shrink-0"
+            className="w-full sm:w-auto px-6 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-md cursor-pointer shrink-0 theme-btn-primary"
           >
-            <span>Next Word</span>
+            <span>Next Verb</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      {/* Mobile Segmented Tense Switcher (Hidden on lg+ desktop where all 3 show side-by-side) */}
-      <div className="lg:hidden grid grid-cols-3 gap-1.5 p-1 bg-slate-900 border border-slate-800 rounded-xl">
+      {/* Mobile Segmented Tense Switcher */}
+      <div className="lg:hidden grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl border theme-subtle">
         {TENSES.map((t) => {
           const count = getTenseLockedCount(t.key);
           const isComplete = count === 6;
@@ -503,33 +539,45 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
               key={t.key}
               type="button"
               onClick={() => setMobileTense(t.key)}
-              className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+              className="py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              style={
                 isActive
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : isComplete
-                  ? 'bg-emerald-950/40 text-emerald-300 border border-emerald-500/20'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+                  ? {
+                      backgroundColor: 'var(--bg-surface)',
+                      color: 'var(--text-primary)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                    }
+                  : {
+                      color: isComplete
+                        ? 'var(--success-text)'
+                        : 'var(--text-secondary)',
+                    }
+              }
             >
               <span>{t.titleCz.replace(' čas', '')}</span>
               <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                className="text-[10px] px-1.5 py-0.2 rounded-full font-extrabold"
+                style={
                   isComplete
-                    ? 'bg-emerald-500/30 text-emerald-200'
-                    : isActive
-                    ? 'bg-indigo-800 text-indigo-100'
-                    : 'bg-slate-800 text-slate-400'
-                }`}
+                    ? {
+                        backgroundColor: 'var(--success-bg)',
+                        color: 'var(--success-text)',
+                      }
+                    : {
+                        backgroundColor: 'var(--bg-subtle)',
+                        color: 'var(--text-muted)',
+                      }
+                }
               >
-                {count}/6 {isComplete ? '✓' : ''}
+                {count}/6
               </span>
             </button>
           );
         })}
       </div>
 
-      {/* 3 Tense Tables (Side-by-side on desktop, active tab on mobile) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* 3 Tense Cards (Side-by-side on desktop, active tense on mobile) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {TENSES.map((tenseMeta) => {
           const tense = tenseMeta.key;
           const lockedInTense = getTenseLockedCount(tense);
@@ -540,29 +588,43 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
             <div
               key={tense}
               className={`${
-                isVisibleOnMobile ? 'block' : 'hidden lg:block'
-              } bg-slate-900/90 border rounded-2xl p-3.5 sm:p-4 flex flex-col justify-between transition-all ${
+                isVisibleOnMobile ? 'flex' : 'hidden lg:flex'
+              } rounded-3xl p-4 sm:p-5 border flex-col justify-between transition-all theme-surface`}
+              style={
                 isTenseComplete
-                  ? 'border-emerald-500/40 shadow-md shadow-emerald-950/20'
-                  : 'border-slate-800'
-              }`}
+                  ? { borderColor: 'var(--success-border)' }
+                  : undefined
+              }
             >
               <div>
-                {/* Tense Card Header */}
-                <div className="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-800">
+                {/* Tense Header */}
+                <div
+                  className="flex items-start justify-between gap-2 pb-3.5 mb-3.5 border-b"
+                  style={{ borderColor: 'var(--border-subtle)' }}
+                >
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm sm:text-base font-bold text-white">
+                    <div className="flex items-baseline gap-2">
+                      <h3
+                        className="font-display text-2xl tracking-tight leading-none"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
                         {tenseMeta.titleCz}
                       </h3>
-                      <span className="text-xs text-slate-400">({tenseMeta.titleEn})</span>
+                      <span
+                        className="text-xs font-medium"
+                        style={{ color: 'var(--text-muted)' }}
+                      >
+                        {tenseMeta.titleEn}
+                      </span>
                     </div>
 
-                    {/* Explicit Tense Sub-Specification */}
                     {tense === 'past' && (
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        Col 1 targets:{' '}
-                        <strong className="text-slate-200">
+                      <p
+                        className="text-[11px] mt-1 font-medium"
+                        style={{ color: 'var(--text-secondary)' }}
+                      >
+                        Singular targets:{' '}
+                        <strong style={{ color: 'var(--text-primary)' }}>
                           Já ({session.genders.ja === 'm' ? '♂' : '♀'}), Ty (
                           {session.genders.ty === 'm' ? '♂' : '♀'}),{' '}
                           {session.genders.thirdSg.toUpperCase()}
@@ -571,23 +633,30 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
                     )}
 
                     {tense === 'present' && (
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        Imperfective present forms of{' '}
-                        <strong className="text-slate-200">{verb.infinitive}</strong>
+                      <p
+                        className="text-[11px] mt-1 font-medium"
+                        style={{ color: 'var(--text-secondary)' }}
+                      >
+                        Present stem of{' '}
+                        <strong style={{ color: 'var(--text-primary)' }}>
+                          {verb.infinitive}
+                        </strong>
                       </p>
                     )}
 
                     {tense === 'future' && (
-                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                        {session.futureMode === 'pf' && verb.forms.futurePf ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-purple-500/20 text-purple-200 border border-purple-500/30">
-                            Target: Perfective ({verb.aspectPairInfinitive})
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-sky-500/20 text-sky-200 border border-sky-500/30">
-                            Target: Imperfective (budu + {verb.infinitive})
-                          </span>
-                        )}
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                        <span
+                          className="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-bold"
+                          style={{
+                            backgroundColor: 'var(--accent-soft)',
+                            color: 'var(--accent-primary)',
+                          }}
+                        >
+                          {session.futureMode === 'pf' && verb.forms.futurePf
+                            ? `Perfective: ${verb.aspectPairInfinitive}`
+                            : `Imperfective: budu + ${verb.infinitive}`}
+                        </span>
 
                         {verb.forms.futurePf && (
                           <button
@@ -597,9 +666,10 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
                                 session.futureMode === 'impf' ? 'pf' : 'impf'
                               )
                             }
-                            className="text-[10px] underline text-slate-400 hover:text-slate-200 cursor-pointer"
+                            className="text-[11px] underline cursor-pointer"
+                            style={{ color: 'var(--text-muted)' }}
                           >
-                            Switch to {session.futureMode === 'impf' ? 'Perfective' : 'Imperfective'}
+                            Switch
                           </button>
                         )}
                       </div>
@@ -607,22 +677,34 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
                   </div>
 
                   <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-bold shrink-0 ${
+                    className="px-2.5 py-1 rounded-full text-xs font-bold shrink-0"
+                    style={
                       isTenseComplete
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                        : 'bg-slate-800 text-slate-300'
-                    }`}
+                        ? {
+                            backgroundColor: 'var(--success-bg)',
+                            color: 'var(--success-text)',
+                            border: '1px solid var(--success-border)',
+                          }
+                        : {
+                            backgroundColor: 'var(--bg-subtle)',
+                            color: 'var(--text-secondary)',
+                          }
+                    }
                   >
                     {lockedInTense}/6
                   </span>
                 </div>
 
-                {/* 3x2 Conjugation Grid */}
-                <div className="grid grid-cols-2 gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-500 px-1 mb-1.5">
-                  <div>Col 1 • Singular</div>
-                  <div>Col 2 • Plural</div>
+                {/* Column Subheaders */}
+                <div
+                  className="grid grid-cols-2 gap-2.5 text-[10px] font-bold uppercase tracking-widest px-1 mb-2"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  <div>Singular (Jednotné)</div>
+                  <div>Plural (Množné)</div>
                 </div>
 
+                {/* 3×2 Conjugation Matrix */}
                 <div className="space-y-2.5">
                   {GRID_ROWS.map(([col1Person, col2Person], rowIdx) => (
                     <div key={rowIdx} className="grid grid-cols-2 gap-2.5">
@@ -638,29 +720,40 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
                         return (
                           <div
                             key={cellKey}
-                            className={`rounded-xl p-2.5 border transition-all flex flex-col justify-between ${
+                            className="rounded-2xl p-2.5 border transition-all flex flex-col justify-between"
+                            style={
                               isLocked
-                                ? 'bg-emerald-950/35 border-emerald-500/40'
+                                ? {
+                                    backgroundColor: 'var(--success-bg)',
+                                    borderColor: 'var(--success-border)',
+                                  }
                                 : feedback?.status === 'error'
-                                ? 'bg-rose-950/30 border-rose-500/50'
-                                : 'bg-slate-950/80 border-slate-800 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20'
-                            }`}
+                                ? {
+                                    backgroundColor: 'var(--error-bg)',
+                                    borderColor: 'var(--error-border)',
+                                  }
+                                : {
+                                    backgroundColor: 'var(--bg-input)',
+                                    borderColor: 'var(--border-subtle)',
+                                  }
+                            }
                           >
-                            {/* Cell Pronoun Header */}
-                            <div className="flex items-center justify-between gap-1 mb-1.5">
+                            {/* Pronoun & Gender Badge Row */}
+                            <div className="flex items-center justify-between gap-1 mb-1">
                               <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-bold text-slate-200">
+                                <span
+                                  className="text-xs font-bold"
+                                  style={{ color: 'var(--text-secondary)' }}
+                                >
                                   {labelInfo.pronoun}
                                 </span>
                                 {labelInfo.badge && (
                                   <span
-                                    className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
-                                      labelInfo.badge.includes('♂')
-                                        ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
-                                        : labelInfo.badge.includes('♀')
-                                        ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30'
-                                        : 'bg-slate-700/60 text-slate-300'
-                                    }`}
+                                    className="text-[10px] font-bold px-1.5 py-0.2 rounded-md"
+                                    style={{
+                                      backgroundColor: 'var(--bg-subtle)',
+                                      color: 'var(--text-primary)',
+                                    }}
                                   >
                                     {labelInfo.badge}
                                   </span>
@@ -668,23 +761,25 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
                               </div>
 
                               {isLocked ? (
-                                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400">
-                                  <Check className="w-3 h-3" />
-                                </span>
+                                <Check
+                                  className="w-3.5 h-3.5"
+                                  style={{ color: 'var(--success-text)' }}
+                                />
                               ) : (
                                 <button
                                   type="button"
                                   tabIndex={-1}
                                   onClick={() => handleRevealCell(tense, person)}
-                                  title="Peek answer for this cell"
-                                  className="text-slate-500 hover:text-slate-300 p-0.5 cursor-pointer"
+                                  title="Peek expected form"
+                                  className="text-[10px] font-semibold opacity-60 hover:opacity-100 cursor-pointer"
+                                  style={{ color: 'var(--text-muted)' }}
                                 >
-                                  <HelpCircle className="w-3.5 h-3.5" />
+                                  <Eye className="w-3.5 h-3.5" />
                                 </button>
                               )}
                             </div>
 
-                            {/* Conjugation Input (16px text-base prevents iOS Safari zoom!) */}
+                            {/* Input Field (16px prevents iOS Safari zoom) */}
                             <input
                               ref={(el) => {
                                 cellInputRefs.current[cellKey] = el;
@@ -702,25 +797,32 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
                                   focusNextUnlockedCell(tense, person, session.lockedCells);
                                 }
                               }}
-                              placeholder="..."
+                              placeholder="—"
                               autoCapitalize="none"
                               autoCorrect="off"
                               autoComplete="off"
                               spellCheck={false}
                               enterKeyHint="next"
-                              className={`w-full bg-transparent text-base font-semibold outline-none ${
-                                isLocked
-                                  ? 'text-emerald-300 cursor-default'
+                              className="w-full bg-transparent text-base font-bold outline-none"
+                              style={{
+                                color: isLocked
+                                  ? 'var(--success-text)'
                                   : feedback?.status === 'error'
-                                  ? 'text-rose-200 placeholder-rose-500/40'
-                                  : 'text-white placeholder-slate-600'
-                              }`}
+                                  ? 'var(--error-text)'
+                                  : 'var(--text-primary)',
+                              }}
                             />
 
-                            {/* Cell Error / Hint Feedback */}
+                            {/* Subtle Inline Hint when Wrong or Peeked */}
                             {!isLocked && feedback && (
-                              <div className="mt-1.5 pt-1 border-t border-rose-500/20 text-[11px] text-rose-300 leading-tight flex items-center justify-between gap-1">
-                                <span>
+                              <div
+                                className="mt-1 pt-1 border-t text-[11px] font-medium leading-tight flex items-center justify-between gap-1"
+                                style={{
+                                  borderColor: 'var(--error-border)',
+                                  color: 'var(--error-text)',
+                                }}
+                              >
+                                <span className="truncate">
                                   {feedback.hint || 'Try again'}
                                 </span>
                                 {!feedback.revealedAnswer && (
@@ -728,9 +830,9 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
                                     type="button"
                                     tabIndex={-1}
                                     onClick={() => handleRevealCell(tense, person)}
-                                    className="inline-flex items-center gap-0.5 text-[10px] font-semibold underline text-rose-200 hover:text-white shrink-0 cursor-pointer"
+                                    className="text-[10px] font-bold underline shrink-0 cursor-pointer"
                                   >
-                                    <Eye className="w-3 h-3" /> Show
+                                    Peek
                                   </button>
                                 )}
                               </div>
@@ -744,19 +846,29 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
               </div>
 
               {/* Per-Tense Check Button */}
-              <div className="mt-4 pt-3 border-t border-slate-800/80">
+              <div
+                className="mt-4 pt-3.5 border-t"
+                style={{ borderColor: 'var(--border-subtle)' }}
+              >
                 {isTenseComplete ? (
-                  <div className="w-full py-2.5 px-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5">
+                  <div
+                    className="w-full py-2.5 px-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5"
+                    style={{
+                      backgroundColor: 'var(--success-bg)',
+                      color: 'var(--success-text)',
+                    }}
+                  >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>{tenseMeta.titleCz} Complete (6/6)</span>
+                    <span>{tenseMeta.titleCz} Complete</span>
                   </div>
                 ) : (
                   <button
                     type="button"
                     onClick={() => validateCells([tense])}
-                    className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-indigo-600 active:scale-[0.99] text-slate-100 font-semibold text-xs sm:text-sm border border-slate-700 hover:border-indigo-500 transition-all cursor-pointer"
+                    className="w-full py-2.5 px-4 rounded-2xl font-bold text-xs sm:text-sm border transition-all cursor-pointer theme-subtle"
+                    style={{ color: 'var(--text-primary)' }}
                   >
-                    Check {tenseMeta.titleCz} (6 cells)
+                    Check {tenseMeta.titleCz}
                   </button>
                 )}
               </div>
@@ -765,18 +877,18 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
         })}
       </div>
 
-      {/* Bottom Action Bar: Check All 3 Tenses at Once or Next Word */}
+      {/* Bottom Action Bar: Check All 3 Tenses */}
       {!isAll18Complete && (
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5">
-          <div className="text-xs text-slate-400">
-            Correct cells lock in (<span className="text-emerald-400 font-semibold">✅</span>). Keep retrying remaining cells until all 3 tenses (18/18) are right!
+        <div className="rounded-3xl p-4 border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 theme-surface">
+          <div className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Correct answers lock in automatically. Keep going until all 18 cells are complete.
           </div>
           <button
             type="button"
             onClick={() => validateCells(['past', 'present', 'future'])}
-            className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-indigo-600/25 transition-all shrink-0 cursor-pointer"
+            className="px-6 py-3 rounded-2xl font-bold text-sm shadow-md transition-all shrink-0 cursor-pointer theme-btn-primary"
           >
-            Check All 3 Tenses ({18 - totalLocked} remaining)
+            Check All 3 Tenses ({18 - totalLocked} left)
           </button>
         </div>
       )}
