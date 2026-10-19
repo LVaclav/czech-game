@@ -65,14 +65,10 @@ export const AccentBar: React.FC<AccentBarProps> = ({ activeInputRef }) => {
 
   return (
     <div
-      className="w-full border-t px-2 py-1.5 select-none transition-colors"
-      style={{
-        backgroundColor: 'var(--bg-surface)',
-        borderColor: 'var(--border-subtle)',
-      }}
+      className="px-3 sm:px-6 select-none"
       aria-label="Czech diacritic characters"
     >
-      <div className="max-w-5xl mx-auto flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+      <div className="max-w-5xl mx-auto rounded-full border px-3 py-1.5 flex items-center gap-1 overflow-x-auto no-scrollbar theme-surface">
         <span
           className="text-[10px] font-bold uppercase tracking-widest px-2 shrink-0 hidden sm:inline"
           style={{ color: 'var(--text-muted)' }}
@@ -88,10 +84,8 @@ export const AccentBar: React.FC<AccentBarProps> = ({ activeInputRef }) => {
               e.preventDefault();
               handleInsert(char);
             }}
-            className="min-w-[34px] h-9 px-2 rounded-xl font-semibold text-base flex items-center justify-center transition-all border active:scale-95 shrink-0 cursor-pointer"
+            className="min-w-[34px] h-8.5 px-2 rounded-full font-bold text-base flex items-center justify-center transition-all border active:scale-90 shrink-0 cursor-pointer theme-subtle"
             style={{
-              backgroundColor: 'var(--bg-subtle)',
-              borderColor: 'var(--border-subtle)',
               color: 'var(--text-primary)',
             }}
           >

@@ -52,7 +52,6 @@ export const App: React.FC = () => {
     applyTheme(theme);
   }, [theme]);
 
-  // Sync user's progress with Netlify Blobs when session becomes active
   useEffect(() => {
     if (!session) return;
     let cancelled = false;
@@ -129,35 +128,31 @@ export const App: React.FC = () => {
       {/* Save as PWA Pop-up Modal (triggers automatically in browser, no top-bar icon) */}
       <IosInstallBanner />
 
-      {/* Clean Editorial Header Bar */}
-      <header
-        className="sticky top-0 z-30 backdrop-blur-md border-b pt-safe transition-colors"
-        style={{
-          backgroundColor: 'color-mix(in srgb, var(--bg-surface) 88%, transparent)',
-          borderColor: 'var(--border-subtle)',
-        }}
-      >
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-15 flex items-center justify-between gap-3">
+      {/* Native Apple iOS 26 Floating Liquid Glass Top Bar */}
+      <header className="sticky top-0 z-30 pt-safe px-3 sm:px-6 pt-2.5">
+        <div className="max-w-5xl mx-auto h-14 px-4 rounded-full border flex items-center justify-between gap-3 theme-surface">
           {/* Brand Title */}
-          <div className="flex items-baseline gap-2.5">
+          <div className="flex items-center gap-2.5 pl-1">
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center font-extrabold text-xs tracking-tight shadow-xs"
+              style={{
+                background: 'var(--accent-gradient)',
+                color: 'var(--accent-primary-fg)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)',
+              }}
+            >
+              ČJ
+            </div>
             <span
-              className="font-display text-2xl sm:text-3xl tracking-tight leading-none"
+              className="font-display text-lg sm:text-xl tracking-tight leading-none"
               style={{ color: 'var(--text-primary)' }}
             >
               Čeština
             </span>
-            <span
-              className="text-[11px] font-semibold uppercase tracking-widest hidden sm:inline"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              Slovesa
-            </span>
           </div>
 
-          {/* Desktop Navigation Pills */}
-          <nav
-            className="hidden md:flex items-center gap-1 p-1 rounded-2xl border theme-subtle"
-          >
+          {/* Desktop Capsule Navigation Pills */}
+          <nav className="hidden md:flex items-center gap-1 p-1 rounded-full border theme-subtle">
             {[
               {
                 id: 'table' as const,
@@ -188,13 +183,14 @@ export const App: React.FC = () => {
                   key={item.id}
                   type="button"
                   onClick={() => setActiveTab(item.id)}
-                  className="px-4 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
+                  className="px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
                   style={
                     isActive
                       ? {
-                          backgroundColor: 'var(--bg-surface)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.22)',
                           color: 'var(--text-primary)',
-                          boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+                          boxShadow:
+                            'inset 0 1px 0 rgba(255,255,255,0.45), 0 2px 8px rgba(0,0,0,0.12)',
                         }
                       : { color: 'var(--text-secondary)' }
                   }
@@ -225,19 +221,19 @@ export const App: React.FC = () => {
             })}
           </nav>
 
-          {/* Right Controls: Style Switcher + Streak + User */}
+          {/* Right Controls: Glass Tint Switcher + Streak + User */}
           <div className="flex items-center gap-2">
-            {/* Live Style Switcher Dropdown */}
+            {/* Liquid Glass Tint Switcher */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setShowThemeMenu((prev) => !prev)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer theme-subtle"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all cursor-pointer theme-subtle"
                 style={{ color: 'var(--text-primary)' }}
-                title="Switch Visual Theme"
+                title="Switch Glass Tint"
               >
                 <span
-                  className="w-3 h-3 rounded-full"
+                  className="w-3 h-3 rounded-full border border-white/40"
                   style={{ backgroundColor: activeThemeMeta.swatchAccent }}
                 />
                 <Palette className="w-3.5 h-3.5 sm:hidden" />
@@ -251,13 +247,16 @@ export const App: React.FC = () => {
                     onClick={() => setShowThemeMenu(false)}
                   />
                   <div
-                    className="absolute right-0 mt-2 w-60 rounded-2xl p-2 border z-50 space-y-1 theme-surface"
+                    className="absolute right-0 mt-2.5 w-64 rounded-3xl p-2.5 border z-50 space-y-1 theme-surface"
+                    style={{
+                      backgroundColor: 'rgba(18, 34, 62, 0.86)',
+                    }}
                   >
                     <div
-                      className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest"
+                      className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest"
                       style={{ color: 'var(--text-muted)' }}
                     >
-                      Visual Style
+                      Liquid Glass Tint
                     </div>
                     {THEME_OPTIONS.map((opt) => {
                       const selected = opt.id === theme;
@@ -269,10 +268,10 @@ export const App: React.FC = () => {
                             setTheme(opt.id);
                             setShowThemeMenu(false);
                           }}
-                          className="w-full text-left px-3 py-2 rounded-xl flex items-center justify-between gap-2 transition-all cursor-pointer"
+                          className="w-full text-left px-3 py-2 rounded-2xl flex items-center justify-between gap-2 transition-all cursor-pointer"
                           style={{
                             backgroundColor: selected
-                              ? 'var(--accent-soft)'
+                              ? 'rgba(255, 255, 255, 0.16)'
                               : 'transparent',
                             color: 'var(--text-primary)',
                           }}
@@ -288,11 +287,11 @@ export const App: React.FC = () => {
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
                             <span
-                              className="w-3.5 h-3.5 rounded-full border border-black/15"
+                              className="w-3.5 h-3.5 rounded-full border border-white/30"
                               style={{ backgroundColor: opt.swatchBg }}
                             />
                             <span
-                              className="w-3.5 h-3.5 rounded-full"
+                              className="w-3.5 h-3.5 rounded-full border border-white/30"
                               style={{ backgroundColor: opt.swatchAccent }}
                             />
                           </div>
@@ -304,10 +303,10 @@ export const App: React.FC = () => {
               )}
             </div>
 
-            {/* Streak Pill */}
+            {/* Streak Capsule */}
             <div
               title={`${progress.stats.currentStreak} day streak • ${progress.stats.tablesCompletedToday} tables today`}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-bold theme-subtle"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full border text-xs font-bold theme-subtle"
               style={{ color: 'var(--text-primary)' }}
             >
               <Flame
@@ -318,14 +317,14 @@ export const App: React.FC = () => {
             </div>
 
             {/* User & Logout */}
-            <div className="flex items-center gap-1 pl-1">
+            <div className="flex items-center gap-1">
               <span
                 title={
                   cloudSynced
                     ? `Synced to cloud (${session.username})`
                     : `Saved on device (${session.username})`
                 }
-                className="text-xs font-semibold px-2 py-1 rounded-lg hidden sm:inline-flex items-center gap-1.5"
+                className="text-xs font-semibold px-2 py-1 rounded-full hidden sm:inline-flex items-center gap-1.5"
                 style={{ color: 'var(--text-secondary)' }}
               >
                 <span
@@ -343,7 +342,7 @@ export const App: React.FC = () => {
                 type="button"
                 onClick={handleLogout}
                 title={`Log out (${session.displayName})`}
-                className="p-1.5 rounded-xl border transition-colors cursor-pointer theme-subtle"
+                className="p-2 rounded-full border transition-colors cursor-pointer theme-subtle"
                 style={{ color: 'var(--text-secondary)' }}
                 aria-label="Log Out"
               >
@@ -355,7 +354,7 @@ export const App: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 pt-5 pb-36 md:pb-24">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 pt-5 pb-40 md:pb-24">
         {activeTab === 'table' && (
           <TableTrainerView
             progress={progress}
@@ -383,94 +382,83 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* Bottom Sticky Dock: Czech AccentBar + Mobile Navigation */}
-      <div
-        className="fixed bottom-0 inset-x-0 z-30 flex flex-col pb-safe backdrop-blur-md"
-        style={{
-          backgroundColor: 'color-mix(in srgb, var(--bg-surface) 92%, transparent)',
-        }}
-      >
+      {/* Bottom Sticky Dock: Czech AccentBar + iOS 26 Floating Liquid Glass Tab Pill */}
+      <div className="fixed bottom-0 inset-x-0 z-30 flex flex-col pb-safe pointer-events-none">
         {(activeTab === 'table' || activeTab === 'flashcards') && (
-          <AccentBar activeInputRef={activeInputRef} />
+          <div className="pointer-events-auto">
+            <AccentBar activeInputRef={activeInputRef} />
+          </div>
         )}
 
-        {/* Mobile Bottom Tab Bar */}
-        <nav
-          className="md:hidden grid grid-cols-3 border-t px-2 py-1.5"
-          style={{ borderColor: 'var(--border-subtle)' }}
-        >
-          <button
-            type="button"
-            onClick={() => setActiveTab('table')}
-            className="flex flex-col items-center justify-center py-1 rounded-xl text-[11px] font-bold transition-colors cursor-pointer"
-            style={{
-              color:
+        {/* Mobile Floating Liquid Glass Capsule Tab Bar */}
+        <div className="md:hidden px-4 pt-2 pb-2.5 pointer-events-auto">
+          <nav className="grid grid-cols-3 p-1.5 rounded-full border theme-surface">
+            <button
+              type="button"
+              onClick={() => setActiveTab('table')}
+              className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-xs font-bold transition-all cursor-pointer"
+              style={
                 activeTab === 'table'
-                  ? 'var(--accent-primary)'
-                  : 'var(--text-muted)',
-            }}
-          >
-            <div className="relative">
-              <Grid className="w-5 h-5 mb-0.5" />
+                  ? {
+                      backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                      color: 'var(--text-primary)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.45)',
+                    }
+                  : { color: 'var(--text-secondary)' }
+              }
+            >
+              <Grid className="w-4 h-4" />
+              <span>Matrix</span>
               {relapsedCount > 0 && (
                 <span
-                  className="-top-1 -right-2.5 absolute px-1 rounded-full text-[9px] font-black"
+                  className="px-1.5 rounded-full text-[10px] font-black"
                   style={{
                     backgroundColor: 'var(--warn-bg)',
                     color: 'var(--warn-text)',
-                    border: '1px solid var(--warn-border)',
                   }}
                 >
                   {relapsedCount}
                 </span>
               )}
-            </div>
-            <span>3×2 Matrix</span>
-          </button>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('flashcards')}
-            className="flex flex-col items-center justify-center py-1 rounded-xl text-[11px] font-bold transition-colors cursor-pointer"
-            style={{
-              color:
+            <button
+              type="button"
+              onClick={() => setActiveTab('flashcards')}
+              className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-xs font-bold transition-all cursor-pointer"
+              style={
                 activeTab === 'flashcards'
-                  ? 'var(--accent-primary)'
-                  : 'var(--text-muted)',
-            }}
-          >
-            <div className="relative">
-              <Layers className="w-5 h-5 mb-0.5" />
-              {completedCount > 0 && (
-                <span
-                  className="-top-1 -right-3 absolute px-1 rounded-full text-[9px] font-bold"
-                  style={{
-                    backgroundColor: 'var(--accent-soft)',
-                    color: 'var(--accent-primary)',
-                  }}
-                >
-                  {completedCount}
-                </span>
-              )}
-            </div>
-            <span>Flashcards</span>
-          </button>
+                  ? {
+                      backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                      color: 'var(--text-primary)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.45)',
+                    }
+                  : { color: 'var(--text-secondary)' }
+              }
+            >
+              <Layers className="w-4 h-4" />
+              <span>Cards</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('completed')}
-            className="flex flex-col items-center justify-center py-1 rounded-xl text-[11px] font-bold transition-colors cursor-pointer"
-            style={{
-              color:
+            <button
+              type="button"
+              onClick={() => setActiveTab('completed')}
+              className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-xs font-bold transition-all cursor-pointer"
+              style={
                 activeTab === 'completed'
-                  ? 'var(--accent-primary)'
-                  : 'var(--text-muted)',
-            }}
-          >
-            <Award className="w-5 h-5 mb-0.5" />
-            <span>Words ({completedCount})</span>
-          </button>
-        </nav>
+                  ? {
+                      backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                      color: 'var(--text-primary)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.45)',
+                    }
+                  : { color: 'var(--text-secondary)' }
+              }
+            >
+              <Award className="w-4 h-4" />
+              <span>Words ({completedCount})</span>
+            </button>
+          </nav>
+        </div>
       </div>
     </div>
   );

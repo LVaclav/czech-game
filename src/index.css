@@ -1,131 +1,164 @@
 @import "tailwindcss";
 
 :root,
-[data-theme="prague"] {
-  --bg-canvas: #f7f3eb;
-  --bg-surface: #ffffff;
-  --bg-subtle: #efe9dd;
-  --bg-input: #faf7f2;
-  --border-subtle: #e2d9c8;
-  --border-strong: #cbbba0;
-  --text-primary: #1c1917;
-  --text-secondary: #57534e;
-  --text-muted: #8a8175;
-  --accent-primary: #b93829;
-  --accent-primary-hover: #9e2d20;
-  --accent-primary-fg: #ffffff;
-  --accent-soft: rgba(185, 56, 41, 0.1);
-  --accent-border: rgba(185, 56, 41, 0.3);
-  --success-bg: #ecfdf5;
-  --success-border: #6ee7b7;
-  --success-text: #047857;
-  --error-bg: #fff1f2;
-  --error-border: #fda4af;
-  --error-text: #be123c;
-  --warn-bg: #fffbeb;
-  --warn-border: #fcd34d;
-  --warn-text: #b45309;
-  --shadow-card: 0 10px 30px -10px rgba(28, 25, 23, 0.07), 0 2px 6px -1px rgba(28, 25, 23, 0.04);
-  --font-display: 'Instrument Serif', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-[data-theme="crystal"] {
-  --bg-canvas: #f4f6fb;
-  --bg-surface: #ffffff;
-  --bg-subtle: #eaeef7;
-  --bg-input: #f8fafd;
-  --border-subtle: #e2e8f0;
-  --border-strong: #cbd5e1;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --accent-primary: #0052cc;
-  --accent-primary-hover: #0043a6;
-  --accent-primary-fg: #ffffff;
-  --accent-soft: rgba(0, 82, 204, 0.09);
-  --accent-border: rgba(0, 82, 204, 0.25);
-  --success-bg: #f0fdf4;
-  --success-border: #86efac;
-  --success-text: #15803d;
-  --error-bg: #fef2f2;
-  --error-border: #fca5a5;
-  --error-text: #b91c1c;
-  --warn-bg: #fffbeb;
-  --warn-border: #fde047;
-  --warn-text: #a16207;
-  --shadow-card: 0 12px 32px -8px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
-  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-[data-theme="noir"] {
-  --bg-canvas: #0b0b0e;
-  --bg-surface: #141419;
-  --bg-subtle: #1d1d24;
-  --bg-input: #0f0f13;
-  --border-subtle: #272730;
-  --border-strong: #3a3a48;
-  --text-primary: #f5f3ef;
-  --text-secondary: #a8a29e;
-  --text-muted: #686460;
-  --accent-primary: #e5a93c;
-  --accent-primary-hover: #d4962a;
-  --accent-primary-fg: #111115;
-  --accent-soft: rgba(229, 169, 60, 0.14);
-  --accent-border: rgba(229, 169, 60, 0.35);
-  --success-bg: rgba(16, 185, 129, 0.12);
-  --success-border: rgba(52, 211, 153, 0.35);
-  --success-text: #6ee7b7;
-  --error-bg: rgba(244, 63, 94, 0.12);
-  --error-border: rgba(251, 113, 133, 0.4);
-  --error-text: #fda4af;
-  --warn-bg: rgba(245, 158, 11, 0.14);
-  --warn-border: rgba(251, 191, 36, 0.4);
-  --warn-text: #fcd34d;
-  --shadow-card: 0 16px 40px -12px rgba(0, 0, 0, 0.6);
-  --font-display: 'Instrument Serif', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+[data-theme="sapphire"] {
+  /* Rich mid-tone Apple Weather / iOS 26 Sapphire Blue sky backdrop (not pitch black, not stark white) */
+  --bg-canvas: #1c3158;
+  --bg-mesh:
+    radial-gradient(at 15% 10%, rgba(56, 189, 248, 0.42) 0px, transparent 52%),
+    radial-gradient(at 88% 18%, rgba(99, 102, 241, 0.38) 0px, transparent 55%),
+    radial-gradient(at 50% 85%, rgba(37, 99, 235, 0.45) 0px, transparent 60%),
+    linear-gradient(165deg, #243f6f 0%, #1c3158 50%, #152544 100%);
+  --bg-surface: rgba(255, 255, 255, 0.13);
+  --bg-subtle: rgba(255, 255, 255, 0.09);
+  --bg-input: rgba(11, 23, 46, 0.28);
+  --border-subtle: rgba(255, 255, 255, 0.22);
+  --border-strong: rgba(255, 255, 255, 0.38);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(235, 245, 255, 0.8);
+  --text-muted: rgba(200, 222, 255, 0.56);
+  --accent-primary: #38bdf8;
+  --accent-primary-hover: #7dd3fc;
+  --accent-primary-fg: #08203e;
+  --accent-gradient: linear-gradient(180deg, #5ce1ff 0%, #2589f5 100%);
+  --accent-soft: rgba(56, 189, 248, 0.2);
+  --accent-border: rgba(125, 211, 252, 0.48);
+  --success-bg: rgba(16, 185, 129, 0.22);
+  --success-border: rgba(110, 231, 183, 0.55);
+  --success-text: #a7f3d0;
+  --error-bg: rgba(244, 63, 94, 0.24);
+  --error-border: rgba(253, 164, 175, 0.55);
+  --error-text: #fecdd3;
+  --warn-bg: rgba(245, 158, 11, 0.24);
+  --warn-border: rgba(252, 211, 77, 0.55);
+  --warn-text: #fde68a;
+  --glass-specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.42), inset 0 -1px 0 0 rgba(255, 255, 255, 0.08);
+  --shadow-card: 0 20px 45px -15px rgba(8, 17, 36, 0.42), 0 4px 12px -2px rgba(8, 17, 36, 0.2);
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Plus Jakarta Sans', sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Plus Jakarta Sans', sans-serif;
 }
 
 [data-theme="vltava"] {
-  --bg-canvas: #081216;
-  --bg-surface: #0f1e24;
-  --bg-subtle: #162b33;
-  --bg-input: #0a171c;
-  --border-subtle: #1f3942;
-  --border-strong: #2c4f5c;
-  --text-primary: #ecfeff;
-  --text-secondary: #94b8c2;
-  --text-muted: #567985;
-  --accent-primary: #14b8a6;
-  --accent-primary-hover: #0d9488;
+  /* Rich mid-tone Adriatic / Vltava Teal-Blue Liquid Glass */
+  --bg-canvas: #173a47;
+  --bg-mesh:
+    radial-gradient(at 18% 12%, rgba(45, 212, 191, 0.38) 0px, transparent 52%),
+    radial-gradient(at 85% 20%, rgba(56, 189, 248, 0.36) 0px, transparent 55%),
+    radial-gradient(at 50% 88%, rgba(14, 165, 233, 0.38) 0px, transparent 60%),
+    linear-gradient(165deg, #1f4c5c 0%, #173a47 50%, #112b36 100%);
+  --bg-surface: rgba(255, 255, 255, 0.13);
+  --bg-subtle: rgba(255, 255, 255, 0.09);
+  --bg-input: rgba(8, 28, 36, 0.28);
+  --border-subtle: rgba(255, 255, 255, 0.22);
+  --border-strong: rgba(255, 255, 255, 0.38);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(226, 252, 249, 0.82);
+  --text-muted: rgba(186, 230, 226, 0.56);
+  --accent-primary: #2dd4bf;
+  --accent-primary-hover: #5eead4;
   --accent-primary-fg: #042f2e;
-  --accent-soft: rgba(20, 184, 166, 0.14);
-  --accent-border: rgba(20, 184, 166, 0.38);
-  --success-bg: rgba(16, 185, 129, 0.14);
-  --success-border: rgba(52, 211, 153, 0.4);
-  --success-text: #6ee7b7;
-  --error-bg: rgba(244, 63, 94, 0.14);
-  --error-border: rgba(251, 113, 133, 0.4);
-  --error-text: #fda4af;
-  --warn-bg: rgba(245, 158, 11, 0.14);
-  --warn-border: rgba(251, 191, 36, 0.4);
-  --warn-text: #fcd34d;
-  --shadow-card: 0 16px 40px -12px rgba(0, 0, 0, 0.5);
-  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --accent-gradient: linear-gradient(180deg, #5eead4 0%, #14b8a6 100%);
+  --accent-soft: rgba(45, 212, 191, 0.2);
+  --accent-border: rgba(94, 234, 212, 0.5);
+  --success-bg: rgba(16, 185, 129, 0.24);
+  --success-border: rgba(110, 231, 183, 0.55);
+  --success-text: #a7f3d0;
+  --error-bg: rgba(244, 63, 94, 0.24);
+  --error-border: rgba(253, 164, 175, 0.55);
+  --error-text: #fecdd3;
+  --warn-bg: rgba(245, 158, 11, 0.24);
+  --warn-border: rgba(252, 211, 77, 0.55);
+  --warn-text: #fde68a;
+  --glass-specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.42), inset 0 -1px 0 0 rgba(255, 255, 255, 0.08);
+  --shadow-card: 0 20px 45px -15px rgba(5, 20, 26, 0.42), 0 4px 12px -2px rgba(5, 20, 26, 0.2);
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Plus Jakarta Sans', sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Plus Jakarta Sans', sans-serif;
+}
+
+[data-theme="twilight"] {
+  /* Rich mid-tone Dusk Indigo & Periwinkle Blue Liquid Glass */
+  --bg-canvas: #242954;
+  --bg-mesh:
+    radial-gradient(at 15% 15%, rgba(129, 140, 248, 0.42) 0px, transparent 52%),
+    radial-gradient(at 88% 18%, rgba(56, 189, 248, 0.34) 0px, transparent 55%),
+    radial-gradient(at 50% 85%, rgba(99, 102, 241, 0.42) 0px, transparent 60%),
+    linear-gradient(165deg, #2f366e 0%, #242954 50%, #1a1e40 100%);
+  --bg-surface: rgba(255, 255, 255, 0.13);
+  --bg-subtle: rgba(255, 255, 255, 0.09);
+  --bg-input: rgba(15, 18, 42, 0.28);
+  --border-subtle: rgba(255, 255, 255, 0.22);
+  --border-strong: rgba(255, 255, 255, 0.38);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(235, 238, 255, 0.82);
+  --text-muted: rgba(199, 206, 255, 0.56);
+  --accent-primary: #818cf8;
+  --accent-primary-hover: #a5b4fc;
+  --accent-primary-fg: #131636;
+  --accent-gradient: linear-gradient(180deg, #a5b4fc 0%, #6366f1 100%);
+  --accent-soft: rgba(129, 140, 248, 0.22);
+  --accent-border: rgba(165, 180, 252, 0.5);
+  --success-bg: rgba(16, 185, 129, 0.22);
+  --success-border: rgba(110, 231, 183, 0.55);
+  --success-text: #a7f3d0;
+  --error-bg: rgba(244, 63, 94, 0.24);
+  --error-border: rgba(253, 164, 175, 0.55);
+  --error-text: #fecdd3;
+  --warn-bg: rgba(245, 158, 11, 0.24);
+  --warn-border: rgba(252, 211, 77, 0.55);
+  --warn-text: #fde68a;
+  --glass-specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.42), inset 0 -1px 0 0 rgba(255, 255, 255, 0.08);
+  --shadow-card: 0 20px 45px -15px rgba(10, 12, 30, 0.45), 0 4px 12px -2px rgba(10, 12, 30, 0.22);
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Plus Jakarta Sans', sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Plus Jakarta Sans', sans-serif;
+}
+
+[data-theme="daylight"] {
+  /* Bright Sky Blue & Frosted Ice Liquid Glass */
+  --bg-canvas: #2d5a88;
+  --bg-mesh:
+    radial-gradient(at 20% 10%, rgba(125, 211, 252, 0.5) 0px, transparent 55%),
+    radial-gradient(at 85% 20%, rgba(147, 197, 253, 0.45) 0px, transparent 55%),
+    radial-gradient(at 50% 85%, rgba(56, 189, 248, 0.4) 0px, transparent 60%),
+    linear-gradient(165deg, #386fa4 0%, #2d5a88 52%, #1f4368 100%);
+  --bg-surface: rgba(255, 255, 255, 0.16);
+  --bg-subtle: rgba(255, 255, 255, 0.11);
+  --bg-input: rgba(12, 34, 58, 0.24);
+  --border-subtle: rgba(255, 255, 255, 0.26);
+  --border-strong: rgba(255, 255, 255, 0.45);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(240, 249, 255, 0.86);
+  --text-muted: rgba(215, 236, 255, 0.62);
+  --accent-primary: #7dd3fc;
+  --accent-primary-hover: #bae6fd;
+  --accent-primary-fg: #082846;
+  --accent-gradient: linear-gradient(180deg, #bae6fd 0%, #38bdf8 100%);
+  --accent-soft: rgba(125, 211, 252, 0.24);
+  --accent-border: rgba(186, 230, 253, 0.55);
+  --success-bg: rgba(16, 185, 129, 0.24);
+  --success-border: rgba(110, 231, 183, 0.6);
+  --success-text: #bbf7d0;
+  --error-bg: rgba(244, 63, 94, 0.25);
+  --error-border: rgba(253, 164, 175, 0.6);
+  --error-text: #fecdd3;
+  --warn-bg: rgba(245, 158, 11, 0.25);
+  --warn-border: rgba(252, 211, 77, 0.6);
+  --warn-text: #fef08a;
+  --glass-specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.48), inset 0 -1px 0 0 rgba(255, 255, 255, 0.12);
+  --shadow-card: 0 20px 45px -15px rgba(9, 26, 46, 0.35), 0 4px 12px -2px rgba(9, 26, 46, 0.18);
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Plus Jakarta Sans', sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Plus Jakarta Sans', sans-serif;
 }
 
 @layer base {
   html,
   body {
     background-color: var(--bg-canvas);
+    background-image: var(--bg-mesh);
+    background-attachment: fixed;
     color: var(--text-primary);
     font-family: var(--font-sans);
     overscroll-behavior-y: none;
     -webkit-tap-highlight-color: transparent;
-    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   /* Ensure iPhone Safari never auto-zooms on input focus */
@@ -138,36 +171,61 @@
 
 .font-display {
   font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.028em;
 }
 
 .font-mono-code {
   font-family: 'JetBrains Mono', monospace;
 }
 
+/* Native Apple iOS 26 Liquid Glass Surface */
 .theme-surface {
   background-color: var(--bg-surface);
+  backdrop-filter: blur(30px) saturate(190%);
+  -webkit-backdrop-filter: blur(30px) saturate(190%);
   border-color: var(--border-subtle);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--glass-specular), var(--shadow-card);
 }
 
+/* Secondary Frosted Glass Pill / Capsule */
 .theme-subtle {
   background-color: var(--bg-subtle);
+  backdrop-filter: blur(20px) saturate(170%);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
   border-color: var(--border-subtle);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
 }
 
+/* Recessed Glass Input Well */
 .theme-input {
   background-color: var(--bg-input);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-color: var(--border-subtle);
   color: var(--text-primary);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
+.theme-input:focus,
+.theme-input:focus-within {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-soft), inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* Luminous Liquid Glass Primary Button */
 .theme-btn-primary {
-  background-color: var(--accent-primary);
+  background: var(--accent-gradient);
   color: var(--accent-primary-fg);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.55), 0 8px 20px -4px rgba(14, 165, 233, 0.45);
 }
 
 .theme-btn-primary:hover {
-  background-color: var(--accent-primary-hover);
+  filter: brightness(1.06);
+}
+
+.theme-btn-primary:active {
+  transform: scale(0.985);
 }
 
 .pt-safe {

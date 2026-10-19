@@ -1,4 +1,4 @@
-export type ThemeId = 'prague' | 'crystal' | 'noir' | 'vltava';
+export type ThemeId = 'sapphire' | 'daylight' | 'vltava' | 'twilight';
 
 export interface ThemeOption {
   id: ThemeId;
@@ -12,44 +12,44 @@ export interface ThemeOption {
 
 export const THEME_OPTIONS: ThemeOption[] = [
   {
-    id: 'prague',
-    name: 'Prague Café',
-    shortName: 'Prague',
-    tagline: 'Warm literary parchment & Bohemian garnet',
-    swatchBg: '#F7F3EB',
-    swatchAccent: '#B93829',
-    metaThemeColor: '#F7F3EB',
+    id: 'sapphire',
+    name: 'Sapphire Glass',
+    shortName: 'Sapphire',
+    tagline: 'Rich cobalt sky & luminous cyan glass',
+    swatchBg: '#1C3158',
+    swatchAccent: '#38BDF8',
+    metaThemeColor: '#1e345c',
   },
   {
-    id: 'crystal',
-    name: 'Bohemian Crystal',
-    shortName: 'Crystal',
-    tagline: 'Clean Apple iOS alabaster & royal cobalt',
-    swatchBg: '#F4F6FB',
-    swatchAccent: '#0052CC',
-    metaThemeColor: '#F4F6FB',
-  },
-  {
-    id: 'noir',
-    name: 'Karlův Most Noir',
-    shortName: 'Noir',
-    tagline: 'Velvet obsidian & warm champagne gold',
-    swatchBg: '#0B0B0E',
-    swatchAccent: '#E5A93C',
-    metaThemeColor: '#0B0B0E',
+    id: 'daylight',
+    name: 'Cerulean Sky',
+    shortName: 'Sky',
+    tagline: 'Brighter azure blue & frosted ice glass',
+    swatchBg: '#2D5A88',
+    swatchAccent: '#7DD3FC',
+    metaThemeColor: '#2d5a88',
   },
   {
     id: 'vltava',
-    name: 'Vltava Midnight',
-    shortName: 'Vltava',
-    tagline: 'Deep river pine & vibrant emerald',
-    swatchBg: '#081216',
-    swatchAccent: '#14B8A6',
-    metaThemeColor: '#081216',
+    name: 'Ocean Teal Glass',
+    shortName: 'Ocean',
+    tagline: 'Deep aquamarine & mint liquid glass',
+    swatchBg: '#173A47',
+    swatchAccent: '#2DD4BF',
+    metaThemeColor: '#173a47',
+  },
+  {
+    id: 'twilight',
+    name: 'Dusk Indigo Glass',
+    shortName: 'Indigo',
+    tagline: 'Evening periwinkle & starlight glass',
+    swatchBg: '#242954',
+    swatchAccent: '#818CF8',
+    metaThemeColor: '#242954',
   },
 ];
 
-const THEME_STORAGE_KEY = 'czech_trainer_theme_v1';
+const THEME_STORAGE_KEY = 'czech_trainer_theme_v2';
 
 export function getSavedTheme(): ThemeId {
   try {
@@ -60,7 +60,7 @@ export function getSavedTheme(): ThemeId {
   } catch {
     // Ignore
   }
-  return 'prague';
+  return 'sapphire';
 }
 
 export function applyTheme(theme: ThemeId): void {
