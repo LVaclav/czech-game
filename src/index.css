@@ -1,61 +1,24 @@
 @import "tailwindcss";
 
-/* Apple Human Interface Guidelines (HIG) — iOS Translate System Colors */
-:root,
-[data-theme="light"] {
-  --ios-bg-grouped: #f2f2f7;           /* systemGroupedBackground */
-  --ios-card: #ffffff;                 /* secondarySystemGroupedBackground */
-  --ios-card-tertiary: #f2f2f7;        /* tertiarySystemGroupedBackground */
-  --ios-fill: rgba(120, 120, 128, 0.12); /* tertiarySystemFill (segmented control track) */
-  --ios-fill-secondary: rgba(120, 120, 128, 0.16);
-  --ios-separator: rgba(60, 60, 67, 0.18); /* opaqueSeparator / hairline */
-  --ios-label: #000000;                /* label */
-  --ios-label-secondary: rgba(60, 60, 67, 0.6); /* secondaryLabel (#8E8E93) */
-  --ios-label-tertiary: rgba(60, 60, 67, 0.3);  /* placeholderText (#C7C7CC) */
-  --ios-blue: #007aff;                 /* systemBlue */
-  --ios-teal: #00c7be;                 /* systemMint / Translate accent */
-  --ios-green: #34c759;                /* systemGreen */
-  --ios-green-bg: rgba(52, 199, 89, 0.1);
-  --ios-green-text: #248a3d;
-  --ios-red: #ff3b30;                  /* systemRed */
-  --ios-red-bg: rgba(255, 59, 48, 0.08);
-  --ios-red-text: #d70015;
-  --ios-orange: #ff9500;               /* systemOrange */
-  --ios-orange-bg: rgba(255, 149, 0, 0.12);
-  --ios-orange-text: #c93400;
-  --ios-chrome-bg: rgba(249, 249, 249, 0.82);
-  --ios-keyboard-bg: rgba(209, 212, 217, 0.92);
-  --ios-keycap-bg: #ffffff;
-  --ios-keycap-shadow: #898a8d;
-  --ios-segmented-thumb: #ffffff;
-}
-
-[data-theme="dark"] {
-  --ios-bg-grouped: #000000;           /* systemGroupedBackground (dark) */
-  --ios-card: #1c1c1e;                 /* secondarySystemGroupedBackground (dark) */
-  --ios-card-tertiary: #2c2c2e;        /* tertiarySystemGroupedBackground (dark) */
-  --ios-fill: rgba(118, 118, 128, 0.24);
-  --ios-fill-secondary: rgba(118, 118, 128, 0.32);
-  --ios-separator: rgba(84, 84, 88, 0.6);
-  --ios-label: #ffffff;
-  --ios-label-secondary: rgba(235, 235, 245, 0.6);
-  --ios-label-tertiary: rgba(235, 235, 245, 0.3);
-  --ios-blue: #0a84ff;
-  --ios-teal: #63e6e2;
-  --ios-green: #30d158;
-  --ios-green-bg: rgba(48, 209, 88, 0.14);
-  --ios-green-text: #30d158;
-  --ios-red: #ff453a;
-  --ios-red-bg: rgba(255, 69, 58, 0.14);
-  --ios-red-text: #ff6961;
-  --ios-orange: #ff9f0a;
-  --ios-orange-bg: rgba(255, 159, 10, 0.16);
-  --ios-orange-text: #ffb340;
-  --ios-chrome-bg: rgba(28, 28, 30, 0.82);
-  --ios-keyboard-bg: rgba(43, 43, 45, 0.94);
-  --ios-keycap-bg: #4a4a4c;
-  --ios-keycap-shadow: #151516;
-  --ios-segmented-thumb: #636366;
+/* Exact iOS 26 Translate App Color & Liquid Glass Tokens */
+:root {
+  --tr-bg: #000000;
+  --tr-card: #18181b;
+  --tr-card-elevated: #222226;
+  --tr-divider: #000000;
+  --tr-hairline: rgba(255, 255, 255, 0.09);
+  --tr-text: #ffffff;
+  --tr-text-secondary: #8e8e93;
+  --tr-text-placeholder: #48484c;
+  --tr-cyan: #00e5e5;
+  --tr-cyan-dim: #0a8d96;
+  --tr-cyan-soft: rgba(0, 229, 229, 0.14);
+  --tr-green: #30d158;
+  --tr-green-soft: rgba(48, 209, 88, 0.14);
+  --tr-red: #ff453a;
+  --tr-red-soft: rgba(255, 69, 58, 0.15);
+  --tr-orange: #ff9f0a;
+  --tr-orange-soft: rgba(255, 159, 10, 0.16);
 }
 
 @layer base {
@@ -66,9 +29,9 @@
 
   html,
   body {
-    background-color: var(--ios-bg-grouped);
-    color: var(--ios-label);
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background-color: var(--tr-bg);
+    color: var(--tr-text);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
     overscroll-behavior-y: none;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
@@ -86,96 +49,104 @@
 .font-display {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-weight: 700;
-  letter-spacing: -0.022em;
+  letter-spacing: -0.024em;
 }
 
-/* Apple Translate Card (secondarySystemGroupedBackground) */
-.ios-card {
-  background-color: var(--ios-card);
-  border-radius: 18px;
+/* Main iOS 26 Translate Card (#18181B, 34px squircle radius) */
+.tr-card {
+  background-color: var(--tr-card);
+  border-radius: 34px;
 }
 
-/* Hairline 0.5px iOS Separator */
-.ios-hairline-t {
-  border-top: 0.5px solid var(--ios-separator);
-}
-
-.ios-hairline-b {
-  border-bottom: 0.5px solid var(--ios-separator);
-}
-
-.ios-hairline-r {
-  border-right: 0.5px solid var(--ios-separator);
-}
-
-/* Native iOS Translucent Chrome Bar */
-.ios-chrome {
-  background-color: var(--ios-chrome-bg);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-}
-
-/* Native UISegmentedControl */
-.ios-segmented {
-  background-color: var(--ios-fill);
-  padding: 2px;
-  border-radius: 9px;
-}
-
-.ios-segmented-active {
-  background-color: var(--ios-segmented-thumb);
-  border-radius: 7px;
+/* Top Circular Liquid Glass Toolbar Button (48x48 circle with specular glass edge) */
+.tr-circle-glass {
+  background: linear-gradient(180deg, rgba(44, 44, 48, 0.88) 0%, rgba(28, 28, 32, 0.92) 100%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.13);
   box-shadow:
-    0 3px 8px rgba(0, 0, 0, 0.12),
-    0 3px 1px rgba(0, 0, 0, 0.04);
+    inset 0 1px 0.5px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -0.5px 0.5px 0 rgba(255, 255, 255, 0.08),
+    0 6px 16px rgba(0, 0, 0, 0.5);
+  transition: transform 0.12s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* Native iOS Keyboard Tray & Keycap */
-.ios-keyboard-tray {
-  background-color: var(--ios-keyboard-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 0.5px solid var(--ios-separator);
+.tr-circle-glass:active {
+  transform: scale(0.92);
 }
 
-.ios-keycap {
-  background-color: var(--ios-keycap-bg);
-  color: var(--ios-label);
-  border-radius: 5px;
-  box-shadow: 0 1px 0 0 var(--ios-keycap-shadow);
-  transition: transform 0.05s ease, background-color 0.05s ease;
+/* Bottom Floating Liquid Glass Tab Capsule (Exact match to iOS 26 Translate bottom bar) */
+.tr-bottom-dock-glass {
+  background: linear-gradient(180deg, rgba(44, 44, 48, 0.86) 0%, rgba(28, 28, 32, 0.90) 100%);
+  backdrop-filter: blur(32px) saturate(190%);
+  -webkit-backdrop-filter: blur(32px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0.5px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -0.5px 0.5px 0 rgba(255, 255, 255, 0.10),
+    0 14px 34px rgba(0, 0, 0, 0.85);
 }
 
-.ios-keycap:active {
-  transform: translateY(1px);
-  opacity: 0.8;
+/* Active Inner Recessed Pill inside the Bottom Liquid Glass Capsule */
+.tr-bottom-tab-active {
+  background-color: rgba(10, 10, 12, 0.82);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.6),
+    0 0.5px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* Native iOS System Blue Primary Button */
-.ios-btn-blue {
-  background-color: var(--ios-blue);
+/* Liquid Glass Pill Button / Tense Switcher */
+.tr-pill-glass {
+  background: linear-gradient(180deg, rgba(40, 40, 44, 0.82) 0%, rgba(26, 26, 30, 0.88) 100%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0.5px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* Primary Cyan Action Pill */
+.tr-btn-cyan {
+  background-color: var(--tr-cyan);
+  color: #000000;
+  border-radius: 9999px;
+  font-weight: 700;
+  transition: transform 0.12s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.12s ease;
+}
+
+.tr-btn-cyan:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+/* Hairlines */
+.tr-hairline-t {
+  border-top: 1px solid var(--tr-hairline);
+}
+
+.tr-hairline-b {
+  border-bottom: 1px solid var(--tr-hairline);
+}
+
+.tr-hairline-r {
+  border-right: 1px solid var(--tr-hairline);
+}
+
+/* Dark iOS Keyboard Keycaps for Czech Háčky */
+.tr-keycap {
+  background: linear-gradient(180deg, #3a3a3e 0%, #2c2c30 100%);
   color: #ffffff;
-  border-radius: 14px;
-  font-weight: 600;
-  transition: opacity 0.12s ease, transform 0.12s ease;
+  border-radius: 7px;
+  border: 0.5px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 1.5px 0 #000000;
+  transition: transform 0.06s ease, background-color 0.06s ease;
 }
 
-.ios-btn-blue:active {
-  opacity: 0.75;
-  transform: scale(0.985);
-}
-
-/* Native iOS Secondary Fill Button */
-.ios-btn-secondary {
-  background-color: var(--ios-fill);
-  color: var(--ios-blue);
-  border-radius: 14px;
-  font-weight: 600;
-  transition: opacity 0.12s ease;
-}
-
-.ios-btn-secondary:active {
-  opacity: 0.65;
+.tr-keycap:active {
+  transform: translateY(1px) scale(0.94);
+  background: var(--tr-cyan);
+  color: #000000;
 }
 
 .pt-safe {

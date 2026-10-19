@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  AlertTriangle,
   ArrowRight,
   Check,
   CheckCircle2,
   Eye,
-  Info,
+  Lightbulb,
   RotateCcw,
 } from 'lucide-react';
 import {
@@ -37,9 +38,9 @@ interface TableTrainerViewProps {
 }
 
 const TENSES: { key: TenseKey; titleCz: string; shortCz: string; titleEn: string }[] = [
-  { key: 'past', titleCz: 'Minulý čas', shortCz: 'Minulý', titleEn: 'Past' },
-  { key: 'present', titleCz: 'Přítomný čas', shortCz: 'Přítomný', titleEn: 'Present' },
-  { key: 'future', titleCz: 'Budoucí čas', shortCz: 'Budoucí', titleEn: 'Future' },
+  { key: 'past', titleCz: 'Minulý čas', shortCz: 'Minulý', titleEn: 'Past Tense' },
+  { key: 'present', titleCz: 'Přítomný čas', shortCz: 'Přítomný', titleEn: 'Present Tense' },
+  { key: 'future', titleCz: 'Budoucí čas', shortCz: 'Budoucí', titleEn: 'Future Tense' },
 ];
 
 /**
@@ -106,7 +107,7 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
     ...session.lockedCells,
   }));
   const [cellFeedback, setCellFeedback] = useState<Record<string, CellFeedback>>({});
-  const [activeTense, setActiveTense] = useState<TenseKey>('past');
+  const [mobileTense, setMobileTense] = useState<TenseKey>('past');
   const [showMnemonic, setShowMnemonic] = useState(false);
   const [justCompletedWord, setJustCompletedWord] = useState(false);
 
@@ -129,7 +130,7 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
       setSession(newSession);
       setInputs({});
       setCellFeedback({});
-      setActiveTense('past');
+      setMobileTense('past');
       setJustCompletedWord(false);
       onClearForcedVerb();
     }
@@ -171,7 +172,7 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
       const key = `${candidate.tense}:${candidate.person}`;
       if (!lockedMap[key]) {
         if (candidate.tense !== currentTense) {
-          setActiveTense(candidate.tense);
+          setMobileTense(candidate.tense);
         }
         setTimeout(() => {
           const el = cellInputRefs.current[key];
@@ -250,7 +251,7 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
     });
 
     const currentTenseLocked = ORDERED_PERSONS.filter((p) =>
-      Boolean(nextLocked[`${activeTense}:${p}`])
+      Boolean(nextLocked[`${mobileTense}:${p}`])
     ).length;
 
     if (currentTenseLocked === 6) {
@@ -259,10 +260,10 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
           ORDERED_PERSONS.filter((p) => Boolean(nextLocked[`${t.key}:${p}`])).length < 6
       );
       if (nextIncompleteTense) {
-        setActiveTense(nextIncompleteTense.key);
+        setMobileTense(nextIncompleteTense.key);
       }
     } else if (firstWrongCellKey) {
-      setActiveTense(firstWrongCellKey.tense);
+      setMobileTense(firstWrongCellKey.tense);
       setTimeout(() => {
         const el = cellInputRefs.current[firstWrongCellKey!.key];
         if (el) {
@@ -329,7 +330,7 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
     setSession(newSession);
     setInputs({});
     setCellFeedback({});
-    setActiveTense('past');
+    setMobileTense('past');
     setJustCompletedWord(false);
     setShowMnemonic(false);
 
@@ -343,202 +344,202 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
     });
   };
 
-  const activeTenseMeta = TENSES.find((t) => t.key === activeTense) || TENSES[0];
-  const lockedInActiveTense = getTenseLockedCount(activeTense);
-  const isActiveTenseComplete = lockedInActiveTense === 6;
-
   return (
-    <div className="max-w-lg mx-auto space-y-4 pb-6">
-      {/* Apple Translate Split Source/Target Card */}
-      <div className="ios-card overflow-hidden">
-        {/* Top Pane: CZECH (Source) */}
-        <div className="p-4 sm:p-5">
-          <div className="flex items-center justify-between gap-2 mb-1">
-            <div className="flex items-center gap-2">
-              <span
-                className="text-[12px] font-semibold uppercase tracking-wide"
-                style={{ color: 'var(--ios-label-secondary)' }}
-              >
-                Czech
-              </span>
-              {selectionInfo.reason === 'relapsed' && (
+    <div className="space-y-4">
+      {/* 1. Spacious Verb Header Card (Styled with iOS 26 Translate #18181B surface & Cyan accents) */}
+      <div className="tr-card p-5 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-2">
+            {/* Metadata Pills */}
+            <div className="flex flex-wrap items-center gap-2">
+              {selectionInfo.reason === 'relapsed' ? (
                 <span
-                  className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold"
                   style={{
-                    backgroundColor: 'var(--ios-orange-bg)',
-                    color: 'var(--ios-orange-text)',
+                    backgroundColor: 'var(--tr-orange-soft)',
+                    color: 'var(--tr-orange)',
                   }}
                 >
-                  Priority Review
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  Re-Queued Priority ({selectionInfo.priorityScore})
+                </span>
+              ) : (
+                <span
+                  className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold"
+                  style={{
+                    backgroundColor: 'var(--tr-cyan-soft)',
+                    color: 'var(--tr-cyan)',
+                  }}
+                >
+                  Freq #{verb.frequencyRank}
+                </span>
+              )}
+
+              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/8 text-[#8E8E93]">
+                {verb.conjugationClass}
+              </span>
+
+              {verb.aspectPairInfinitive && (
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/8 text-white">
+                  Pair: <strong style={{ color: 'var(--tr-cyan)' }}>{verb.aspectPairInfinitive}</strong>
                 </span>
               )}
             </div>
 
-            <span
-              className="text-[12px] font-medium"
-              style={{ color: 'var(--ios-label-secondary)' }}
-            >
-              {verb.conjugationClass}
-              {verb.aspectPairInfinitive ? ` • pf. ${verb.aspectPairInfinitive}` : ''}
-            </span>
-          </div>
-
-          <div className="font-display text-[30px] sm:text-[34px] leading-tight">
-            {verb.infinitive}
-          </div>
-
-          <p
-            className="text-[14px] mt-1 leading-snug"
-            style={{ color: 'var(--ios-label-secondary)' }}
-          >
-            {verb.exampleCz}
-          </p>
-        </div>
-
-        {/* Hairline 0.5px Divider (Exact Apple Translate Card Split) */}
-        <div className="mx-4 ios-hairline-t" />
-
-        {/* Bottom Pane: ENGLISH (Target in Apple System Blue) */}
-        <div className="p-4 sm:p-5 flex items-center justify-between gap-3">
-          <div>
-            <div
-              className="text-[12px] font-semibold uppercase tracking-wide mb-0.5"
-              style={{ color: 'var(--ios-blue)' }}
-            >
-              English
+            {/* Czech Verb + Glowing Cyan English Translation */}
+            <div className="flex items-baseline gap-3.5 flex-wrap pt-0.5">
+              <h2 className="font-display text-3xl sm:text-4xl text-white tracking-tight">
+                {verb.infinitive}
+              </h2>
+              <span
+                className="font-display text-2xl sm:text-3xl"
+                style={{ color: 'var(--tr-cyan)' }}
+              >
+                — {verb.english}
+              </span>
             </div>
-            <div
-              className="font-display text-[24px] sm:text-[26px] leading-tight"
-              style={{ color: 'var(--ios-blue)' }}
-            >
-              {verb.english}
-            </div>
-            <p
-              className="text-[13px] mt-0.5"
-              style={{ color: 'var(--ios-label-secondary)' }}
-            >
-              {verb.exampleEn}
+
+            <p className="text-xs sm:text-sm text-[#8E8E93]">
+              “{verb.exampleCz}” <span className="text-[#545458]">({verb.exampleEn})</span>
             </p>
           </div>
 
-          {/* Right Circular Action Buttons */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Right Controls: Pattern Tip + Reroll Genders */}
+          <div className="flex items-center gap-2 self-start">
             <button
               type="button"
               onClick={() => setShowMnemonic((prev) => !prev)}
-              title="Grammar Note"
-              className="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-opacity active:opacity-60"
+              className="h-10 px-4 rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer tr-circle-glass"
               style={{
-                backgroundColor: 'var(--ios-fill)',
-                color: 'var(--ios-blue)',
+                color: showMnemonic ? 'var(--tr-cyan)' : '#ffffff',
               }}
             >
-              <Info className="w-4 h-4" />
+              <Lightbulb className="w-4 h-4" />
+              <span>Pattern Tip</span>
             </button>
 
             <button
               type="button"
               onClick={() => startNextWord(true)}
-              title="Randomize genders"
-              className="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-opacity active:opacity-60"
-              style={{
-                backgroundColor: 'var(--ios-fill)',
-                color: 'var(--ios-blue)',
-              }}
+              title="Reset table with new random genders"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white cursor-pointer tr-circle-glass"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Grammar Note Drawer */}
         {showMnemonic && (
-          <div
-            className="px-4 py-3 text-[13px] leading-relaxed ios-hairline-t"
-            style={{
-              backgroundColor: 'var(--ios-fill)',
-              color: 'var(--ios-label)',
-            }}
-          >
-            <strong style={{ color: 'var(--ios-blue)' }}>Grammar Note:</strong>{' '}
+          <div className="mt-4 p-4 rounded-2xl bg-black/50 text-xs sm:text-sm text-white/90 leading-relaxed">
+            <strong style={{ color: 'var(--tr-cyan)' }}>Grammar & Stem Tip:</strong>{' '}
             {verb.mnemonicTip}
           </div>
         )}
+
+        {/* 18-Cell Progress Track */}
+        <div className="mt-5 pt-4 tr-hairline-t flex items-center justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex justify-between text-xs font-semibold mb-1.5">
+              <span className="text-[#8E8E93]">
+                3×2 Mastery Progress (Past • Present • Future)
+              </span>
+              <span
+                className="tabular-nums font-bold"
+                style={{
+                  color: isAll18Complete ? 'var(--tr-green)' : 'var(--tr-cyan)',
+                }}
+              >
+                {totalLocked} / 18 locked
+              </span>
+            </div>
+            <div className="w-full h-2 rounded-full bg-black overflow-hidden">
+              <div
+                className="h-full transition-all duration-300 rounded-full"
+                style={{
+                  width: `${Math.round((totalLocked / 18) * 100)}%`,
+                  backgroundColor: isAll18Complete
+                    ? 'var(--tr-green)'
+                    : 'var(--tr-cyan)',
+                }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Completion Banner when all 18/18 cells are complete */}
+      {/* 2. Celebration Banner when all 18/18 cells are complete */}
       {isAll18Complete && (
         <div
-          className="ios-card p-4 flex items-center justify-between gap-3"
+          className="tr-card p-5 flex flex-col sm:flex-row items-center justify-between gap-4"
           style={{
-            backgroundColor: 'var(--ios-green-bg)',
-            border: '0.5px solid var(--ios-green)',
+            border: '1px solid var(--tr-green)',
           }}
         >
-          <div className="flex items-center gap-3">
-            <CheckCircle2
-              className="w-6 h-6 shrink-0"
-              style={{ color: 'var(--ios-green)' }}
-            />
+          <div className="flex items-center gap-3.5">
+            <div
+              className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+              style={{
+                backgroundColor: 'var(--tr-green-soft)',
+                color: 'var(--tr-green)',
+              }}
+            >
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
             <div>
-              <div
-                className="text-[15px] font-semibold"
-                style={{ color: 'var(--ios-label)' }}
-              >
-                All 18 Forms Mastered
-              </div>
-              <div
-                className="text-[13px]"
-                style={{ color: 'var(--ios-label-secondary)' }}
-              >
+              <h3 className="text-base sm:text-lg font-bold text-white">
+                Výborně! All 18/18 forms of “{verb.infinitive}” mastered!
+              </h3>
+              <p className="text-xs text-[#8E8E93]">
                 {justCompletedWord
-                  ? 'Added to Favorites / Completed list'
-                  : 'Past, Present, and Future complete'}
-              </div>
+                  ? 'Saved to your Vocabulary pool and cleared from high-priority queue.'
+                  : 'All 3 tenses are locked in.'}
+              </p>
             </div>
           </div>
 
           <button
             type="button"
             onClick={() => startNextWord(false)}
-            className="px-4 py-2 text-[14px] flex items-center gap-1.5 cursor-pointer shrink-0 ios-btn-blue"
+            className="w-full sm:w-auto px-6 py-3 text-sm flex items-center justify-center gap-2 cursor-pointer shrink-0 tr-btn-cyan"
           >
-            <span>Next</span>
+            <span>Next Word</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      {/* Native iOS UISegmentedControl (Past • Present • Future) */}
-      <div className="grid grid-cols-3 ios-segmented">
+      {/* 3. Mobile Tense Switcher Capsule (Hidden on lg+ desktop where all 3 show side-by-side) */}
+      <div className="lg:hidden h-[52px] p-[4px] rounded-full grid grid-cols-3 items-center tr-bottom-dock-glass">
         {TENSES.map((t) => {
           const count = getTenseLockedCount(t.key);
           const isComplete = count === 6;
-          const isActive = activeTense === t.key;
+          const isActive = mobileTense === t.key;
 
           return (
             <button
               key={t.key}
               type="button"
-              onClick={() => setActiveTense(t.key)}
-              className={`py-1.5 px-2 text-[13px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                isActive ? 'ios-segmented-active' : ''
+              onClick={() => setMobileTense(t.key)}
+              className={`h-full rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                isActive ? 'tr-bottom-tab-active' : ''
               }`}
               style={{
                 color: isActive
-                  ? 'var(--ios-label)'
-                  : 'var(--ios-label-secondary)',
+                  ? 'var(--tr-cyan)'
+                  : isComplete
+                  ? 'var(--tr-green)'
+                  : '#ffffff',
               }}
             >
               <span>{t.shortCz}</span>
               <span
-                className="text-[11px] tabular-nums font-semibold"
+                className="text-[11px] tabular-nums"
                 style={{
                   color: isComplete
-                    ? 'var(--ios-green)'
+                    ? 'var(--tr-green)'
                     : isActive
-                    ? 'var(--ios-blue)'
-                    : 'var(--ios-label-tertiary)',
+                    ? 'var(--tr-cyan)'
+                    : '#8E8E93',
                 }}
               >
                 {isComplete ? '✓' : `${count}/6`}
@@ -548,234 +549,300 @@ export const TableTrainerView: React.FC<TableTrainerViewProps> = ({
         })}
       </div>
 
-      {/* iOS Inset Grouped Section Header */}
-      <div className="flex items-center justify-between px-4 pt-1">
-        <div
-          className="text-[12px] font-semibold uppercase tracking-wide"
-          style={{ color: 'var(--ios-label-secondary)' }}
-        >
-          {activeTenseMeta.titleCz} ({activeTenseMeta.titleEn})
-          {activeTense === 'future' && (
-            <span className="ml-1.5 normal-case font-medium">
-              •{' '}
-              {session.futureMode === 'pf' && verb.forms.futurePf
-                ? `pf. ${verb.aspectPairInfinitive}`
-                : `budu + ${verb.infinitive}`}
-            </span>
-          )}
-        </div>
+      {/* 4. Three 3×2 Tense Cards (Side-by-side on desktop, active tense on mobile) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {TENSES.map((tenseMeta) => {
+          const tense = tenseMeta.key;
+          const lockedInTense = getTenseLockedCount(tense);
+          const isTenseComplete = lockedInTense === 6;
+          const isVisibleOnMobile = mobileTense === tense;
 
-        {activeTense === 'future' && verb.forms.futurePf ? (
-          <button
-            type="button"
-            onClick={() =>
-              handleToggleFutureMode(session.futureMode === 'impf' ? 'pf' : 'impf')
-            }
-            className="text-[12px] font-medium cursor-pointer"
-            style={{ color: 'var(--ios-blue)' }}
-          >
-            Switch Aspect
-          </button>
-        ) : (
-          <span
-            className="text-[12px] tabular-nums"
-            style={{ color: 'var(--ios-label-secondary)' }}
-          >
-            {totalLocked}/18 total
-          </span>
-        )}
-      </div>
-
-      {/* Native iOS Inset Grouped 3×2 Conjugation Table */}
-      <div className="ios-card overflow-hidden">
-        {/* Column Subheaders */}
-        <div
-          className="grid grid-cols-2 text-[11px] font-semibold uppercase tracking-wider ios-hairline-b"
-          style={{ color: 'var(--ios-label-secondary)' }}
-        >
-          <div className="px-4 py-2 ios-hairline-r">Singular</div>
-          <div className="px-4 py-2">Plural</div>
-        </div>
-
-        {/* 3 Rows × 2 Columns */}
-        {GRID_ROWS.map(([col1Person, col2Person], rowIdx) => (
-          <div
-            key={rowIdx}
-            className={`grid grid-cols-2 ${rowIdx < 2 ? 'ios-hairline-b' : ''}`}
-          >
-            {[col1Person, col2Person].map((person, colIdx) => {
-              const cellKey = `${activeTense}:${person}`;
-              const isLocked = Boolean(session.lockedCells[cellKey]);
-              const feedback = cellFeedback[cellKey];
-              const labelInfo = formatPersonLabel(person, activeTense, session.genders);
-              const val = isLocked
-                ? session.lockedCells[cellKey]
-                : inputs[cellKey] ?? '';
-
-              return (
-                <div
-                  key={cellKey}
-                  onClick={() => {
-                    if (!isLocked) {
-                      cellInputRefs.current[cellKey]?.focus();
-                    }
-                  }}
-                  className={`px-4 py-3 flex flex-col justify-between cursor-text transition-colors ${
-                    colIdx === 0 ? 'ios-hairline-r' : ''
-                  }`}
-                  style={
-                    isLocked
-                      ? { backgroundColor: 'var(--ios-green-bg)' }
-                      : feedback?.status === 'error'
-                      ? { backgroundColor: 'var(--ios-red-bg)' }
-                      : undefined
-                  }
-                >
-                  {/* Pronoun & Gender Badge */}
-                  <div className="flex items-center justify-between gap-1 mb-1">
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        className="text-[13px] font-medium"
-                        style={{ color: 'var(--ios-label-secondary)' }}
-                      >
-                        {labelInfo.pronoun}
+          return (
+            <div
+              key={tense}
+              className={`${
+                isVisibleOnMobile ? 'flex' : 'hidden lg:flex'
+              } tr-card p-5 flex-col justify-between transition-all`}
+            >
+              <div>
+                {/* Tense Card Header */}
+                <div className="flex items-start justify-between gap-2 pb-3.5 mb-3.5 tr-hairline-b">
+                  <div>
+                    <div className="flex items-baseline gap-2">
+                      <h3 className="text-lg font-bold text-white tracking-tight">
+                        {tenseMeta.titleCz}
+                      </h3>
+                      <span className="text-xs text-[#8E8E93]">
+                        {tenseMeta.titleEn}
                       </span>
-                      {labelInfo.badge && (
-                        <span
-                          className="text-[11px] font-semibold px-1.5 py-0.2 rounded-md"
-                          style={{
-                            backgroundColor: 'var(--ios-fill)',
-                            color: 'var(--ios-label)',
-                          }}
-                        >
-                          {labelInfo.badge}
-                        </span>
-                      )}
                     </div>
 
-                    {isLocked ? (
-                      <span
-                        className="w-4 h-4 rounded-full flex items-center justify-center"
-                        style={{
-                          backgroundColor: 'var(--ios-green)',
-                          color: '#ffffff',
-                        }}
-                      >
-                        <Check className="w-2.5 h-2.5 stroke-[3]" />
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRevealCell(activeTense, person);
-                        }}
-                        title="Reveal form"
-                        className="p-0.5 cursor-pointer"
-                        style={{ color: 'var(--ios-label-tertiary)' }}
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
+                    {tense === 'past' && (
+                      <p className="text-xs text-[#8E8E93] mt-1">
+                        Col 1 targets:{' '}
+                        <strong style={{ color: 'var(--tr-cyan)' }}>
+                          Já ({session.genders.ja === 'm' ? '♂' : '♀'}), Ty (
+                          {session.genders.ty === 'm' ? '♂' : '♀'}),{' '}
+                          {session.genders.thirdSg.toUpperCase()}
+                        </strong>
+                      </p>
+                    )}
+
+                    {tense === 'present' && (
+                      <p className="text-xs text-[#8E8E93] mt-1">
+                        Imperfective present of{' '}
+                        <strong className="text-white">{verb.infinitive}</strong>
+                      </p>
+                    )}
+
+                    {tense === 'future' && (
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                        <span
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold"
+                          style={{
+                            backgroundColor: 'var(--tr-cyan-soft)',
+                            color: 'var(--tr-cyan)',
+                          }}
+                        >
+                          {session.futureMode === 'pf' && verb.forms.futurePf
+                            ? `Perfective (${verb.aspectPairInfinitive})`
+                            : `Imperfective (budu + ${verb.infinitive})`}
+                        </span>
+
+                        {verb.forms.futurePf && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleToggleFutureMode(
+                                session.futureMode === 'impf' ? 'pf' : 'impf'
+                              )
+                            }
+                            className="text-[11px] underline text-[#8E8E93] hover:text-white cursor-pointer"
+                          >
+                            Switch
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
 
-                  {/* Native iOS Inline Text Input */}
-                  <input
-                    ref={(el) => {
-                      cellInputRefs.current[cellKey] = el;
-                    }}
-                    type="text"
-                    value={val}
-                    disabled={isLocked}
-                    onFocus={(e) => {
-                      activeInputRef.current = e.currentTarget;
-                    }}
-                    onChange={(e) => handleInputChange(cellKey, e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        focusNextUnlockedCell(activeTense, person, session.lockedCells);
-                      }
-                    }}
-                    placeholder="Conjugate"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    autoComplete="off"
-                    spellCheck={false}
-                    enterKeyHint="next"
-                    className="w-full bg-transparent text-[17px] font-semibold tracking-tight outline-none"
-                    style={{
-                      color: isLocked
-                        ? 'var(--ios-green-text)'
-                        : feedback?.status === 'error'
-                        ? 'var(--ios-red-text)'
-                        : 'var(--ios-label)',
-                    }}
-                  />
-
-                  {/* Error / Revealed Feedback */}
-                  {!isLocked && feedback && (
-                    <div
-                      className="mt-1 pt-1 text-[11px] font-medium leading-tight flex items-center justify-between gap-1 ios-hairline-t"
-                      style={{ color: 'var(--ios-red-text)' }}
-                    >
-                      <span className="truncate">{feedback.hint || 'Incorrect'}</span>
-                      {!feedback.revealedAnswer && (
-                        <button
-                          type="button"
-                          tabIndex={-1}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRevealCell(activeTense, person);
-                          }}
-                          className="text-[11px] font-semibold underline shrink-0 cursor-pointer"
-                        >
-                          Show
-                        </button>
-                      )}
-                    </div>
-                  )}
+                  <span
+                    className="px-2.5 py-1 rounded-full text-xs font-bold tabular-nums shrink-0"
+                    style={
+                      isTenseComplete
+                        ? {
+                            backgroundColor: 'var(--tr-green-soft)',
+                            color: 'var(--tr-green)',
+                          }
+                        : {
+                            backgroundColor: '#000000',
+                            color: '#8E8E93',
+                          }
+                    }
+                  >
+                    {lockedInTense}/6
+                  </span>
                 </div>
-              );
-            })}
-          </div>
-        ))}
+
+                {/* Column Headers */}
+                <div className="grid grid-cols-2 gap-2.5 text-[11px] font-bold uppercase tracking-wider text-[#8E8E93] px-1 mb-2">
+                  <div>Col 1 • Singular</div>
+                  <div>Col 2 • Plural</div>
+                </div>
+
+                {/* 3×2 Conjugation Cells */}
+                <div className="space-y-2.5">
+                  {GRID_ROWS.map(([col1Person, col2Person], rowIdx) => (
+                    <div key={rowIdx} className="grid grid-cols-2 gap-2.5">
+                      {[col1Person, col2Person].map((person) => {
+                        const cellKey = `${tense}:${person}`;
+                        const isLocked = Boolean(session.lockedCells[cellKey]);
+                        const feedback = cellFeedback[cellKey];
+                        const labelInfo = formatPersonLabel(person, tense, session.genders);
+                        const val = isLocked
+                          ? session.lockedCells[cellKey]
+                          : inputs[cellKey] ?? '';
+
+                        return (
+                          <div
+                            key={cellKey}
+                            onClick={() => {
+                              if (!isLocked) {
+                                cellInputRefs.current[cellKey]?.focus();
+                              }
+                            }}
+                            className="rounded-[20px] p-3 transition-all flex flex-col justify-between cursor-text border"
+                            style={
+                              isLocked
+                                ? {
+                                    backgroundColor: 'var(--tr-green-soft)',
+                                    borderColor: 'rgba(48, 209, 88, 0.4)',
+                                  }
+                                : feedback?.status === 'error'
+                                ? {
+                                    backgroundColor: 'var(--tr-red-soft)',
+                                    borderColor: 'rgba(255, 69, 58, 0.45)',
+                                  }
+                                : {
+                                    backgroundColor: '#000000',
+                                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                                  }
+                            }
+                          >
+                            {/* Pronoun & Gender Badge */}
+                            <div className="flex items-center justify-between gap-1 mb-1.5">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-bold text-white">
+                                  {labelInfo.pronoun}
+                                </span>
+                                {labelInfo.badge && (
+                                  <span
+                                    className="text-[10px] font-bold px-1.5 py-0.2 rounded-md"
+                                    style={{
+                                      backgroundColor: 'var(--tr-cyan-soft)',
+                                      color: 'var(--tr-cyan)',
+                                    }}
+                                  >
+                                    {labelInfo.badge}
+                                  </span>
+                                )}
+                              </div>
+
+                              {isLocked ? (
+                                <span
+                                  className="w-4 h-4 rounded-full flex items-center justify-center"
+                                  style={{
+                                    backgroundColor: 'var(--tr-green)',
+                                    color: '#000000',
+                                  }}
+                                >
+                                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  tabIndex={-1}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRevealCell(tense, person);
+                                  }}
+                                  title="Peek answer"
+                                  className="text-[#545458] hover:text-white p-0.5 cursor-pointer"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Input Field (16px+ prevents iOS Safari zoom) */}
+                            <input
+                              ref={(el) => {
+                                cellInputRefs.current[cellKey] = el;
+                              }}
+                              type="text"
+                              value={val}
+                              disabled={isLocked}
+                              onFocus={(e) => {
+                                activeInputRef.current = e.currentTarget;
+                              }}
+                              onChange={(e) => handleInputChange(cellKey, e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  focusNextUnlockedCell(tense, person, session.lockedCells);
+                                }
+                              }}
+                              placeholder="Type..."
+                              autoCapitalize="none"
+                              autoCorrect="off"
+                              autoComplete="off"
+                              spellCheck={false}
+                              enterKeyHint="next"
+                              className="w-full bg-transparent text-[17px] font-bold tracking-tight outline-none placeholder-[#48484C]"
+                              style={{
+                                color: isLocked
+                                  ? 'var(--tr-green)'
+                                  : feedback?.status === 'error'
+                                  ? 'var(--tr-red)'
+                                  : 'var(--tr-cyan)',
+                              }}
+                            />
+
+                            {/* Cell Error / Hint */}
+                            {!isLocked && feedback && (
+                              <div
+                                className="mt-1.5 pt-1 text-[11px] font-medium leading-tight flex items-center justify-between gap-1 tr-hairline-t"
+                                style={{ color: 'var(--tr-red)' }}
+                              >
+                                <span className="truncate">
+                                  {feedback.hint || 'Try again'}
+                                </span>
+                                {!feedback.revealedAnswer && (
+                                  <button
+                                    type="button"
+                                    tabIndex={-1}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRevealCell(tense, person);
+                                    }}
+                                    className="text-[10px] font-bold underline shrink-0 cursor-pointer"
+                                  >
+                                    Show
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Per-Tense Check Button */}
+              <div className="mt-4 pt-3.5 tr-hairline-t">
+                {isTenseComplete ? (
+                  <div
+                    className="w-full py-2.5 px-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5"
+                    style={{
+                      backgroundColor: 'var(--tr-green-soft)',
+                      color: 'var(--tr-green)',
+                    }}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{tenseMeta.titleCz} Complete (6/6)</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => validateCells([tense])}
+                    className="w-full py-3 px-4 rounded-full text-xs sm:text-sm font-bold cursor-pointer tr-btn-cyan"
+                  >
+                    Check {tenseMeta.titleCz} (6 cells)
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Primary iOS Action Button */}
-      <div className="space-y-2 pt-1">
-        {isActiveTenseComplete ? (
-          <div
-            className="w-full py-3.5 px-4 rounded-[14px] text-[15px] font-semibold flex items-center justify-center gap-2"
-            style={{
-              backgroundColor: 'var(--ios-green-bg)',
-              color: 'var(--ios-green-text)',
-            }}
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            <span>{activeTenseMeta.titleCz} Complete (6/6)</span>
+      {/* 5. Bottom Check All 3 Tenses Bar */}
+      {!isAll18Complete && (
+        <div className="tr-card p-4 sm:px-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="text-xs sm:text-sm text-[#8E8E93]">
+            Correct cells lock in (<span style={{ color: 'var(--tr-green)' }}>✓</span>). Keep retrying remaining cells until all 3 tenses (18/18) are right!
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => validateCells([activeTense])}
-            className="w-full py-3.5 px-5 text-[16px] cursor-pointer ios-btn-blue"
-          >
-            Check {activeTenseMeta.titleCz}
-          </button>
-        )}
-
-        {!isAll18Complete && totalLocked > 0 && (
           <button
             type="button"
             onClick={() => validateCells(['past', 'present', 'future'])}
-            className="w-full py-3 px-4 text-[14px] cursor-pointer ios-btn-secondary"
+            className="px-6 py-3 text-sm shrink-0 cursor-pointer tr-btn-cyan"
           >
-            Check All 3 Tenses ({18 - totalLocked} remaining)
+            Check All 3 Tenses ({18 - totalLocked} left)
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

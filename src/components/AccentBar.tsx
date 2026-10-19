@@ -50,9 +50,6 @@ export function insertTextIntoInput(input: HTMLInputElement, char: string): void
   input.focus();
 }
 
-/**
- * Authentic iOS Keyboard Accessory Row (#D1D5DB tray with #FFFFFF 5px-radius keycaps)
- */
 export const AccentBar: React.FC<AccentBarProps> = ({ activeInputRef }) => {
   const handleInsert = (char: string) => {
     const target =
@@ -68,10 +65,10 @@ export const AccentBar: React.FC<AccentBarProps> = ({ activeInputRef }) => {
 
   return (
     <div
-      className="w-full px-1.5 py-1.5 select-none ios-keyboard-tray"
-      aria-label="Czech diacritic keyboard keys"
+      className="px-3 pb-2.5 select-none"
+      aria-label="Czech diacritic keys"
     >
-      <div className="max-w-xl mx-auto flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-0.5 px-0.5">
+      <div className="max-w-md mx-auto rounded-full px-2.5 py-1.5 flex items-center gap-1 overflow-x-auto no-scrollbar tr-pill-glass">
         {CZECH_ACCENTS.map((char) => (
           <button
             key={char}
@@ -81,7 +78,7 @@ export const AccentBar: React.FC<AccentBarProps> = ({ activeInputRef }) => {
               e.preventDefault();
               handleInsert(char);
             }}
-            className="min-w-[31px] flex-1 h-[38px] px-1 font-normal text-[18px] leading-none flex items-center justify-center shrink-0 cursor-pointer ios-keycap"
+            className="min-w-[30px] flex-1 h-[34px] px-1.5 font-medium text-[16px] leading-none flex items-center justify-center shrink-0 cursor-pointer tr-keycap"
           >
             {char}
           </button>

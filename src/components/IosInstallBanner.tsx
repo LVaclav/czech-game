@@ -26,9 +26,6 @@ export function isRunningStandalonePwa(): boolean {
   );
 }
 
-/**
- * Native iOS Modal Sheet for "Add to Home Screen"
- */
 export const IosInstallBanner: React.FC = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(
@@ -90,41 +87,29 @@ export const IosInstallBanner: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-black/40"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-xs"
       role="dialog"
       aria-modal="true"
       aria-labelledby="pwa-popup-title"
     >
-      <div
-        className="w-full max-w-sm rounded-[24px] p-5 pt-3 space-y-4 shadow-2xl"
-        style={{ backgroundColor: 'var(--ios-bg-grouped)' }}
-      >
-        {/* iOS Sheet Grabber */}
-        <div
-          className="w-9 h-1.5 rounded-full mx-auto"
-          style={{ backgroundColor: 'var(--ios-label-tertiary)' }}
-        />
-
+      <div className="w-full max-w-sm rounded-[34px] p-5 space-y-4 tr-bottom-dock-glass">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div
-              className="w-11 h-11 rounded-[12px] flex items-center justify-center shrink-0"
-              style={{ backgroundColor: 'var(--ios-blue)', color: '#ffffff' }}
+              className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 bg-black"
+              style={{ color: 'var(--tr-cyan)' }}
             >
-              <Smartphone className="w-6 h-6" />
+              <Smartphone className="w-5 h-5" />
             </div>
             <div>
               <h2
                 id="pwa-popup-title"
-                className="text-[17px] font-semibold tracking-tight"
+                className="text-[17px] font-bold text-white tracking-tight"
               >
                 Add to Home Screen
               </h2>
-              <p
-                className="text-[13px]"
-                style={{ color: 'var(--ios-label-secondary)' }}
-              >
-                Install Čeština as a full-screen iOS app.
+              <p className="text-[13px] text-[#8E8E93]">
+                Save Čeština as a full-screen iPhone app.
               </p>
             </div>
           </div>
@@ -132,55 +117,56 @@ export const IosInstallBanner: React.FC = () => {
           <button
             type="button"
             onClick={handleClose}
-            className="w-7 h-7 rounded-full flex items-center justify-center cursor-pointer shrink-0"
-            style={{
-              backgroundColor: 'var(--ios-fill)',
-              color: 'var(--ios-label-secondary)',
-            }}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-black/60 text-[#8E8E93] hover:text-white cursor-pointer shrink-0"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Native UISegmentedControl */}
-        <div className="grid grid-cols-2 ios-segmented">
+        {/* Platform Capsule Switcher */}
+        <div className="h-[42px] p-[3px] rounded-full grid grid-cols-2 bg-black/50">
           <button
             type="button"
             onClick={() => setPlatform('ios')}
-            className={`py-1.5 px-3 text-[13px] font-semibold transition-all cursor-pointer ${
-              platform === 'ios' ? 'ios-segmented-active' : ''
+            className={`rounded-full text-[12px] font-semibold transition-all cursor-pointer ${
+              platform === 'ios' ? 'bg-[#26262A]' : ''
             }`}
+            style={{
+              color: platform === 'ios' ? 'var(--tr-cyan)' : '#8E8E93',
+            }}
           >
             iPhone / Safari
           </button>
           <button
             type="button"
             onClick={() => setPlatform('android')}
-            className={`py-1.5 px-3 text-[13px] font-semibold transition-all cursor-pointer ${
-              platform === 'android' ? 'ios-segmented-active' : ''
+            className={`rounded-full text-[12px] font-semibold transition-all cursor-pointer ${
+              platform === 'android' ? 'bg-[#26262A]' : ''
             }`}
+            style={{
+              color: platform === 'android' ? 'var(--tr-cyan)' : '#8E8E93',
+            }}
           >
             Android / Chrome
           </button>
         </div>
 
-        {/* iOS Inset Grouped Steps */}
         {platform === 'ios' ? (
-          <div className="ios-card overflow-hidden text-[14px]">
-            <div className="px-4 py-3 flex items-center gap-3 ios-hairline-b">
+          <div className="rounded-[22px] overflow-hidden bg-black/50 text-[14px] text-white">
+            <div className="px-4 py-3 flex items-center gap-3 tr-hairline-b">
               <Share
                 className="w-4 h-4 shrink-0"
-                style={{ color: 'var(--ios-blue)' }}
+                style={{ color: 'var(--tr-cyan)' }}
               />
               <span>
                 1. Tap <strong>Share</strong> in Safari’s bottom bar
               </span>
             </div>
-            <div className="px-4 py-3 flex items-center gap-3 ios-hairline-b">
+            <div className="px-4 py-3 flex items-center gap-3 tr-hairline-b">
               <PlusSquare
                 className="w-4 h-4 shrink-0"
-                style={{ color: 'var(--ios-blue)' }}
+                style={{ color: 'var(--tr-cyan)' }}
               />
               <span>
                 2. Tap <strong>Add to Home Screen</strong>
@@ -189,7 +175,7 @@ export const IosInstallBanner: React.FC = () => {
             <div className="px-4 py-3 flex items-center gap-3">
               <CheckCircle2
                 className="w-4 h-4 shrink-0"
-                style={{ color: 'var(--ios-green)' }}
+                style={{ color: 'var(--tr-green)' }}
               />
               <span>
                 3. Tap <strong>Add</strong> in the top-right corner
@@ -197,30 +183,30 @@ export const IosInstallBanner: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="ios-card overflow-hidden text-[14px]">
+          <div className="rounded-[22px] overflow-hidden bg-black/50 text-[14px] text-white">
             {deferredPrompt && (
-              <div className="p-3 ios-hairline-b">
+              <div className="p-3 tr-hairline-b">
                 <button
                   type="button"
                   onClick={handleNativeInstallClick}
-                  className="w-full py-2.5 px-4 text-[14px] flex items-center justify-center gap-2 cursor-pointer ios-btn-blue"
+                  className="w-full py-2.5 px-4 text-[14px] flex items-center justify-center gap-2 cursor-pointer tr-btn-cyan"
                 >
                   <Download className="w-4 h-4" />
                   <span>Install App Now</span>
                 </button>
               </div>
             )}
-            <div className="px-4 py-3 flex items-center gap-3 ios-hairline-b">
+            <div className="px-4 py-3 flex items-center gap-3 tr-hairline-b">
               <MoreVertical
                 className="w-4 h-4 shrink-0"
-                style={{ color: 'var(--ios-blue)' }}
+                style={{ color: 'var(--tr-cyan)' }}
               />
               <span>1. Tap the browser menu or install icon</span>
             </div>
             <div className="px-4 py-3 flex items-center gap-3">
               <Download
                 className="w-4 h-4 shrink-0"
-                style={{ color: 'var(--ios-blue)' }}
+                style={{ color: 'var(--tr-cyan)' }}
               />
               <span>
                 2. Select <strong>Add to Home Screen</strong>
@@ -232,7 +218,7 @@ export const IosInstallBanner: React.FC = () => {
         <button
           type="button"
           onClick={handleClose}
-          className="w-full py-3 text-[16px] cursor-pointer ios-btn-blue"
+          className="w-full py-3 text-[15px] cursor-pointer tr-btn-cyan"
         >
           Done
         </button>

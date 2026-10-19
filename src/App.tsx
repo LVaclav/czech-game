@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Bookmark,
-  Grid,
+  Flame,
   Languages,
   Layers,
+  List,
   LogOut,
-  Moon,
-  Sun,
+  MoreHorizontal,
 } from 'lucide-react';
 import { AuthUserSession, UserProgressBlob } from './types';
 import {
@@ -16,11 +16,6 @@ import {
   loadLocalProgress,
   syncUserProgress,
 } from './lib/api';
-import {
-  applyTheme,
-  getSavedTheme,
-  ThemeId,
-} from './lib/theme';
 import { VERB_MAP } from './lib/priorityQueue';
 import { AuthView } from './components/AuthView';
 import { TableTrainerView } from './components/TableTrainerView';
@@ -32,8 +27,6 @@ import { IosInstallBanner } from './components/IosInstallBanner';
 type ActiveTab = 'table' | 'flashcards' | 'completed';
 
 export const App: React.FC = () => {
-  const [theme, setTheme] = useState<ThemeId>(() => getSavedTheme());
-
   const [session, setSession] = useState<AuthUserSession | null>(() =>
     getSavedSession()
   );
@@ -44,12 +37,9 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('table');
   const [forcedVerbId, setForcedVerbId] = useState<string | null>(null);
   const [cloudSynced, setCloudSynced] = useState<boolean>(false);
+  const [showMoreMenu, setShowMoreMenu] = useState<boolean>(false);
 
   const activeInputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
 
   useEffect(() => {
     if (!session) return;
@@ -87,6 +77,7 @@ export const App: React.FC = () => {
     setSession(null);
     setProgress(null);
     setCloudSynced(false);
+    setShowMoreMenu(false);
   };
 
   const handleJumpToVerbInTable = useCallback((verbId?: string) => {
@@ -120,76 +111,114 @@ export const App: React.FC = () => {
   const TAB_TITLES: Record<ActiveTab, string> = {
     table: 'Conjugate',
     flashcards: 'Flashcards',
-    completed: 'Saved Verbs',
+    completed: 'Vocabulary',
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col">
-      {/* Native iOS Modal Sheet for Add to Home Screen (when opened in browser) */}
+    <div className="min-h-[100dvh] flex flex-col bg-black text-white">
       <IosInstallBanner />
 
-      {/* Native iOS Navigation Bar */}
-      <header className="sticky top-0 z-30 pt-safe ios-chrome ios-hairline-b">
-        <div className="max-w-lg mx-auto px-4 h-12 flex items-center justify-between">
-          {/* Left: Title */}
-          <div className="flex items-center gap-2">
-            <Languages
-              className="w-5 h-5"
-              style={{ color: 'var(--ios-blue)' }}
-            />
-            <h1 className="font-display text-[19px] tracking-tight">
-              {TAB_TITLES[activeTab]}
-            </h1>
-          </div>
-
-          {/* Right: Streak, Appearance Toggle, User Sign Out */}
-          <div className="flex items-center gap-3">
-            <span
-              className="text-[13px] font-medium tabular-nums"
-              style={{ color: 'var(--ios-label-secondary)' }}
-              title={`${progress.stats.currentStreak} day streak`}
-            >
-              {progress.stats.currentStreak}d streak
-            </span>
-
-            <button
-              type="button"
-              onClick={() =>
-                setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
-              }
-              className="p-1.5 rounded-full cursor-pointer transition-opacity active:opacity-60"
+      {/* Top Header: Spacious max-w-5xl container with iOS 26 Circular Liquid Glass Buttons + Large Title */}
+      <header className="pt-safe px-4 sm:px-6 pt-3 pb-2 max-w-5xl w-full mx-auto">
+        <div className="flex items-center justify-between mb-3">
+          {/* Left Circular Liquid Glass Button (Quick Vocabulary Toggle) */}
+          <button
+            type="button"
+            onClick={() =>
+              setActiveTab((prev) => (prev === 'completed' ? 'table' : 'completed'))
+            }
+            className="w-[46px] h-[46px] rounded-full flex items-center justify-center cursor-pointer tr-circle-glass"
+            aria-label="Vocabulary List"
+            title="Saved Vocabulary"
+          >
+            <List
+              className="w-[22px] h-[22px]"
               style={{
-                backgroundColor: 'var(--ios-fill)',
-                color: 'var(--ios-blue)',
+                color: activeTab === 'completed' ? 'var(--tr-cyan)' : '#ffffff',
               }}
-              aria-label="Toggle Light/Dark Mode"
-              title="Toggle iOS Light / Dark Appearance"
-            >
-              {theme === 'light' ? (
-                <Moon className="w-4 h-4" />
-              ) : (
-                <Sun className="w-4 h-4" />
-              )}
-            </button>
+            />
+          </button>
 
-            <button
-              type="button"
-              onClick={handleLogout}
-              title={`Signed in as ${session.displayName} (${
-                cloudSynced ? 'Synced' : 'Local'
-              }) — Tap to Sign Out`}
-              className="flex items-center gap-1 text-[13px] font-medium cursor-pointer transition-opacity active:opacity-60"
-              style={{ color: 'var(--ios-blue)' }}
+          {/* Right Circular Controls: Streak Badge + ••• User Menu */}
+          <div className="flex items-center gap-2.5">
+            <div
+              title={`${progress.stats.currentStreak} day streak • ${progress.stats.tablesCompletedToday} tables completed today`}
+              className="h-[46px] px-4 rounded-full flex items-center gap-2 text-[14px] font-bold tr-circle-glass"
             >
-              <span className="max-w-[70px] truncate">{session.displayName}</span>
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
+              <Flame
+                className="w-4 h-4"
+                style={{ color: 'var(--tr-cyan)' }}
+              />
+              <span>{progress.stats.currentStreak}d</span>
+              <span className="text-[#8E8E93] hidden sm:inline">
+                • {progress.stats.tablesCompletedToday} today
+              </span>
+            </div>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowMoreMenu((prev) => !prev)}
+                className="w-[46px] h-[46px] rounded-full flex items-center justify-center cursor-pointer tr-circle-glass"
+                aria-label="Account Menu"
+              >
+                <MoreHorizontal className="w-[22px] h-[22px] text-white" />
+              </button>
+
+              {showMoreMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowMoreMenu(false)}
+                  />
+                  <div className="absolute right-0 mt-2.5 w-64 rounded-[26px] p-2.5 z-50 space-y-1 tr-bottom-dock-glass">
+                    <div className="px-3.5 py-2.5 flex items-center justify-between tr-hairline-b">
+                      <div>
+                        <div className="text-[15px] font-bold text-white">
+                          {session.displayName}
+                        </div>
+                        <div className="text-[12px] text-[#8E8E93]">
+                          {cloudSynced ? 'Synced to Netlify Blobs' : 'Saved on device'}
+                        </div>
+                      </div>
+                      <span
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{
+                          backgroundColor: cloudSynced
+                            ? 'var(--tr-green)'
+                            : '#8E8E93',
+                        }}
+                      />
+                    </div>
+
+                    <div className="px-3.5 py-2 text-[13px] text-[#8E8E93] flex justify-between">
+                      <span>Mastered Verbs</span>
+                      <strong className="text-white">{completedCount} / 30</strong>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="w-full text-left px-3.5 py-2.5 rounded-[18px] text-[14px] font-semibold text-[#FF453A] hover:bg-white/5 flex items-center justify-between cursor-pointer"
+                    >
+                      <span>Switch User / Sign Out</span>
+                      <LogOut className="w-4 h-4" />
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Large Bold iOS Title */}
+        <h1 className="font-display text-[34px] sm:text-[38px] leading-[1.08] text-white tracking-tight">
+          {TAB_TITLES[activeTab]}
+        </h1>
       </header>
 
-      {/* Main Content View */}
-      <main className="flex-1 w-full mx-auto px-4 pt-4 pb-36">
+      {/* Full-Width Responsive Main Content Area (supports 3-column desktop tables & spacious mobile UX) */}
+      <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-2 pb-44">
         {activeTab === 'table' && (
           <TableTrainerView
             progress={progress}
@@ -217,20 +246,22 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* Bottom Sticky Dock: Native iOS Keyboard Accessory Row + Native iOS Tab Bar */}
-      <div className="fixed bottom-0 inset-x-0 z-30 flex flex-col">
+      {/* Bottom Floating Dock: Czech Háčky Bar + iOS 26 Floating Liquid Glass Capsule Tab Menu */}
+      <div className="fixed bottom-0 inset-x-0 z-30 flex flex-col items-center pb-safe pointer-events-none">
         {(activeTab === 'table' || activeTab === 'flashcards') && (
-          <AccentBar activeInputRef={activeInputRef} />
+          <div className="w-full pointer-events-auto">
+            <AccentBar activeInputRef={activeInputRef} />
+          </div>
         )}
 
-        {/* Native iOS UITabBar */}
-        <nav className="ios-chrome ios-hairline-t pb-safe">
-          <div className="max-w-md mx-auto grid grid-cols-3 h-[50px]">
+        {/* Floating Liquid Glass Capsule Menu */}
+        <div className="pb-4 pt-0.5 px-4 pointer-events-auto">
+          <nav className="w-[336px] h-[64px] p-[4px] rounded-full grid grid-cols-3 items-center tr-bottom-dock-glass">
             {[
               {
                 id: 'table' as const,
                 label: 'Conjugate',
-                icon: Grid,
+                icon: Languages,
                 badge: relapsedCount > 0 ? String(relapsedCount) : null,
               },
               {
@@ -253,37 +284,35 @@ export const App: React.FC = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className="relative flex flex-col items-center justify-center gap-0.5 cursor-pointer"
+                  className={`relative h-full rounded-full flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer ${
+                    isActive ? 'tr-bottom-tab-active' : ''
+                  }`}
                   style={{
-                    color: isActive
-                      ? 'var(--ios-blue)'
-                      : 'var(--ios-label-secondary)',
+                    color: isActive ? 'var(--tr-cyan)' : '#ffffff',
                   }}
                 >
                   <div className="relative">
-                    <Icon className="w-[22px] h-[22px]" />
+                    <Icon className="w-[22px] h-[22px]" strokeWidth={2.1} />
                     {tab.badge && (
                       <span
-                        className="-top-1 -right-3.5 absolute px-1.5 min-w-[16px] h-[16px] rounded-full text-[10px] font-bold flex items-center justify-center text-white"
+                        className="-top-1 -right-3.5 absolute px-1.5 min-w-[15px] h-[15px] rounded-full text-[9px] font-black flex items-center justify-center"
                         style={{
-                          backgroundColor:
-                            tab.id === 'table'
-                              ? 'var(--ios-red)'
-                              : 'var(--ios-blue)',
+                          backgroundColor: isActive ? 'var(--tr-cyan)' : '#ffffff',
+                          color: '#000000',
                         }}
                       >
                         {tab.badge}
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] font-medium leading-none">
+                  <span className="text-[11px] font-semibold tracking-tight leading-none">
                     {tab.label}
                   </span>
                 </button>
               );
             })}
-          </div>
-        </nav>
+          </nav>
+        </div>
       </div>
     </div>
   );

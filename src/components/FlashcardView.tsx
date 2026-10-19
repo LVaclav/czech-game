@@ -5,6 +5,7 @@ import {
   BookOpen,
   CheckCircle2,
   RotateCcw,
+  Sparkles,
   XCircle,
 } from 'lucide-react';
 import { TenseKey, UserProgressBlob } from '../types';
@@ -71,38 +72,37 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
 
   if (completedCount === 0 || !prompt) {
     return (
-      <div className="max-w-lg mx-auto my-6 p-8 text-center ios-card space-y-4">
+      <div className="max-w-xl mx-auto tr-card p-8 text-center space-y-4">
         <div
-          className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
-          style={{
-            backgroundColor: 'var(--ios-fill)',
-            color: 'var(--ios-blue)',
-          }}
+          className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto bg-black border border-white/10"
+          style={{ color: 'var(--tr-cyan)' }}
         >
           <BookOpen className="w-6 h-6" />
         </div>
-        <h2 className="font-display text-[22px]">No Completed Verbs Yet</h2>
-        <p
-          className="text-[15px] leading-relaxed"
-          style={{ color: 'var(--ios-label-secondary)' }}
-        >
-          Complete your first verb across Past, Present, and Future in the{' '}
-          <strong>3×2 Matrix</strong> to unlock Flashcard drills.
+        <h2 className="font-display text-[24px] text-white">
+          Unlock Flashcards by Completing a Verb
+        </h2>
+        <p className="text-[15px] text-[#8E8E93] leading-relaxed">
+          Flashcards pull exclusively from your <strong>Completed Verbs</strong> pool.
+          Finish all 18 forms of your first verb in <strong>Conjugate</strong> to unlock
+          spaced flashcard practice!
         </p>
         <button
           type="button"
           onClick={() => onSwitchToTableTrainer()}
-          className="px-6 py-3 text-[15px] inline-flex items-center gap-2 cursor-pointer ios-btn-blue"
+          className="px-6 py-3 text-[15px] inline-flex items-center gap-2 cursor-pointer tr-btn-cyan"
         >
-          <span>Open 3×2 Matrix</span>
+          <Sparkles className="w-4 h-4" />
+          <span>Go to Conjugate</span>
         </button>
       </div>
     );
   }
 
-  const verbRecord = progress.verbs[prompt.verb.id];
   const personInfo = formatPersonLabel(prompt.person, prompt.tense, prompt.genders);
   const tenseInfo = TENSE_LABELS[prompt.tense];
+  const verbRecord = progress.verbs[prompt.verb.id];
+  const fcStats = verbRecord?.flashcards;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,103 +178,83 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
     setGrading(null);
   };
 
-  const attempts = verbRecord?.flashcards.totalAttempts || 0;
-  const accuracy =
-    attempts > 0
-      ? Math.round(((verbRecord?.flashcards.totalCorrect || 0) / attempts) * 100)
-      : 100;
-
   return (
-    <div className="max-w-lg mx-auto space-y-4 pb-6">
-      {/* iOS Section Header */}
-      <div
-        className="flex items-center justify-between text-[12px] font-semibold uppercase tracking-wide px-4"
-        style={{ color: 'var(--ios-label-secondary)' }}
-      >
-        <span>{tenseInfo.cz} ({tenseInfo.en})</span>
-        <span>Accuracy: {accuracy}%</span>
+    <div className="max-w-xl mx-auto space-y-4">
+      {/* Pool & Word Accuracy Bar */}
+      <div className="flex items-center justify-between text-[13px] font-medium px-2 text-[#8E8E93]">
+        <span>
+          Drawing from <strong className="text-white">{completedCount}</strong> mastered{' '}
+          {completedCount === 1 ? 'verb' : 'verbs'}
+        </span>
+        {fcStats && fcStats.totalAttempts > 0 && (
+          <span>
+            Word accuracy:{' '}
+            <strong style={{ color: 'var(--tr-cyan)' }}>
+              {Math.round((fcStats.totalCorrect / fcStats.totalAttempts) * 100)}%
+            </strong>{' '}
+            ({fcStats.totalCorrect}/{fcStats.totalAttempts})
+          </span>
+        )}
       </div>
 
-      {/* Apple Translate Dual-Pane Flashcard */}
-      <div className="ios-card overflow-hidden">
-        {/* Top Pane: Verb & Person Prompt */}
-        <div className="p-5 space-y-3">
-          <div className="flex items-center justify-between gap-2">
+      {/* Main Flashcard Surface in Translate Dark Matte Card */}
+      <div className="tr-card p-6 sm:p-8 space-y-6">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <span
+            className="text-[12px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-black border border-white/10"
+            style={{ color: 'var(--tr-cyan)' }}
+          >
+            {tenseInfo.cz} • {tenseInfo.en}
+          </span>
+
+          {prompt.tense === 'future' && prompt.futureMode === 'pf' && (
             <span
-              className="text-[12px] font-semibold uppercase tracking-wide"
-              style={{ color: 'var(--ios-label-secondary)' }}
+              className="text-[12px] font-semibold px-3 py-1 rounded-full"
+              style={{
+                backgroundColor: 'var(--tr-orange-soft)',
+                color: 'var(--tr-orange)',
+              }}
             >
-              Infinitive • {prompt.verb.english}
+              Perfective Pair ({prompt.verb.aspectPairInfinitive})
             </span>
+          )}
+        </div>
 
-            {prompt.tense === 'future' && (
-              <span
-                className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                style={{
-                  backgroundColor: 'var(--ios-fill)',
-                  color: 'var(--ios-label)',
-                }}
-              >
-                {prompt.futureMode === 'pf' && prompt.verb.forms.futurePf
-                  ? `Perfective (${prompt.verb.aspectPairInfinitive})`
-                  : `Imperfective (budu + ${prompt.verb.infinitive})`}
-              </span>
-            )}
+        <div className="text-center space-y-2 py-2">
+          <div className="text-[13px] uppercase tracking-widest font-semibold text-[#8E8E93]">
+            Conjugate in Czech
           </div>
-
-          <div className="font-display text-[32px] leading-tight">
+          <h2 className="font-display text-3xl sm:text-4xl text-white">
             {prompt.tense === 'future' &&
             prompt.futureMode === 'pf' &&
             prompt.verb.aspectPairInfinitive
               ? prompt.verb.aspectPairInfinitive
               : prompt.verb.infinitive}
-          </div>
+          </h2>
+          <p
+            className="text-[17px] font-medium"
+            style={{ color: 'var(--tr-cyan)' }}
+          >
+            “{prompt.verb.english}”
+          </p>
 
-          <div className="flex items-center gap-2 pt-1">
-            <span
-              className="text-[13px] font-medium"
-              style={{ color: 'var(--ios-label-secondary)' }}
-            >
-              Person:
-            </span>
-            <span
-              className="text-[16px] font-bold"
-              style={{ color: 'var(--ios-blue)' }}
-            >
+          <div className="pt-3 flex items-center justify-center gap-2">
+            <span className="px-4 py-1.5 rounded-full text-[16px] font-bold bg-black text-white border border-white/10">
               {personInfo.pronoun}
             </span>
             {personInfo.badge && (
               <span
-                className="px-2 py-0.5 rounded-md text-[12px] font-semibold"
-                style={{
-                  backgroundColor: 'var(--ios-fill)',
-                  color: 'var(--ios-label)',
-                }}
+                className="px-3 py-1.5 rounded-full text-[13px] font-bold bg-black border border-white/10"
+                style={{ color: 'var(--tr-cyan)' }}
               >
                 {personInfo.badge}
               </span>
             )}
-            <span
-              className="text-[13px]"
-              style={{ color: 'var(--ios-label-secondary)' }}
-            >
-              ({personInfo.subtitle})
-            </span>
           </div>
         </div>
 
-        {/* Hairline 0.5px Separator */}
-        <div className="mx-5 ios-hairline-t" />
-
-        {/* Bottom Pane: User Typed Czech Answer */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <div
-              className="text-[12px] font-semibold uppercase tracking-wide mb-1.5"
-              style={{ color: 'var(--ios-blue)' }}
-            >
-              Your Conjugation ({personInfo.pronoun})
-            </div>
             <input
               ref={inputRef}
               type="text"
@@ -284,19 +264,30 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                 activeInputRef.current = e.currentTarget;
               }}
               onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Enter Czech form..."
+              placeholder={`Type ${personInfo.pronoun.toLowerCase()} form…`}
               autoCapitalize="none"
               autoCorrect="off"
               autoComplete="off"
               spellCheck={false}
               enterKeyHint="done"
-              className="w-full bg-transparent font-display text-[26px] outline-none"
+              className={`w-full text-center text-[20px] font-semibold px-4 py-3.5 rounded-2xl border outline-none transition-all ${
+                !grading
+                  ? 'bg-black/65 border-white/10 focus:border-[#00E5E5]'
+                  : grading.result.isValid || grading.overriddenAsCorrect
+                  ? 'border-[#30D158]/50'
+                  : 'border-[#FF453A]/55'
+              }`}
               style={{
                 color: !grading
-                  ? 'var(--ios-blue)'
+                  ? 'var(--tr-cyan)'
                   : grading.result.isValid || grading.overriddenAsCorrect
-                  ? 'var(--ios-green-text)'
-                  : 'var(--ios-red-text)',
+                  ? 'var(--tr-green)'
+                  : 'var(--tr-red)',
+                backgroundColor: !grading
+                  ? undefined
+                  : grading.result.isValid || grading.overriddenAsCorrect
+                  ? 'var(--tr-green-soft)'
+                  : 'var(--tr-red-soft)',
               }}
             />
           </div>
@@ -304,37 +295,51 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
           {!grading ? (
             <button
               type="submit"
-              className="w-full py-3.5 px-5 text-[16px] cursor-pointer ios-btn-blue"
+              className="w-full py-3.5 px-5 text-[16px] cursor-pointer tr-btn-cyan"
             >
               Check Answer
             </button>
           ) : (
-            <div className="space-y-3 pt-1">
+            <div className="space-y-3">
               {grading.result.isValid || grading.overriddenAsCorrect ? (
                 <div
-                  className="p-3.5 rounded-[14px] flex items-center gap-2.5 text-[14px] font-semibold"
+                  className="p-4 rounded-2xl flex items-center justify-between gap-3"
                   style={{
-                    backgroundColor: 'var(--ios-green-bg)',
-                    color: 'var(--ios-green-text)',
+                    backgroundColor: 'var(--tr-green-soft)',
+                    color: 'var(--tr-green)',
                   }}
                 >
-                  <CheckCircle2 className="w-5 h-5 shrink-0" />
-                  <span>Correct — {grading.result.canonicalAnswer}</span>
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle2 className="w-5 h-5 shrink-0" />
+                    <div>
+                      <div className="text-[15px] font-bold">
+                        Správně! ({grading.result.canonicalAnswer})
+                      </div>
+                      {grading.overriddenAsCorrect && (
+                        <div className="text-[12px] opacity-85">
+                          Marked as typo override — streak preserved.
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div
-                  className="p-3.5 rounded-[14px] space-y-2.5"
+                  className="p-4 rounded-2xl space-y-3"
                   style={{
-                    backgroundColor: 'var(--ios-red-bg)',
-                    color: 'var(--ios-red-text)',
+                    backgroundColor: 'var(--tr-red-soft)',
+                    color: 'var(--tr-red)',
                   }}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2.5">
                       <XCircle className="w-5 h-5 shrink-0 mt-0.5" />
                       <div>
-                        <div className="text-[14px] font-semibold">
-                          Expected: <u>{grading.result.canonicalAnswer}</u>
+                        <div className="text-[15px] font-bold">
+                          Expected:{' '}
+                          <span className="underline">
+                            {grading.result.canonicalAnswer}
+                          </span>
                         </div>
                         {grading.result.feedbackHint && (
                           <div className="text-[12px] mt-0.5 opacity-90">
@@ -347,37 +352,35 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                     <button
                       type="button"
                       onClick={handleOverrideTypo}
-                      className="px-2.5 py-1 rounded-lg text-[12px] font-semibold shrink-0 flex items-center gap-1 cursor-pointer"
-                      style={{
-                        backgroundColor: 'var(--ios-card)',
-                        color: 'var(--ios-blue)',
-                      }}
+                      className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-black text-white border border-white/10 shrink-0 flex items-center gap-1 cursor-pointer"
                     >
                       <RotateCcw className="w-3 h-3" />
-                      <span>Typo</span>
+                      <span>I made a typo</span>
                     </button>
                   </div>
 
                   {grading.relapsedNow && (
                     <div
-                      className="p-2.5 rounded-xl text-[12px] flex items-center justify-between gap-2"
+                      className="p-3 rounded-xl flex items-center justify-between gap-3 text-[12px]"
                       style={{
-                        backgroundColor: 'var(--ios-orange-bg)',
-                        color: 'var(--ios-orange-text)',
+                        backgroundColor: 'var(--tr-orange-soft)',
+                        color: 'var(--tr-orange)',
                       }}
                     >
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         <AlertTriangle className="w-4 h-4 shrink-0" />
                         <span>
-                          Re-queued with High Priority in 3×2 Matrix (still in your Completed list).
+                          <strong>Relapse detected:</strong> Re-queued at the top of{' '}
+                          <strong>Conjugate</strong> while staying in your flashcards.
                         </span>
                       </div>
                       <button
                         type="button"
                         onClick={() => onSwitchToTableTrainer(prompt.verb.id)}
-                        className="font-bold underline shrink-0 cursor-pointer"
+                        className="px-2.5 py-1 rounded-lg bg-black font-bold shrink-0 cursor-pointer"
+                        style={{ color: 'var(--tr-cyan)' }}
                       >
-                        Practice
+                        Practice Table
                       </button>
                     </div>
                   )}
@@ -386,7 +389,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-3.5 px-5 text-[16px] flex items-center justify-center gap-2 cursor-pointer ios-btn-blue"
+                className="w-full py-3.5 px-5 text-[16px] flex items-center justify-center gap-2 cursor-pointer tr-btn-cyan"
               >
                 <span>Next Card</span>
                 <ArrowRight className="w-4 h-4" />
