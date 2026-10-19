@@ -95,12 +95,24 @@ export interface UserProgressBlob {
   updatedAt: string;
   stats: {
     currentStreak: number;
+    longestStreak?: number;
     lastActiveDate: string | null;
     tablesCompletedToday: number;
     totalTablesCompleted: number;
+    activityByDate?: Record<string, number>;
     activeSession: ActiveTableSession | null;
   };
   verbs: Record<string, VerbUserRecord>;
+}
+
+export interface LeaderboardEntry {
+  username: string;
+  displayName: string;
+  currentStreak: number;
+  longestStreak: number;
+  masteredCount: number;
+  totalTablesCompleted: number;
+  lastActiveDate: string | null;
 }
 
 export interface AuthUserSession {

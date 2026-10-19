@@ -143,10 +143,84 @@ function getTodayDateString(): string {
 }
 
 /**
+ * Returns a complete map of YYYY-MM-DD -> activity count, combining explicit
+ * `stats.activityByDate` with any historical timestamps from `lastActiveDate`
+ * and completed verb records so existing accounts show all their hit days.
+ */
+export function getEffectiveActivityMap(
+  progress: UserProgressBlob
+): Record<string, number> {
+  const map: Record<string, number> = {
+    ...(progress.stats.activityByDate || {}),
+  };
+
+  if (progress.stats.lastActiveDate) {
+    const d = progress.stats.lastActiveDate.slice(0, 10);
+    map[d] = Math.max(map[d] || 0, progress.stats.tablesCompletedToday || 1);
+  }
+
+  for (const rec of Object.values(progress.verbs)) {
+    if (rec.firstCompletedAt) {
+      const d = rec.firstCompletedAt.slice(0, 10);
+      map[d] = Math.max(map[d] || 0, 1);
+    }
+    if (rec.lastTableCompletedAt) {
+      const d = rec.lastTableCompletedAt.slice(0, 10);
+      map[d] = Math.max(map[d] || 0, 1);
+    }
+    if (rec.flashcards?.lastReviewedAt) {
+      const d = rec.flashcards.lastReviewedAt.slice(0, 10);
+      map[d] = Math.max(map[d] || 0, 1);
+    }
+  }
+
+  return map;
+}
+
+/**
+ * Computes the user's all-time longest streak (in days) from both `stats.longestStreak`,
+ * `stats.currentStreak`, and consecutive dates in `getEffectiveActivityMap`.
+ */
+export function getLongestStreak(progress: UserProgressBlob): number {
+  const map = getEffectiveActivityMap(progress);
+  const dates = Object.keys(map)
+    .filter((d) => map[d] > 0)
+    .sort();
+
+  let bestFromDates = 0;
+  let currentRun = 0;
+  let prevTime: number | null = null;
+
+  for (const d of dates) {
+    const t = new Date(d + 'T00:00:00Z').getTime();
+    if (prevTime !== null) {
+      const diffDays = Math.round((t - prevTime) / (1000 * 60 * 60 * 24));
+      if (diffDays === 1) {
+        currentRun += 1;
+      } else if (diffDays > 1) {
+        currentRun = 1;
+      }
+    } else {
+      currentRun = 1;
+    }
+    if (currentRun > bestFromDates) {
+      bestFromDates = currentRun;
+    }
+    prevTime = t;
+  }
+
+  return Math.max(
+    progress.stats.longestStreak || 0,
+    progress.stats.currentStreak || 0,
+    bestFromDates
+  );
+}
+
+/**
  * Marks a verb's 3x2x3 table (18/18 cells) as completed:
  * - Adds/keeps it in `completed`
  * - Clears `inMatrixQueue` and resets relapse priority back to normal
- * - Updates user streak and daily/total table counters
+ * - Updates user streak, longestStreak, activityByDate, and daily/total table counters
  */
 export function recordTableCompletion(
   progress: UserProgressBlob,
@@ -192,15 +266,28 @@ export function recordTableCompletion(
 
   totalTablesCompleted += 1;
 
+  const prevActivity = getEffectiveActivityMap(progress);
+  const nextActivityByDate: Record<string, number> = {
+    ...prevActivity,
+    [today]: Math.max((prevActivity[today] || 0) + 1, tablesCompletedToday),
+  };
+
+  const longestStreak = Math.max(
+    getLongestStreak(progress),
+    currentStreak
+  );
+
   const updatedProgress: UserProgressBlob = {
     ...progress,
     updatedAt: nowIso,
     stats: {
       ...progress.stats,
       currentStreak,
+      longestStreak,
       lastActiveDate,
       tablesCompletedToday,
       totalTablesCompleted,
+      activityByDate: nextActivityByDate,
       activeSession: null,
     },
     verbs: {
@@ -284,9 +371,20 @@ export function recordFlashcardAttempt(
     },
   };
 
+  const today = getTodayDateString();
+  const prevActivity = getEffectiveActivityMap(progress);
+  const nextActivityByDate: Record<string, number> = {
+    ...prevActivity,
+    [today]: Math.max(prevActivity[today] || 0, 1),
+  };
+
   const updatedProgress: UserProgressBlob = {
     ...progress,
     updatedAt: nowIso,
+    stats: {
+      ...progress.stats,
+      activityByDate: nextActivityByDate,
+    },
     verbs: {
       ...progress.verbs,
       [verbId]: updatedVerb,

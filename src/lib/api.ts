@@ -1,4 +1,5 @@
-import { AuthUserSession, UserProgressBlob } from '../types';
+import { AuthUserSession, LeaderboardEntry, UserProgressBlob } from '../types';
+import { getLongestStreak, VERB_MAP } from './priorityQueue';
 
 const SESSION_STORAGE_KEY = 'czech_trainer_auth_session_v1';
 const LOCAL_USERS_DB_KEY = 'czech_trainer_local_users_v1';
@@ -14,12 +15,13 @@ export function createInitialProgress(username: string): UserProgressBlob {
     updatedAt: new Date().toISOString(),
     stats: {
       currentStreak: 0,
+      longestStreak: 0,
       lastActiveDate: null,
       tablesCompletedToday: 0,
-      tablesTotal: 0,
       totalTablesCompleted: 0,
+      activityByDate: {},
       activeSession: null,
-    } as UserProgressBlob['stats'],
+    },
     verbs: {},
   };
 }
@@ -105,7 +107,11 @@ export async function authenticateUser(
       return session;
     }
   } catch (err) {
-    if (err instanceof Error && !err.message.includes('Failed to fetch') && !err.message.includes('NetworkError')) {
+    if (
+      err instanceof Error &&
+      !err.message.includes('Failed to fetch') &&
+      !err.message.includes('NetworkError')
+    ) {
       throw err;
     }
     // Fall through to local auth fallback if running pure `vite` dev server or offline
@@ -189,6 +195,7 @@ export async function fetchUserProgress(
 
     const remote = (await res.json()) as UserProgressBlob | null;
     if (!remote || !remote.verbs) {
+      await syncUserProgress(session, local);
       return { progress: local, syncedWithCloud: true };
     }
 
@@ -238,4 +245,98 @@ export async function syncUserProgress(
   } catch {
     return false;
   }
+}
+
+function progressToLeaderboardEntry(
+  username: string,
+  displayName: string,
+  progress: UserProgressBlob
+): LeaderboardEntry {
+  const masteredCount = Object.values(progress.verbs || {}).filter(
+    (v) => v.completed && VERB_MAP[v.verbId]
+  ).length;
+
+  return {
+    username: username.toLowerCase(),
+    displayName,
+    currentStreak: progress.stats.currentStreak || 0,
+    longestStreak: getLongestStreak(progress),
+    masteredCount,
+    totalTablesCompleted: progress.stats.totalTablesCompleted || 0,
+    lastActiveDate: progress.stats.lastActiveDate || null,
+  };
+}
+
+/**
+ * Fetches the multi-user leaderboard from Netlify Blobs and merges with local state
+ * so the active user and any other accounts on the device or cloud appear ranked.
+ */
+export async function fetchLeaderboard(
+  session: AuthUserSession,
+  currentProgress: UserProgressBlob
+): Promise<LeaderboardEntry[]> {
+  const entriesByUsername: Record<string, LeaderboardEntry> = {};
+
+  // 1. Include any local accounts stored on this browser
+  const localUsers = getLocalUsers();
+  for (const u of Object.values(localUsers)) {
+    const p = loadLocalProgress(u.username);
+    entriesByUsername[u.username.toLowerCase()] = progressToLeaderboardEntry(
+      u.username,
+      u.displayName,
+      p
+    );
+  }
+
+  // 2. Always include the current signed-in user with their live progress
+  entriesByUsername[session.username.toLowerCase()] = progressToLeaderboardEntry(
+    session.username,
+    session.displayName,
+    currentProgress
+  );
+
+  // 3. Fetch cloud leaderboard from Netlify Blobs if authenticated with cloud token
+  if (!session.token.startsWith('local-dev-token:')) {
+    try {
+      const res = await fetch('/api/progress?leaderboard=1', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${session.token}`,
+        },
+      });
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        const data = (await res.json()) as { leaderboard?: LeaderboardEntry[] };
+        if (Array.isArray(data.leaderboard)) {
+          for (const remoteEntry of data.leaderboard) {
+            const uname = remoteEntry.username.toLowerCase();
+            if (uname === session.username.toLowerCase()) {
+              // Keep live currentProgress if it has >= masteredCount / tables
+              const liveEntry = entriesByUsername[uname];
+              if (
+                remoteEntry.masteredCount > liveEntry.masteredCount ||
+                remoteEntry.totalTablesCompleted > liveEntry.totalTablesCompleted
+              ) {
+                entriesByUsername[uname] = remoteEntry;
+              }
+            } else {
+              entriesByUsername[uname] = remoteEntry;
+            }
+          }
+        }
+      }
+    } catch {
+      // Fallback to local entries when offline
+    }
+  }
+
+  return Object.values(entriesByUsername).sort((a, b) => {
+    if (b.masteredCount !== a.masteredCount) {
+      return b.masteredCount - a.masteredCount;
+    }
+    if (b.currentStreak !== a.currentStreak) {
+      return b.currentStreak - a.currentStreak;
+    }
+    return b.totalTablesCompleted - a.totalTablesCompleted;
+  });
 }

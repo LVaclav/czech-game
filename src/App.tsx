@@ -16,13 +16,14 @@ import {
   loadLocalProgress,
   syncUserProgress,
 } from './lib/api';
-import { VERB_MAP } from './lib/priorityQueue';
 import { AuthView } from './components/AuthView';
 import { TableTrainerView } from './components/TableTrainerView';
 import { FlashcardView } from './components/FlashcardView';
 import { CompletedListView } from './components/CompletedListView';
 import { AccentBar } from './components/AccentBar';
 import { IosInstallBanner } from './components/IosInstallBanner';
+import { StreakStatsModal } from './components/StreakStatsModal';
+import { ALL_VERBS, VERB_MAP } from './lib/priorityQueue';
 
 type ActiveTab = 'table' | 'flashcards' | 'completed';
 
@@ -38,6 +39,7 @@ export const App: React.FC = () => {
   const [forcedVerbId, setForcedVerbId] = useState<string | null>(null);
   const [cloudSynced, setCloudSynced] = useState<boolean>(false);
   const [showMoreMenu, setShowMoreMenu] = useState<boolean>(false);
+  const [showStreakModal, setShowStreakModal] = useState<boolean>(false);
 
   const activeInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -117,6 +119,13 @@ export const App: React.FC = () => {
   return (
     <div className="min-h-[100dvh] flex flex-col bg-black text-white">
       <IosInstallBanner />
+      {showStreakModal && (
+        <StreakStatsModal
+          session={session}
+          progress={progress}
+          onClose={() => setShowStreakModal(false)}
+        />
+      )}
 
       {/* Top Header: Spacious max-w-5xl container with iOS 26 Circular Liquid Glass Buttons + Large Title */}
       <header className="pt-safe px-4 sm:px-6 pt-3 pb-2 max-w-5xl w-full mx-auto">
@@ -139,11 +148,13 @@ export const App: React.FC = () => {
             />
           </button>
 
-          {/* Right Circular Controls: Streak Badge + ••• User Menu */}
+          {/* Right Circular Controls: Tappable Streak Badge + ••• User Menu */}
           <div className="flex items-center gap-2.5">
-            <div
-              title={`${progress.stats.currentStreak} day streak • ${progress.stats.tablesCompletedToday} tables completed today`}
-              className="h-[46px] px-4 rounded-full flex items-center gap-2 text-[14px] font-bold tr-circle-glass"
+            <button
+              type="button"
+              onClick={() => setShowStreakModal(true)}
+              title="Tap to view streak history, calendar & leaderboard"
+              className="h-[46px] px-4 rounded-full flex items-center gap-2 text-[14px] font-bold cursor-pointer active:scale-95 transition-transform tr-circle-glass"
             >
               <Flame
                 className="w-4 h-4"
@@ -153,7 +164,7 @@ export const App: React.FC = () => {
               <span className="text-[#8E8E93] hidden sm:inline">
                 • {progress.stats.tablesCompletedToday} today
               </span>
-            </div>
+            </button>
 
             <div className="relative">
               <button
@@ -193,7 +204,9 @@ export const App: React.FC = () => {
 
                     <div className="px-3.5 py-2 text-[13px] text-[#8E8E93] flex justify-between">
                       <span>Mastered Verbs</span>
-                      <strong className="text-white">{completedCount} / 30</strong>
+                      <strong className="text-white">
+                        {completedCount} / {ALL_VERBS.length}
+                      </strong>
                     </div>
 
                     <button
