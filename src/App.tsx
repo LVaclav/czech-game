@@ -186,7 +186,7 @@ export const App: React.FC = () => {
           isScrolled ? 'tr-sticky-header-scrolled' : 'bg-transparent'
         }`}
       >
-        <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 pt-2.5 pb-2.5 relative flex items-center justify-between">
+        <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 pt-2.5 pb-2.5 flex items-center justify-between gap-2">
           {/* Left Circular Liquid Glass Button (Quick Vocabulary Toggle) */}
           <button
             type="button"
@@ -195,7 +195,7 @@ export const App: React.FC = () => {
                 prev === 'completed' ? 'table' : 'completed'
               )
             }
-            className="w-[46px] h-[46px] rounded-full flex items-center justify-center cursor-pointer tr-circle-glass"
+            className="w-[46px] h-[46px] shrink-0 rounded-full flex items-center justify-center cursor-pointer tr-circle-glass"
             aria-label="Vocabulary List"
             title="Saved Vocabulary"
           >
@@ -207,9 +207,9 @@ export const App: React.FC = () => {
             />
           </button>
 
-          {/* Centered Compact Inline Title (Fades in when scrolled past the Large Title, just like iOS 26 Translate) */}
+          {/* Centered Between Left Button and Leaderboard/Streak Button */}
           <div
-            className={`absolute left-1/2 -translate-x-1/2 text-[17px] font-semibold text-white tracking-tight pointer-events-none transition-all duration-200 ${
+            className={`flex-1 text-center text-[17px] font-semibold text-white tracking-tight truncate pointer-events-none transition-all duration-200 ${
               isScrolled
                 ? 'opacity-100 translate-y-0'
                 : 'opacity-0 translate-y-1.5'
@@ -219,7 +219,7 @@ export const App: React.FC = () => {
           </div>
 
           {/* Right Circular Controls: Tappable Streak Badge + ••• User Menu */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={() => setShowStreakModal(true)}
