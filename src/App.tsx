@@ -20,7 +20,6 @@ import { AuthView } from './components/AuthView';
 import { TableTrainerView } from './components/TableTrainerView';
 import { FlashcardView } from './components/FlashcardView';
 import { CompletedListView } from './components/CompletedListView';
-import { AccentBar } from './components/AccentBar';
 import { IosInstallBanner } from './components/IosInstallBanner';
 import { StreakStatsModal } from './components/StreakStatsModal';
 import { ALL_VERBS, VERB_MAP } from './lib/priorityQueue';
@@ -43,6 +42,37 @@ export const App: React.FC = () => {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState<boolean>(false);
 
   const activeInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Hide the bottom menu bar when an input is focused so the iOS keyboard covers it cleanly
+  useEffect(() => {
+    const handleFocusIn = (e: FocusEvent) => {
+      if (
+        e.target instanceof HTMLInputElement &&
+        !e.target.readOnly &&
+        !e.target.disabled
+      ) {
+        setIsKeyboardOpen(true);
+      }
+    };
+
+    const handleFocusOut = () => {
+      setTimeout(() => {
+        const active = document.activeElement;
+        const stillFocused =
+          active instanceof HTMLInputElement &&
+          !active.readOnly &&
+          !active.disabled;
+        setIsKeyboardOpen(stillFocused);
+      }, 60);
+    };
+
+    document.addEventListener('focusin', handleFocusIn);
+    document.addEventListener('focusout', handleFocusOut);
+    return () => {
+      document.removeEventListener('focusin', handleFocusIn);
+      document.removeEventListener('focusout', handleFocusOut);
+    };
+  }, []);
 
   useEffect(() => {
     if (!session) return;
@@ -92,7 +122,7 @@ export const App: React.FC = () => {
 
   if (!session || !progress) {
     return (
-      <div className="h-full w-full overflow-y-auto bg-black text-white">
+      <>
         <IosInstallBanner />
         <AuthView
           onAuthenticated={(newSession) => {
@@ -100,7 +130,7 @@ export const App: React.FC = () => {
             setProgress(loadLocalProgress(newSession.username));
           }}
         />
-      </div>
+      </>
     );
   }
 
@@ -118,7 +148,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="h-full w-full overflow-hidden flex flex-col bg-black text-white">
+    <div className="min-h-[100dvh] flex flex-col bg-black text-white">
       <IosInstallBanner />
       {showStreakModal && (
         <StreakStatsModal
@@ -128,161 +158,143 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* Solid Black Top Safe-Area Spacer — prevents scrolled content from entering the status bar or triggering iOS WebKit's top scroll blur */}
-      <div className="pt-safe shrink-0 bg-black" />
+      {/* Top Header: Full edge-to-edge real estate with pt-safe padding */}
+      <header className="pt-safe px-4 sm:px-6 pt-3 pb-2 max-w-5xl w-full mx-auto">
+        <div className="flex items-center justify-between mb-3">
+          {/* Left Circular Liquid Glass Button (Quick Vocabulary Toggle) */}
+          <button
+            type="button"
+            onClick={() =>
+              setActiveTab((prev) =>
+                prev === 'completed' ? 'table' : 'completed'
+              )
+            }
+            className="w-[46px] h-[46px] rounded-full flex items-center justify-center cursor-pointer tr-circle-glass"
+            aria-label="Vocabulary List"
+            title="Saved Vocabulary"
+          >
+            <List
+              className="w-[22px] h-[22px]"
+              style={{
+                color: activeTab === 'completed' ? 'var(--tr-cyan)' : '#ffffff',
+              }}
+            />
+          </button>
 
-      {/* Internal Scroll Container (keeps window.scrollY === 0 at all times so iOS never adds a top blur) */}
-      <div className="flex-1 overflow-y-auto overscroll-y-contain">
-        {/* Top Header */}
-        <header className="px-4 sm:px-6 pt-3 pb-2 max-w-5xl w-full mx-auto">
-          <div className="flex items-center justify-between mb-3">
-            {/* Left Circular Liquid Glass Button (Quick Vocabulary Toggle) */}
+          {/* Right Circular Controls: Tappable Streak Badge + ••• User Menu */}
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
-              onClick={() =>
-                setActiveTab((prev) =>
-                  prev === 'completed' ? 'table' : 'completed'
-                )
-              }
-              className="w-[46px] h-[46px] rounded-full flex items-center justify-center cursor-pointer tr-circle-glass"
-              aria-label="Vocabulary List"
-              title="Saved Vocabulary"
+              onClick={() => setShowStreakModal(true)}
+              title="Tap to view streak history, calendar & leaderboard"
+              className="h-[46px] px-4 rounded-full flex items-center gap-2 text-[14px] font-bold cursor-pointer active:scale-95 transition-transform tr-circle-glass"
             >
-              <List
-                className="w-[22px] h-[22px]"
-                style={{
-                  color: activeTab === 'completed' ? 'var(--tr-cyan)' : '#ffffff',
-                }}
+              <Flame
+                className="w-4 h-4"
+                style={{ color: 'var(--tr-cyan)' }}
               />
+              <span>{progress.stats.currentStreak}d</span>
+              <span className="text-[#8E8E93] hidden sm:inline">
+                • {progress.stats.tablesCompletedToday} today
+              </span>
             </button>
 
-            {/* Right Circular Controls: Tappable Streak Badge + ••• User Menu */}
-            <div className="flex items-center gap-2.5">
+            <div className="relative">
               <button
                 type="button"
-                onClick={() => setShowStreakModal(true)}
-                title="Tap to view streak history, calendar & leaderboard"
-                className="h-[46px] px-4 rounded-full flex items-center gap-2 text-[14px] font-bold cursor-pointer active:scale-95 transition-transform tr-circle-glass"
+                onClick={() => setShowMoreMenu((prev) => !prev)}
+                className="w-[46px] h-[46px] rounded-full flex items-center justify-center cursor-pointer tr-circle-glass"
+                aria-label="Account Menu"
               >
-                <Flame
-                  className="w-4 h-4"
-                  style={{ color: 'var(--tr-cyan)' }}
-                />
-                <span>{progress.stats.currentStreak}d</span>
-                <span className="text-[#8E8E93] hidden sm:inline">
-                  • {progress.stats.tablesCompletedToday} today
-                </span>
+                <MoreHorizontal className="w-[22px] h-[22px] text-white" />
               </button>
 
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowMoreMenu((prev) => !prev)}
-                  className="w-[46px] h-[46px] rounded-full flex items-center justify-center cursor-pointer tr-circle-glass"
-                  aria-label="Account Menu"
-                >
-                  <MoreHorizontal className="w-[22px] h-[22px] text-white" />
-                </button>
-
-                {showMoreMenu && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setShowMoreMenu(false)}
-                    />
-                    <div className="absolute right-0 mt-2.5 w-64 rounded-[26px] p-2.5 z-50 space-y-1 tr-bottom-dock-glass">
-                      <div className="px-3.5 py-2.5 flex items-center justify-between tr-hairline-b">
-                        <div>
-                          <div className="text-[15px] font-bold text-white">
-                            {session.displayName}
-                          </div>
-                          <div className="text-[12px] text-[#8E8E93]">
-                            {cloudSynced
-                              ? 'Synced to Netlify Blobs'
-                              : 'Saved on device'}
-                          </div>
+              {showMoreMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowMoreMenu(false)}
+                  />
+                  <div className="absolute right-0 mt-2.5 w-64 rounded-[26px] p-2.5 z-50 space-y-1 tr-bottom-dock-glass">
+                    <div className="px-3.5 py-2.5 flex items-center justify-between tr-hairline-b">
+                      <div>
+                        <div className="text-[15px] font-bold text-white">
+                          {session.displayName}
                         </div>
-                        <span
-                          className="w-2.5 h-2.5 rounded-full"
-                          style={{
-                            backgroundColor: cloudSynced
-                              ? 'var(--tr-green)'
-                              : '#8E8E93',
-                          }}
-                        />
+                        <div className="text-[12px] text-[#8E8E93]">
+                          {cloudSynced
+                            ? 'Synced to Netlify Blobs'
+                            : 'Saved on device'}
+                        </div>
                       </div>
-
-                      <div className="px-3.5 py-2 text-[13px] text-[#8E8E93] flex justify-between">
-                        <span>Mastered Verbs</span>
-                        <strong className="text-white">
-                          {completedCount} / {ALL_VERBS.length}
-                        </strong>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="w-full text-left px-3.5 py-2.5 rounded-[18px] text-[14px] font-semibold text-[#FF453A] hover:bg-white/5 flex items-center justify-between cursor-pointer"
-                      >
-                        <span>Switch User / Sign Out</span>
-                        <LogOut className="w-4 h-4" />
-                      </button>
+                      <span
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{
+                          backgroundColor: cloudSynced
+                            ? 'var(--tr-green)'
+                            : '#8E8E93',
+                        }}
+                      />
                     </div>
-                  </>
-                )}
-              </div>
+
+                    <div className="px-3.5 py-2 text-[13px] text-[#8E8E93] flex justify-between">
+                      <span>Mastered Verbs</span>
+                      <strong className="text-white">
+                        {completedCount} / {ALL_VERBS.length}
+                      </strong>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="w-full text-left px-3.5 py-2.5 rounded-[18px] text-[14px] font-semibold text-[#FF453A] hover:bg-white/5 flex items-center justify-between cursor-pointer"
+                    >
+                      <span>Switch User / Sign Out</span>
+                      <LogOut className="w-4 h-4" />
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
+        </div>
 
-          {/* Large Bold iOS Title */}
-          <h1 className="font-display text-[34px] sm:text-[38px] leading-[1.08] text-white tracking-tight">
-            {TAB_TITLES[activeTab]}
-          </h1>
-        </header>
+        {/* Large Bold iOS Title */}
+        <h1 className="font-display text-[34px] sm:text-[38px] leading-[1.08] text-white tracking-tight">
+          {TAB_TITLES[activeTab]}
+        </h1>
+      </header>
 
-        {/* Main Content Area */}
-        <main
-          className={`w-full max-w-5xl mx-auto px-4 sm:px-6 pt-2 ${
-            isKeyboardOpen ? 'pb-72' : 'pb-28'
-          }`}
-        >
-          {activeTab === 'table' && (
-            <TableTrainerView
-              progress={progress}
-              onUpdateProgress={handleUpdateProgress}
-              forcedVerbId={forcedVerbId}
-              onClearForcedVerb={() => setForcedVerbId(null)}
-              activeInputRef={activeInputRef}
-            />
-          )}
+      {/* Full-Bleed Main Content Area (full edge-to-edge screen real estate) */}
+      <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-2 pb-28">
+        {activeTab === 'table' && (
+          <TableTrainerView
+            progress={progress}
+            onUpdateProgress={handleUpdateProgress}
+            forcedVerbId={forcedVerbId}
+            onClearForcedVerb={() => setForcedVerbId(null)}
+            activeInputRef={activeInputRef}
+          />
+        )}
 
-          {activeTab === 'flashcards' && (
-            <FlashcardView
-              progress={progress}
-              onUpdateProgress={handleUpdateProgress}
-              onSwitchToTableTrainer={handleJumpToVerbInTable}
-              activeInputRef={activeInputRef}
-            />
-          )}
+        {activeTab === 'flashcards' && (
+          <FlashcardView
+            progress={progress}
+            onUpdateProgress={handleUpdateProgress}
+            onSwitchToTableTrainer={handleJumpToVerbInTable}
+            activeInputRef={activeInputRef}
+          />
+        )}
 
-          {activeTab === 'completed' && (
-            <CompletedListView
-              progress={progress}
-              onPracticeVerbInTable={(verbId) => handleJumpToVerbInTable(verbId)}
-            />
-          )}
-        </main>
-      </div>
+        {activeTab === 'completed' && (
+          <CompletedListView
+            progress={progress}
+            onPracticeVerbInTable={(verbId) => handleJumpToVerbInTable(verbId)}
+          />
+        )}
+      </main>
 
-      {/* Czech Letter Row: Floats directly on top of the iPhone keyboard when an input is focused */}
-      {(activeTab === 'table' || activeTab === 'flashcards') && (
-        <AccentBar
-          activeInputRef={activeInputRef}
-          onKeyboardStateChange={setIsKeyboardOpen}
-        />
-      )}
-
-      {/* Bottom Floating Liquid Glass Tab Bar: Rests right at the bottom of the screen, and stays hidden behind the keyboard when typing */}
+      {/* Bottom Floating Liquid Glass Tab Bar: Rests at the bottom of the screen, and hides behind the keyboard when typing */}
       <div
         className={`fixed inset-x-0 z-30 flex justify-center px-4 tr-bottom-dock-position transition-opacity duration-150 ${
           isKeyboardOpen

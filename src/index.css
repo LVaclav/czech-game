@@ -27,17 +27,13 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Lock root html/body so window.scrollY stays 0 — completely prevents iOS WebKit's automatic top status-bar blur on scroll */
   html,
-  body,
-  #root {
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
+  body {
+    min-height: 100%;
     background-color: var(--tr-bg);
     color: var(--tr-text);
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
-    overscroll-behavior: none;
+    overscroll-behavior-y: none;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     -webkit-user-select: none;
@@ -92,9 +88,9 @@
     0 14px 34px rgba(0, 0, 0, 0.85);
 }
 
-/* Resting position for the native iOS bottom tab bar — hugs the bottom edge / home indicator */
+/* Resting position for the native iOS bottom tab bar — sits low at the bottom edge of the screen */
 .tr-bottom-dock-position {
-  bottom: max(6px, calc(env(safe-area-inset-bottom, 0px) - 12px));
+  bottom: 12px;
 }
 
 /* Active Inner Recessed Pill inside the Bottom Liquid Glass Capsule */
