@@ -5,7 +5,6 @@ import {
   BookOpen,
   CheckCircle2,
   RotateCcw,
-  Sparkles,
   XCircle,
 } from 'lucide-react';
 import { TenseKey, UserProgressBlob } from '../types';
@@ -72,36 +71,30 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
 
   if (completedCount === 0 || !prompt) {
     return (
-      <div className="rounded-3xl p-8 sm:p-10 text-center max-w-lg mx-auto my-6 border theme-surface space-y-4">
+      <div className="max-w-lg mx-auto my-6 p-8 text-center ios-card space-y-4">
         <div
-          className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto"
+          className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
           style={{
-            backgroundColor: 'var(--accent-soft)',
-            color: 'var(--accent-primary)',
+            backgroundColor: 'var(--ios-fill)',
+            color: 'var(--ios-blue)',
           }}
         >
           <BookOpen className="w-6 h-6" />
         </div>
-        <h2
-          className="font-display text-3xl font-normal"
-          style={{ color: 'var(--text-primary)' }}
-        >
-          No Completed Verbs Yet
-        </h2>
+        <h2 className="font-display text-[22px]">No Completed Verbs Yet</h2>
         <p
-          className="text-sm leading-relaxed"
-          style={{ color: 'var(--text-secondary)' }}
+          className="text-[15px] leading-relaxed"
+          style={{ color: 'var(--ios-label-secondary)' }}
         >
-          Flashcards pull exclusively from verbs you have mastered in the{' '}
-          <strong>3×2 Matrix Trainer</strong>. Finish your first verb across Past, Present, and Future to unlock Flashcard drills!
+          Complete your first verb across Past, Present, and Future in the{' '}
+          <strong>3×2 Matrix</strong> to unlock Flashcard drills.
         </p>
         <button
           type="button"
           onClick={() => onSwitchToTableTrainer()}
-          className="px-6 py-3 rounded-2xl font-bold text-sm inline-flex items-center gap-2 shadow-md cursor-pointer theme-btn-primary"
+          className="px-6 py-3 text-[15px] inline-flex items-center gap-2 cursor-pointer ios-btn-blue"
         >
-          <Sparkles className="w-4 h-4" />
-          <span>Open 3×2 Matrix Trainer</span>
+          <span>Open 3×2 Matrix</span>
         </button>
       </div>
     );
@@ -192,193 +185,159 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
       : 100;
 
   return (
-    <div className="max-w-xl mx-auto space-y-4 pb-6">
-      {/* Pool Status Row */}
+    <div className="max-w-lg mx-auto space-y-4 pb-6">
+      {/* iOS Section Header */}
       <div
-        className="flex items-center justify-between text-xs px-2 font-medium"
-        style={{ color: 'var(--text-secondary)' }}
+        className="flex items-center justify-between text-[12px] font-semibold uppercase tracking-wide px-4"
+        style={{ color: 'var(--ios-label-secondary)' }}
       >
-        <span>
-          Pool: <strong style={{ color: 'var(--text-primary)' }}>{completedCount}</strong> mastered{' '}
-          {completedCount === 1 ? 'verb' : 'verbs'}
-        </span>
-        <div className="flex items-center gap-2">
-          <span>
-            Accuracy: <strong style={{ color: 'var(--text-primary)' }}>{accuracy}%</strong>
-          </span>
-          {verbRecord?.inMatrixQueue && (
-            <span
-              className="px-2 py-0.5 rounded-full font-bold text-[11px]"
-              style={{
-                backgroundColor: 'var(--warn-bg)',
-                color: 'var(--warn-text)',
-                border: '1px solid var(--warn-border)',
-              }}
-            >
-              Re-Queued in Matrix
-            </span>
-          )}
-        </div>
+        <span>{tenseInfo.cz} ({tenseInfo.en})</span>
+        <span>Accuracy: {accuracy}%</span>
       </div>
 
-      {/* Tactile Editorial Flashcard */}
-      <div className="rounded-3xl p-6 sm:p-8 border theme-surface space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span
-            className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
-            style={{
-              backgroundColor: 'var(--accent-soft)',
-              color: 'var(--accent-primary)',
-            }}
-          >
-            {tenseInfo.cz} • {tenseInfo.en}
-          </span>
-
-          {prompt.tense === 'future' && (
+      {/* Apple Translate Dual-Pane Flashcard */}
+      <div className="ios-card overflow-hidden">
+        {/* Top Pane: Verb & Person Prompt */}
+        <div className="p-5 space-y-3">
+          <div className="flex items-center justify-between gap-2">
             <span
-              className="px-2.5 py-1 rounded-full text-xs font-semibold border theme-subtle"
-              style={{ color: 'var(--text-secondary)' }}
+              className="text-[12px] font-semibold uppercase tracking-wide"
+              style={{ color: 'var(--ios-label-secondary)' }}
             >
-              {prompt.futureMode === 'pf' && prompt.verb.forms.futurePf
-                ? `Perfective (${prompt.verb.aspectPairInfinitive})`
-                : `Imperfective (budu + ${prompt.verb.infinitive})`}
+              Infinitive • {prompt.verb.english}
             </span>
-          )}
-        </div>
 
-        {/* Center Verb & Person Target */}
-        <div className="text-center py-3 space-y-4">
-          <div>
-            <div
-              className="font-display text-5xl sm:text-6xl font-normal tracking-tight leading-none"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              {prompt.tense === 'future' &&
-              prompt.futureMode === 'pf' &&
-              prompt.verb.aspectPairInfinitive
-                ? prompt.verb.aspectPairInfinitive
-                : prompt.verb.infinitive}
-            </div>
-            <div
-              className="text-base sm:text-lg font-medium mt-2"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              “{prompt.verb.english}”
-            </div>
+            {prompt.tense === 'future' && (
+              <span
+                className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                style={{
+                  backgroundColor: 'var(--ios-fill)',
+                  color: 'var(--ios-label)',
+                }}
+              >
+                {prompt.futureMode === 'pf' && prompt.verb.forms.futurePf
+                  ? `Perfective (${prompt.verb.aspectPairInfinitive})`
+                  : `Imperfective (budu + ${prompt.verb.infinitive})`}
+              </span>
+            )}
           </div>
 
-          <div
-            className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-2xl border theme-subtle"
-          >
+          <div className="font-display text-[32px] leading-tight">
+            {prompt.tense === 'future' &&
+            prompt.futureMode === 'pf' &&
+            prompt.verb.aspectPairInfinitive
+              ? prompt.verb.aspectPairInfinitive
+              : prompt.verb.infinitive}
+          </div>
+
+          <div className="flex items-center gap-2 pt-1">
             <span
-              className="text-xs uppercase tracking-widest font-bold"
-              style={{ color: 'var(--text-muted)' }}
+              className="text-[13px] font-medium"
+              style={{ color: 'var(--ios-label-secondary)' }}
             >
-              Who
+              Person:
             </span>
             <span
-              className="text-xl font-extrabold"
-              style={{ color: 'var(--accent-primary)' }}
+              className="text-[16px] font-bold"
+              style={{ color: 'var(--ios-blue)' }}
             >
               {personInfo.pronoun}
             </span>
             {personInfo.badge && (
               <span
-                className="px-2 py-0.5 rounded-lg text-xs font-bold"
+                className="px-2 py-0.5 rounded-md text-[12px] font-semibold"
                 style={{
-                  backgroundColor: 'var(--bg-surface)',
-                  color: 'var(--text-primary)',
+                  backgroundColor: 'var(--ios-fill)',
+                  color: 'var(--ios-label)',
                 }}
               >
                 {personInfo.badge}
               </span>
             )}
-            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            <span
+              className="text-[13px]"
+              style={{ color: 'var(--ios-label-secondary)' }}
+            >
               ({personInfo.subtitle})
             </span>
           </div>
         </div>
 
-        {/* Answer Input & Grading */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            ref={inputRef}
-            type="text"
-            value={answer}
-            readOnly={Boolean(grading)}
-            onFocus={(e) => {
-              activeInputRef.current = e.currentTarget;
-            }}
-            onChange={(e) => setAnswer(e.target.value)}
-            placeholder={`Conjugate for ${personInfo.pronoun}...`}
-            autoCapitalize="none"
-            autoCorrect="off"
-            autoComplete="off"
-            spellCheck={false}
-            enterKeyHint="done"
-            className="w-full px-4 py-4 rounded-2xl border text-center text-base sm:text-lg font-bold outline-none transition-all"
-            style={
-              !grading
-                ? {
-                    backgroundColor: 'var(--bg-input)',
-                    borderColor: 'var(--border-strong)',
-                    color: 'var(--text-primary)',
-                  }
-                : grading.result.isValid || grading.overriddenAsCorrect
-                ? {
-                    backgroundColor: 'var(--success-bg)',
-                    borderColor: 'var(--success-border)',
-                    color: 'var(--success-text)',
-                  }
-                : {
-                    backgroundColor: 'var(--error-bg)',
-                    borderColor: 'var(--error-border)',
-                    color: 'var(--error-text)',
-                  }
-            }
-          />
+        {/* Hairline 0.5px Separator */}
+        <div className="mx-5 ios-hairline-t" />
+
+        {/* Bottom Pane: User Typed Czech Answer */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <div>
+            <div
+              className="text-[12px] font-semibold uppercase tracking-wide mb-1.5"
+              style={{ color: 'var(--ios-blue)' }}
+            >
+              Your Conjugation ({personInfo.pronoun})
+            </div>
+            <input
+              ref={inputRef}
+              type="text"
+              value={answer}
+              readOnly={Boolean(grading)}
+              onFocus={(e) => {
+                activeInputRef.current = e.currentTarget;
+              }}
+              onChange={(e) => setAnswer(e.target.value)}
+              placeholder="Enter Czech form..."
+              autoCapitalize="none"
+              autoCorrect="off"
+              autoComplete="off"
+              spellCheck={false}
+              enterKeyHint="done"
+              className="w-full bg-transparent font-display text-[26px] outline-none"
+              style={{
+                color: !grading
+                  ? 'var(--ios-blue)'
+                  : grading.result.isValid || grading.overriddenAsCorrect
+                  ? 'var(--ios-green-text)'
+                  : 'var(--ios-red-text)',
+              }}
+            />
+          </div>
 
           {!grading ? (
             <button
               type="submit"
-              className="w-full py-3.5 px-5 rounded-2xl font-bold text-base shadow-md transition-all cursor-pointer theme-btn-primary"
+              className="w-full py-3.5 px-5 text-[16px] cursor-pointer ios-btn-blue"
             >
               Check Answer
             </button>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 pt-1">
               {grading.result.isValid || grading.overriddenAsCorrect ? (
                 <div
-                  className="p-4 rounded-2xl border flex items-center gap-3"
+                  className="p-3.5 rounded-[14px] flex items-center gap-2.5 text-[14px] font-semibold"
                   style={{
-                    backgroundColor: 'var(--success-bg)',
-                    borderColor: 'var(--success-border)',
-                    color: 'var(--success-text)',
+                    backgroundColor: 'var(--ios-green-bg)',
+                    color: 'var(--ios-green-text)',
                   }}
                 >
                   <CheckCircle2 className="w-5 h-5 shrink-0" />
-                  <div className="text-sm font-bold">
-                    Správně! Canonical: <u>{grading.result.canonicalAnswer}</u>
-                  </div>
+                  <span>Correct — {grading.result.canonicalAnswer}</span>
                 </div>
               ) : (
                 <div
-                  className="p-4 rounded-2xl border space-y-3"
+                  className="p-3.5 rounded-[14px] space-y-2.5"
                   style={{
-                    backgroundColor: 'var(--error-bg)',
-                    borderColor: 'var(--error-border)',
-                    color: 'var(--error-text)',
+                    backgroundColor: 'var(--ios-red-bg)',
+                    color: 'var(--ios-red-text)',
                   }}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2">
                       <XCircle className="w-5 h-5 shrink-0 mt-0.5" />
                       <div>
-                        <div className="text-sm font-bold">
+                        <div className="text-[14px] font-semibold">
                           Expected: <u>{grading.result.canonicalAnswer}</u>
                         </div>
                         {grading.result.feedbackHint && (
-                          <div className="text-xs mt-0.5 opacity-90">
+                          <div className="text-[12px] mt-0.5 opacity-90">
                             {grading.result.feedbackHint}
                           </div>
                         )}
@@ -388,33 +347,35 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                     <button
                       type="button"
                       onClick={handleOverrideTypo}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold border shrink-0 flex items-center gap-1 cursor-pointer theme-surface"
-                      style={{ color: 'var(--text-primary)' }}
+                      className="px-2.5 py-1 rounded-lg text-[12px] font-semibold shrink-0 flex items-center gap-1 cursor-pointer"
+                      style={{
+                        backgroundColor: 'var(--ios-card)',
+                        color: 'var(--ios-blue)',
+                      }}
                     >
                       <RotateCcw className="w-3 h-3" />
-                      <span>Typo (Mark Right)</span>
+                      <span>Typo</span>
                     </button>
                   </div>
 
                   {grading.relapsedNow && (
                     <div
-                      className="p-3 rounded-xl border text-xs flex items-center justify-between gap-2"
+                      className="p-2.5 rounded-xl text-[12px] flex items-center justify-between gap-2"
                       style={{
-                        backgroundColor: 'var(--warn-bg)',
-                        borderColor: 'var(--warn-border)',
-                        color: 'var(--warn-text)',
+                        backgroundColor: 'var(--ios-orange-bg)',
+                        color: 'var(--ios-orange-text)',
                       }}
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <AlertTriangle className="w-4 h-4 shrink-0" />
                         <span>
-                          <strong>Re-queued with High Priority!</strong> Kept in your Completed list and moved to #1 in the 3×2 Matrix Trainer.
+                          Re-queued with High Priority in 3×2 Matrix (still in your Completed list).
                         </span>
                       </div>
                       <button
                         type="button"
                         onClick={() => onSwitchToTableTrainer(prompt.verb.id)}
-                        className="px-2.5 py-1 rounded-lg font-bold underline shrink-0 cursor-pointer"
+                        className="font-bold underline shrink-0 cursor-pointer"
                       >
                         Practice
                       </button>
@@ -425,7 +386,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-3.5 px-5 rounded-2xl font-bold text-base flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer theme-btn-primary"
+                className="w-full py-3.5 px-5 text-[16px] flex items-center justify-center gap-2 cursor-pointer ios-btn-blue"
               >
                 <span>Next Card</span>
                 <ArrowRight className="w-4 h-4" />

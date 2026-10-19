@@ -26,6 +26,9 @@ export function isRunningStandalonePwa(): boolean {
   );
 }
 
+/**
+ * Native iOS Modal Sheet for "Add to Home Screen"
+ */
 export const IosInstallBanner: React.FC = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(
@@ -37,8 +40,7 @@ export const IosInstallBanner: React.FC = () => {
     if (typeof window === 'undefined') return;
 
     const ua = window.navigator.userAgent || '';
-    const isAndroid = /Android/i.test(ua);
-    if (isAndroid) {
+    if (/Android/i.test(ua)) {
       setPlatform('android');
     }
 
@@ -88,36 +90,41 @@ export const IosInstallBanner: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-black/40"
       role="dialog"
       aria-modal="true"
       aria-labelledby="pwa-popup-title"
     >
       <div
-        className="w-full max-w-md rounded-3xl p-5 sm:p-6 border space-y-4 theme-surface"
+        className="w-full max-w-sm rounded-[24px] p-5 pt-3 space-y-4 shadow-2xl"
+        style={{ backgroundColor: 'var(--ios-bg-grouped)' }}
       >
+        {/* iOS Sheet Grabber */}
+        <div
+          className="w-9 h-1.5 rounded-full mx-auto"
+          style={{ backgroundColor: 'var(--ios-label-tertiary)' }}
+        />
+
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div
-              className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
-              style={{
-                backgroundColor: 'var(--accent-soft)',
-                color: 'var(--accent-primary)',
-                border: '1px solid var(--accent-border)',
-              }}
+              className="w-11 h-11 rounded-[12px] flex items-center justify-center shrink-0"
+              style={{ backgroundColor: 'var(--ios-blue)', color: '#ffffff' }}
             >
-              <Smartphone className="w-5 h-5" />
+              <Smartphone className="w-6 h-6" />
             </div>
             <div>
               <h2
                 id="pwa-popup-title"
-                className="text-lg font-bold tracking-tight"
-                style={{ color: 'var(--text-primary)' }}
+                className="text-[17px] font-semibold tracking-tight"
               >
-                Save as Home Screen App
+                Add to Home Screen
               </h2>
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                Install <strong>Čeština</strong> as a PWA for a clean, full-screen iPhone experience.
+              <p
+                className="text-[13px]"
+                style={{ color: 'var(--ios-label-secondary)' }}
+              >
+                Install Čeština as a full-screen iOS app.
               </p>
             </div>
           </div>
@@ -125,170 +132,110 @@ export const IosInstallBanner: React.FC = () => {
           <button
             type="button"
             onClick={handleClose}
-            className="p-1.5 rounded-xl border transition-colors cursor-pointer shrink-0 theme-subtle"
-            style={{ color: 'var(--text-secondary)' }}
-            aria-label="Close popup"
+            className="w-7 h-7 rounded-full flex items-center justify-center cursor-pointer shrink-0"
+            style={{
+              backgroundColor: 'var(--ios-fill)',
+              color: 'var(--ios-label-secondary)',
+            }}
+            aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Platform Switcher */}
-        <div
-          className="grid grid-cols-2 gap-1 p-1 rounded-2xl border text-xs font-semibold theme-subtle"
-        >
+        {/* Native UISegmentedControl */}
+        <div className="grid grid-cols-2 ios-segmented">
           <button
             type="button"
             onClick={() => setPlatform('ios')}
-            className="py-2 px-3 rounded-xl transition-all cursor-pointer"
-            style={
-              platform === 'ios'
-                ? {
-                    backgroundColor: 'var(--bg-surface)',
-                    color: 'var(--text-primary)',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                  }
-                : { color: 'var(--text-secondary)' }
-            }
+            className={`py-1.5 px-3 text-[13px] font-semibold transition-all cursor-pointer ${
+              platform === 'ios' ? 'ios-segmented-active' : ''
+            }`}
           >
             iPhone / Safari
           </button>
           <button
             type="button"
             onClick={() => setPlatform('android')}
-            className="py-2 px-3 rounded-xl transition-all cursor-pointer"
-            style={
-              platform === 'android'
-                ? {
-                    backgroundColor: 'var(--bg-surface)',
-                    color: 'var(--text-primary)',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                  }
-                : { color: 'var(--text-secondary)' }
-            }
+            className={`py-1.5 px-3 text-[13px] font-semibold transition-all cursor-pointer ${
+              platform === 'android' ? 'ios-segmented-active' : ''
+            }`}
           >
             Android / Chrome
           </button>
         </div>
 
+        {/* iOS Inset Grouped Steps */}
         {platform === 'ios' ? (
-          <div
-            className="rounded-2xl p-4 border space-y-3 text-xs sm:text-sm theme-input"
-          >
-            <div className="flex items-center gap-3">
-              <span
-                className="w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0"
-                style={{
-                  backgroundColor: 'var(--accent-soft)',
-                  color: 'var(--accent-primary)',
-                }}
-              >
-                1
-              </span>
+          <div className="ios-card overflow-hidden text-[14px]">
+            <div className="px-4 py-3 flex items-center gap-3 ios-hairline-b">
+              <Share
+                className="w-4 h-4 shrink-0"
+                style={{ color: 'var(--ios-blue)' }}
+              />
               <span>
-                Tap{' '}
-                <strong className="inline-flex items-center gap-1 font-semibold">
-                  <Share className="w-3.5 h-3.5 inline" /> Share
-                </strong>{' '}
-                in Safari’s bottom bar.
+                1. Tap <strong>Share</strong> in Safari’s bottom bar
               </span>
             </div>
-
-            <div className="flex items-center gap-3">
-              <span
-                className="w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0"
-                style={{
-                  backgroundColor: 'var(--accent-soft)',
-                  color: 'var(--accent-primary)',
-                }}
-              >
-                2
-              </span>
+            <div className="px-4 py-3 flex items-center gap-3 ios-hairline-b">
+              <PlusSquare
+                className="w-4 h-4 shrink-0"
+                style={{ color: 'var(--ios-blue)' }}
+              />
               <span>
-                Scroll down and tap{' '}
-                <strong className="inline-flex items-center gap-1 font-semibold">
-                  <PlusSquare className="w-3.5 h-3.5 inline" /> Add to Home Screen
-                </strong>
-                .
+                2. Tap <strong>Add to Home Screen</strong>
               </span>
             </div>
-
-            <div className="flex items-center gap-3">
-              <span
-                className="w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0"
-                style={{
-                  backgroundColor: 'var(--accent-soft)',
-                  color: 'var(--accent-primary)',
-                }}
-              >
-                3
-              </span>
+            <div className="px-4 py-3 flex items-center gap-3">
+              <CheckCircle2
+                className="w-4 h-4 shrink-0"
+                style={{ color: 'var(--ios-green)' }}
+              />
               <span>
-                Tap <strong>Add</strong> in the top-right corner to open full-screen.
+                3. Tap <strong>Add</strong> in the top-right corner
               </span>
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl p-4 border space-y-3 text-xs sm:text-sm theme-input">
+          <div className="ios-card overflow-hidden text-[14px]">
             {deferredPrompt && (
-              <button
-                type="button"
-                onClick={handleNativeInstallClick}
-                className="w-full py-2.5 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 cursor-pointer mb-2 theme-btn-primary"
-              >
-                <Download className="w-4 h-4" />
-                <span>Install App Now</span>
-              </button>
+              <div className="p-3 ios-hairline-b">
+                <button
+                  type="button"
+                  onClick={handleNativeInstallClick}
+                  className="w-full py-2.5 px-4 text-[14px] flex items-center justify-center gap-2 cursor-pointer ios-btn-blue"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Install App Now</span>
+                </button>
+              </div>
             )}
-            <div className="flex items-center gap-3">
-              <span
-                className="w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0"
-                style={{
-                  backgroundColor: 'var(--accent-soft)',
-                  color: 'var(--accent-primary)',
-                }}
-              >
-                1
-              </span>
-              <span>
-                Tap the browser menu{' '}
-                <MoreVertical className="w-3.5 h-3.5 inline" /> or address bar install icon.
-              </span>
+            <div className="px-4 py-3 flex items-center gap-3 ios-hairline-b">
+              <MoreVertical
+                className="w-4 h-4 shrink-0"
+                style={{ color: 'var(--ios-blue)' }}
+              />
+              <span>1. Tap the browser menu or install icon</span>
             </div>
-            <div className="flex items-center gap-3">
-              <span
-                className="w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0"
-                style={{
-                  backgroundColor: 'var(--accent-soft)',
-                  color: 'var(--accent-primary)',
-                }}
-              >
-                2
-              </span>
+            <div className="px-4 py-3 flex items-center gap-3">
+              <Download
+                className="w-4 h-4 shrink-0"
+                style={{ color: 'var(--ios-blue)' }}
+              />
               <span>
-                Select <strong>Install App / Add to Home Screen</strong>.
+                2. Select <strong>Add to Home Screen</strong>
               </span>
             </div>
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-3 pt-1">
-          <span
-            className="text-[11px] flex items-center gap-1.5"
-            style={{ color: 'var(--text-muted)' }}
-          >
-            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--success-text)' }} />
-            <span>Full-screen & offline ready</span>
-          </span>
-
-          <button
-            type="button"
-            onClick={handleClose}
-            className="px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer theme-btn-primary"
-          >
-            Got it
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleClose}
+          className="w-full py-3 text-[16px] cursor-pointer ios-btn-blue"
+        >
+          Done
+        </button>
       </div>
     </div>
   );

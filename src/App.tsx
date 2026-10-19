@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Award,
-  Flame,
+  Bookmark,
   Grid,
+  Languages,
   Layers,
   LogOut,
-  Palette,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { AuthUserSession, UserProgressBlob } from './types';
 import {
@@ -18,7 +19,6 @@ import {
 import {
   applyTheme,
   getSavedTheme,
-  THEME_OPTIONS,
   ThemeId,
 } from './lib/theme';
 import { VERB_MAP } from './lib/priorityQueue';
@@ -33,7 +33,6 @@ type ActiveTab = 'table' | 'flashcards' | 'completed';
 
 export const App: React.FC = () => {
   const [theme, setTheme] = useState<ThemeId>(() => getSavedTheme());
-  const [showThemeMenu, setShowThemeMenu] = useState(false);
 
   const [session, setSession] = useState<AuthUserSession | null>(() =>
     getSavedSession()
@@ -106,8 +105,6 @@ export const App: React.FC = () => {
             setSession(newSession);
             setProgress(loadLocalProgress(newSession.username));
           }}
-          currentTheme={theme}
-          onSelectTheme={setTheme}
         />
       </>
     );
@@ -120,241 +117,79 @@ export const App: React.FC = () => {
     (v) => v.completed && v.inMatrixQueue && VERB_MAP[v.verbId]
   ).length;
 
-  const activeThemeMeta =
-    THEME_OPTIONS.find((t) => t.id === theme) || THEME_OPTIONS[0];
+  const TAB_TITLES: Record<ActiveTab, string> = {
+    table: 'Conjugate',
+    flashcards: 'Flashcards',
+    completed: 'Saved Verbs',
+  };
 
   return (
     <div className="min-h-[100dvh] flex flex-col">
-      {/* Save as PWA Pop-up Modal (triggers automatically in browser, no top-bar icon) */}
+      {/* Native iOS Modal Sheet for Add to Home Screen (when opened in browser) */}
       <IosInstallBanner />
 
-      {/* Native Apple iOS 26 Floating Liquid Glass Top Bar */}
-      <header className="sticky top-0 z-30 pt-safe px-3 sm:px-6 pt-2.5">
-        <div className="max-w-5xl mx-auto h-14 px-4 rounded-full border flex items-center justify-between gap-3 theme-surface">
-          {/* Brand Title */}
-          <div className="flex items-center gap-2.5 pl-1">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center font-extrabold text-xs tracking-tight shadow-xs"
-              style={{
-                background: 'var(--accent-gradient)',
-                color: 'var(--accent-primary-fg)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)',
-              }}
-            >
-              ČJ
-            </div>
-            <span
-              className="font-display text-lg sm:text-xl tracking-tight leading-none"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              Čeština
-            </span>
+      {/* Native iOS Navigation Bar */}
+      <header className="sticky top-0 z-30 pt-safe ios-chrome ios-hairline-b">
+        <div className="max-w-lg mx-auto px-4 h-12 flex items-center justify-between">
+          {/* Left: Title */}
+          <div className="flex items-center gap-2">
+            <Languages
+              className="w-5 h-5"
+              style={{ color: 'var(--ios-blue)' }}
+            />
+            <h1 className="font-display text-[19px] tracking-tight">
+              {TAB_TITLES[activeTab]}
+            </h1>
           </div>
 
-          {/* Desktop Capsule Navigation Pills */}
-          <nav className="hidden md:flex items-center gap-1 p-1 rounded-full border theme-subtle">
-            {[
-              {
-                id: 'table' as const,
-                label: '3×2 Matrix',
-                icon: Grid,
-                badge: relapsedCount > 0 ? `${relapsedCount}!` : null,
-                isWarn: relapsedCount > 0,
-              },
-              {
-                id: 'flashcards' as const,
-                label: 'Flashcards',
-                icon: Layers,
-                badge: completedCount > 0 ? String(completedCount) : null,
-                isWarn: false,
-              },
-              {
-                id: 'completed' as const,
-                label: 'Vocabulary',
-                icon: Award,
-                badge: null,
-                isWarn: false,
-              },
-            ].map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setActiveTab(item.id)}
-                  className="px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
-                  style={
-                    isActive
-                      ? {
-                          backgroundColor: 'rgba(255, 255, 255, 0.22)',
-                          color: 'var(--text-primary)',
-                          boxShadow:
-                            'inset 0 1px 0 rgba(255,255,255,0.45), 0 2px 8px rgba(0,0,0,0.12)',
-                        }
-                      : { color: 'var(--text-secondary)' }
-                  }
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{item.label}</span>
-                  {item.badge && (
-                    <span
-                      className="px-1.5 py-0.2 rounded-full text-[10px] font-extrabold"
-                      style={
-                        item.isWarn
-                          ? {
-                              backgroundColor: 'var(--warn-bg)',
-                              color: 'var(--warn-text)',
-                              border: '1px solid var(--warn-border)',
-                            }
-                          : {
-                              backgroundColor: 'var(--accent-soft)',
-                              color: 'var(--accent-primary)',
-                            }
-                      }
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Right Controls: Glass Tint Switcher + Streak + User */}
-          <div className="flex items-center gap-2">
-            {/* Liquid Glass Tint Switcher */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setShowThemeMenu((prev) => !prev)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all cursor-pointer theme-subtle"
-                style={{ color: 'var(--text-primary)' }}
-                title="Switch Glass Tint"
-              >
-                <span
-                  className="w-3 h-3 rounded-full border border-white/40"
-                  style={{ backgroundColor: activeThemeMeta.swatchAccent }}
-                />
-                <Palette className="w-3.5 h-3.5 sm:hidden" />
-                <span className="hidden sm:inline">{activeThemeMeta.shortName}</span>
-              </button>
-
-              {showThemeMenu && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setShowThemeMenu(false)}
-                  />
-                  <div
-                    className="absolute right-0 mt-2.5 w-64 rounded-3xl p-2.5 border z-50 space-y-1 theme-surface"
-                    style={{
-                      backgroundColor: 'rgba(18, 34, 62, 0.86)',
-                    }}
-                  >
-                    <div
-                      className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest"
-                      style={{ color: 'var(--text-muted)' }}
-                    >
-                      Liquid Glass Tint
-                    </div>
-                    {THEME_OPTIONS.map((opt) => {
-                      const selected = opt.id === theme;
-                      return (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          onClick={() => {
-                            setTheme(opt.id);
-                            setShowThemeMenu(false);
-                          }}
-                          className="w-full text-left px-3 py-2 rounded-2xl flex items-center justify-between gap-2 transition-all cursor-pointer"
-                          style={{
-                            backgroundColor: selected
-                              ? 'rgba(255, 255, 255, 0.16)'
-                              : 'transparent',
-                            color: 'var(--text-primary)',
-                          }}
-                        >
-                          <div>
-                            <div className="text-xs font-bold">{opt.name}</div>
-                            <div
-                              className="text-[10px]"
-                              style={{ color: 'var(--text-secondary)' }}
-                            >
-                              {opt.tagline}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <span
-                              className="w-3.5 h-3.5 rounded-full border border-white/30"
-                              style={{ backgroundColor: opt.swatchBg }}
-                            />
-                            <span
-                              className="w-3.5 h-3.5 rounded-full border border-white/30"
-                              style={{ backgroundColor: opt.swatchAccent }}
-                            />
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Streak Capsule */}
-            <div
-              title={`${progress.stats.currentStreak} day streak • ${progress.stats.tablesCompletedToday} tables today`}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full border text-xs font-bold theme-subtle"
-              style={{ color: 'var(--text-primary)' }}
+          {/* Right: Streak, Appearance Toggle, User Sign Out */}
+          <div className="flex items-center gap-3">
+            <span
+              className="text-[13px] font-medium tabular-nums"
+              style={{ color: 'var(--ios-label-secondary)' }}
+              title={`${progress.stats.currentStreak} day streak`}
             >
-              <Flame
-                className="w-3.5 h-3.5"
-                style={{ color: 'var(--accent-primary)' }}
-              />
-              <span>{progress.stats.currentStreak}d</span>
-            </div>
+              {progress.stats.currentStreak}d streak
+            </span>
 
-            {/* User & Logout */}
-            <div className="flex items-center gap-1">
-              <span
-                title={
-                  cloudSynced
-                    ? `Synced to cloud (${session.username})`
-                    : `Saved on device (${session.username})`
-                }
-                className="text-xs font-semibold px-2 py-1 rounded-full hidden sm:inline-flex items-center gap-1.5"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{
-                    backgroundColor: cloudSynced
-                      ? 'var(--success-text)'
-                      : 'var(--text-muted)',
-                  }}
-                />
-                <span className="max-w-[80px] truncate">{session.displayName}</span>
-              </span>
+            <button
+              type="button"
+              onClick={() =>
+                setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
+              }
+              className="p-1.5 rounded-full cursor-pointer transition-opacity active:opacity-60"
+              style={{
+                backgroundColor: 'var(--ios-fill)',
+                color: 'var(--ios-blue)',
+              }}
+              aria-label="Toggle Light/Dark Mode"
+              title="Toggle iOS Light / Dark Appearance"
+            >
+              {theme === 'light' ? (
+                <Moon className="w-4 h-4" />
+              ) : (
+                <Sun className="w-4 h-4" />
+              )}
+            </button>
 
-              <button
-                type="button"
-                onClick={handleLogout}
-                title={`Log out (${session.displayName})`}
-                className="p-2 rounded-full border transition-colors cursor-pointer theme-subtle"
-                style={{ color: 'var(--text-secondary)' }}
-                aria-label="Log Out"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              title={`Signed in as ${session.displayName} (${
+                cloudSynced ? 'Synced' : 'Local'
+              }) — Tap to Sign Out`}
+              className="flex items-center gap-1 text-[13px] font-medium cursor-pointer transition-opacity active:opacity-60"
+              style={{ color: 'var(--ios-blue)' }}
+            >
+              <span className="max-w-[70px] truncate">{session.displayName}</span>
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 pt-5 pb-40 md:pb-24">
+      {/* Main Content View */}
+      <main className="flex-1 w-full mx-auto px-4 pt-4 pb-36">
         {activeTab === 'table' && (
           <TableTrainerView
             progress={progress}
@@ -382,83 +217,73 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* Bottom Sticky Dock: Czech AccentBar + iOS 26 Floating Liquid Glass Tab Pill */}
-      <div className="fixed bottom-0 inset-x-0 z-30 flex flex-col pb-safe pointer-events-none">
+      {/* Bottom Sticky Dock: Native iOS Keyboard Accessory Row + Native iOS Tab Bar */}
+      <div className="fixed bottom-0 inset-x-0 z-30 flex flex-col">
         {(activeTab === 'table' || activeTab === 'flashcards') && (
-          <div className="pointer-events-auto">
-            <AccentBar activeInputRef={activeInputRef} />
-          </div>
+          <AccentBar activeInputRef={activeInputRef} />
         )}
 
-        {/* Mobile Floating Liquid Glass Capsule Tab Bar */}
-        <div className="md:hidden px-4 pt-2 pb-2.5 pointer-events-auto">
-          <nav className="grid grid-cols-3 p-1.5 rounded-full border theme-surface">
-            <button
-              type="button"
-              onClick={() => setActiveTab('table')}
-              className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-xs font-bold transition-all cursor-pointer"
-              style={
-                activeTab === 'table'
-                  ? {
-                      backgroundColor: 'rgba(255, 255, 255, 0.22)',
-                      color: 'var(--text-primary)',
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.45)',
-                    }
-                  : { color: 'var(--text-secondary)' }
-              }
-            >
-              <Grid className="w-4 h-4" />
-              <span>Matrix</span>
-              {relapsedCount > 0 && (
-                <span
-                  className="px-1.5 rounded-full text-[10px] font-black"
+        {/* Native iOS UITabBar */}
+        <nav className="ios-chrome ios-hairline-t pb-safe">
+          <div className="max-w-md mx-auto grid grid-cols-3 h-[50px]">
+            {[
+              {
+                id: 'table' as const,
+                label: 'Conjugate',
+                icon: Grid,
+                badge: relapsedCount > 0 ? String(relapsedCount) : null,
+              },
+              {
+                id: 'flashcards' as const,
+                label: 'Flashcards',
+                icon: Layers,
+                badge: null,
+              },
+              {
+                id: 'completed' as const,
+                label: 'Saved',
+                icon: Bookmark,
+                badge: completedCount > 0 ? String(completedCount) : null,
+              },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className="relative flex flex-col items-center justify-center gap-0.5 cursor-pointer"
                   style={{
-                    backgroundColor: 'var(--warn-bg)',
-                    color: 'var(--warn-text)',
+                    color: isActive
+                      ? 'var(--ios-blue)'
+                      : 'var(--ios-label-secondary)',
                   }}
                 >
-                  {relapsedCount}
-                </span>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('flashcards')}
-              className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-xs font-bold transition-all cursor-pointer"
-              style={
-                activeTab === 'flashcards'
-                  ? {
-                      backgroundColor: 'rgba(255, 255, 255, 0.22)',
-                      color: 'var(--text-primary)',
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.45)',
-                    }
-                  : { color: 'var(--text-secondary)' }
-              }
-            >
-              <Layers className="w-4 h-4" />
-              <span>Cards</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('completed')}
-              className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-xs font-bold transition-all cursor-pointer"
-              style={
-                activeTab === 'completed'
-                  ? {
-                      backgroundColor: 'rgba(255, 255, 255, 0.22)',
-                      color: 'var(--text-primary)',
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.45)',
-                    }
-                  : { color: 'var(--text-secondary)' }
-              }
-            >
-              <Award className="w-4 h-4" />
-              <span>Words ({completedCount})</span>
-            </button>
-          </nav>
-        </div>
+                  <div className="relative">
+                    <Icon className="w-[22px] h-[22px]" />
+                    {tab.badge && (
+                      <span
+                        className="-top-1 -right-3.5 absolute px-1.5 min-w-[16px] h-[16px] rounded-full text-[10px] font-bold flex items-center justify-center text-white"
+                        style={{
+                          backgroundColor:
+                            tab.id === 'table'
+                              ? 'var(--ios-red)'
+                              : 'var(--ios-blue)',
+                        }}
+                      >
+                        {tab.badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-medium leading-none">
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
       </div>
     </div>
   );

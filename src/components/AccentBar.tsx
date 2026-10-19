@@ -50,6 +50,9 @@ export function insertTextIntoInput(input: HTMLInputElement, char: string): void
   input.focus();
 }
 
+/**
+ * Authentic iOS Keyboard Accessory Row (#D1D5DB tray with #FFFFFF 5px-radius keycaps)
+ */
 export const AccentBar: React.FC<AccentBarProps> = ({ activeInputRef }) => {
   const handleInsert = (char: string) => {
     const target =
@@ -65,16 +68,10 @@ export const AccentBar: React.FC<AccentBarProps> = ({ activeInputRef }) => {
 
   return (
     <div
-      className="px-3 sm:px-6 select-none"
-      aria-label="Czech diacritic characters"
+      className="w-full px-1.5 py-1.5 select-none ios-keyboard-tray"
+      aria-label="Czech diacritic keyboard keys"
     >
-      <div className="max-w-5xl mx-auto rounded-full border px-3 py-1.5 flex items-center gap-1 overflow-x-auto no-scrollbar theme-surface">
-        <span
-          className="text-[10px] font-bold uppercase tracking-widest px-2 shrink-0 hidden sm:inline"
-          style={{ color: 'var(--text-muted)' }}
-        >
-          Háčky
-        </span>
+      <div className="max-w-xl mx-auto flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-0.5 px-0.5">
         {CZECH_ACCENTS.map((char) => (
           <button
             key={char}
@@ -84,10 +81,7 @@ export const AccentBar: React.FC<AccentBarProps> = ({ activeInputRef }) => {
               e.preventDefault();
               handleInsert(char);
             }}
-            className="min-w-[34px] h-8.5 px-2 rounded-full font-bold text-base flex items-center justify-center transition-all border active:scale-90 shrink-0 cursor-pointer theme-subtle"
-            style={{
-              color: 'var(--text-primary)',
-            }}
+            className="min-w-[31px] flex-1 h-[38px] px-1 font-normal text-[18px] leading-none flex items-center justify-center shrink-0 cursor-pointer ios-keycap"
           >
             {char}
           </button>
