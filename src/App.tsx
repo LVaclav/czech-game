@@ -127,6 +127,7 @@ export const App: React.FC = () => {
       }
 
       const todayKey = getLocalDateKey(now);
+      const utcTodayKey = now.toISOString().slice(0, 10);
       const lastCheckDate = localStorage.getItem(EVENING_REMINDER_LAST_CHECK_KEY);
       if (lastCheckDate === todayKey) {
         return;
@@ -134,7 +135,9 @@ export const App: React.FC = () => {
       localStorage.setItem(EVENING_REMINDER_LAST_CHECK_KEY, todayKey);
 
       const alreadyPracticedToday =
-        progress.stats.lastActiveDate === todayKey && progress.stats.tablesCompletedToday > 0;
+        (progress.stats.lastActiveDate === todayKey ||
+          progress.stats.lastActiveDate === utcTodayKey) &&
+        progress.stats.tablesCompletedToday > 0;
       if (alreadyPracticedToday || !('Notification' in window)) {
         return;
       }
