@@ -2,7 +2,8 @@ import { AuthUserSession, UserProgressBlob } from '../types';
 import { getEffectiveActivityMap } from './priorityQueue';
 
 export const DEFAULT_VAPID_PUBLIC_KEY =
-  'BMWhW_aUQXyO7GRG0XBMWqn0ZgUD1AEQFktDQPXPgpbj5a0ngp_Fxr9g1e83Ot9_Xm6OMqFQHjhljHcPk-hpzYw';
+  (import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined) ||
+  'BKO_71z0XLOA6laYShvI8nmnerXc-onwpZvMngq0wF5lmNAay4fyfmMC6X7D5nxctXoPnLofY_ZA8In_acmTyFM';
 
 const PROMPT_DISMISSED_SESSION_KEY = 'czech_trainer_notif_prompt_dismissed_session_v1';
 const LOCAL_INBOX_STORAGE_PREFIX = 'czech_trainer_local_inbox_v1:';
@@ -151,9 +152,21 @@ export async function syncPushSubscriptionWithServer(
   try {
     const reg = await getServiceWorkerRegistration();
     if (reg && 'pushManager' in reg) {
+      const appServerKey = urlBase64ToUint8Array(vapidPublicKey);
       let sub = await reg.pushManager.getSubscription();
+
+      if (sub && sub.options?.applicationServerKey) {
+        const existingKey = new Uint8Array(sub.options.applicationServerKey);
+        const matches =
+          existingKey.length === appServerKey.length &&
+          existingKey.every((b, idx) => b === appServerKey[idx]);
+        if (!matches) {
+          await sub.unsubscribe().catch(() => {});
+          sub = null;
+        }
+      }
+
       if (!sub) {
-        const appServerKey = urlBase64ToUint8Array(vapidPublicKey);
         sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: appServerKey as unknown as BufferSource,

@@ -1,19 +1,12 @@
 import crypto from 'node:crypto';
 
 /**
- * Default VAPID keypair (P-256) for Web Push (RFC 8292).
- * Can be overridden via environment variables VAPID_PUBLIC_KEY and VAPID_PRIVATE_JWK.
+ * Public VAPID key (P-256) for Web Push (RFC 8292).
+ * Safe to be public (browsers require it in pushManager.subscribe).
+ * The matching secret key MUST be set in Netlify Environment Variables as `VAPID_PRIVATE_KEY`.
  */
 export const DEFAULT_VAPID_PUBLIC_KEY =
-  'BMWhW_aUQXyO7GRG0XBMWqn0ZgUD1AEQFktDQPXPgpbj5a0ngp_Fxr9g1e83Ot9_Xm6OMqFQHjhljHcPk-hpzYw';
-
-const DEFAULT_VAPID_PRIVATE_JWK: crypto.JsonWebKey = {
-  kty: 'EC',
-  crv: 'P-256',
-  x: 'xaFb9pRBfI7sZEbRcExaqfRmBQPUARAWS0NA9c-CluM',
-  y: '5a0ngp_Fxr9g1e83Ot9_Xm6OMqFQHjhljHcPk-hpzYw',
-  d: 'AQzYhwPmvTtNqjY-Eqpypzj-2xGukF6gwKIIp4vzXDk',
-};
+  'BKO_71z0XLOA6laYShvI8nmnerXc-onwpZvMngq0wF5lmNAay4fyfmMC6X7D5nxctXoPnLofY_ZA8In_acmTyFM';
 
 export interface PushSubscriptionRecord {
   endpoint: string;
@@ -51,7 +44,33 @@ export function getVapidPublicKey(): string {
 
 function getVapidPrivateKey(): crypto.KeyObject {
   const envJwk = process.env.VAPID_PRIVATE_JWK;
-  const jwk = envJwk ? (JSON.parse(envJwk) as crypto.JsonWebKey) : DEFAULT_VAPID_PRIVATE_JWK;
+  if (envJwk) {
+    return crypto.createPrivateKey({
+      key: JSON.parse(envJwk) as crypto.JsonWebKey,
+      format: 'jwk',
+    });
+  }
+
+  const rawPrivateD = process.env.VAPID_PRIVATE_KEY;
+  if (!rawPrivateD) {
+    throw new Error(
+      'Missing VAPID_PRIVATE_KEY environment variable for Web Push signing.'
+    );
+  }
+
+  const pubBytes = Buffer.from(getVapidPublicKey(), 'base64url');
+  if (pubBytes.length !== 65 || pubBytes[0] !== 0x04) {
+    throw new Error('Invalid VAPID_PUBLIC_KEY format (expected 65-byte uncompressed P-256 point).');
+  }
+
+  const jwk: crypto.JsonWebKey = {
+    kty: 'EC',
+    crv: 'P-256',
+    x: pubBytes.subarray(1, 33).toString('base64url'),
+    y: pubBytes.subarray(33, 65).toString('base64url'),
+    d: rawPrivateD.trim(),
+  };
+
   return crypto.createPrivateKey({ key: jwk, format: 'jwk' });
 }
 
