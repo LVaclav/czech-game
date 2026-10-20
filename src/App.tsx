@@ -25,6 +25,15 @@ import { StreakStatsModal } from './components/StreakStatsModal';
 import { ALL_VERBS, VERB_MAP } from './lib/priorityQueue';
 
 type ActiveTab = 'table' | 'flashcards' | 'completed';
+const EVENING_REMINDER_HOUR = 19;
+const EVENING_REMINDER_LAST_CHECK_KEY = 'czech_trainer_evening_reminder_last_check_v1';
+
+function getLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 export const App: React.FC = () => {
   const [session, setSession] = useState<AuthUserSession | null>(() =>
@@ -103,6 +112,97 @@ export const App: React.FC = () => {
       cancelled = true;
     };
   }, [session]);
+
+  useEffect(() => {
+    if (!session || !progress || typeof window === 'undefined') {
+      return;
+    }
+
+    let timeoutId: number | null = null;
+
+    const maybeSendEveningReminder = async () => {
+      const now = new Date();
+      if (now.getHours() < EVENING_REMINDER_HOUR) {
+        return;
+      }
+
+      const todayKey = getLocalDateKey(now);
+      const lastCheckDate = localStorage.getItem(EVENING_REMINDER_LAST_CHECK_KEY);
+      if (lastCheckDate === todayKey) {
+        return;
+      }
+      localStorage.setItem(EVENING_REMINDER_LAST_CHECK_KEY, todayKey);
+
+      const alreadyPracticedToday =
+        progress.stats.lastActiveDate === todayKey && progress.stats.tablesCompletedToday > 0;
+      if (alreadyPracticedToday || !('Notification' in window)) {
+        return;
+      }
+
+      const sendNotification = async () => {
+        const title = "Don't lose your streak 🔥";
+        const body = `${session.displayName}, do one quick table tonight to keep your Czech streak alive.`;
+
+        if ('serviceWorker' in navigator) {
+          const registration = await navigator.serviceWorker.getRegistration();
+          if (registration) {
+            await registration.showNotification(title, {
+              body,
+              tag: `streak-reminder-${todayKey}`,
+            });
+            return;
+          }
+        }
+
+        new Notification(title, {
+          body,
+          tag: `streak-reminder-${todayKey}`,
+        });
+      };
+
+      if (Notification.permission === 'granted') {
+        await sendNotification();
+      } else if (Notification.permission === 'default') {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          await sendNotification();
+        }
+      }
+    };
+
+    const scheduleNextEveningCheck = () => {
+      const now = new Date();
+      const next = new Date(now);
+      next.setHours(EVENING_REMINDER_HOUR, 0, 0, 0);
+      if (next <= now) {
+        next.setDate(next.getDate() + 1);
+      }
+
+      const delayMs = Math.max(next.getTime() - now.getTime(), 1000);
+      timeoutId = window.setTimeout(() => {
+        maybeSendEveningReminder().catch(() => {
+          // Ignore notification errors in restricted environments
+        });
+        scheduleNextEveningCheck();
+      }, delayMs);
+    };
+
+    maybeSendEveningReminder().catch(() => {
+      // Ignore notification errors in restricted environments
+    });
+    scheduleNextEveningCheck();
+
+    return () => {
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [
+    session,
+    progress,
+    progress?.stats.lastActiveDate,
+    progress?.stats.tablesCompletedToday,
+  ]);
 
   const handleUpdateProgress = useCallback(
     (next: UserProgressBlob) => {

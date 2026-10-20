@@ -8,6 +8,7 @@ import {
   Trophy,
   Users,
   X,
+  Zap,
 } from 'lucide-react';
 import { AuthUserSession, LeaderboardEntry, UserProgressBlob } from '../types';
 import {
@@ -59,6 +60,7 @@ export const StreakStatsModal: React.FC<StreakStatsModalProps> = ({
   );
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loadingBoard, setLoadingBoard] = useState(true);
+  const [prodFeedbackForUser, setProdFeedbackForUser] = useState<string | null>(null);
 
   const touchStartX = useRef<number | null>(null);
 
@@ -86,6 +88,32 @@ export const StreakStatsModal: React.FC<StreakStatsModalProps> = ({
       cancelled = true;
     };
   }, [session, progress]);
+
+  const handleProd = async (target: LeaderboardEntry) => {
+    if (target.username.toLowerCase() === session.username.toLowerCase()) {
+      return;
+    }
+
+    const message = `Hey ${target.displayName}, keep your Czech streak alive tonight 🔥`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Czech Trainer prod',
+          text: message,
+        });
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(message);
+      } else {
+        window.prompt('Copy this prod message:', message);
+      }
+      setProdFeedbackForUser(target.username.toLowerCase());
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return;
+      }
+    }
+  };
 
   const handlePrevMonth = () => {
     if (viewMonth === 0) {
@@ -377,7 +405,7 @@ export const StreakStatsModal: React.FC<StreakStatsModalProps> = ({
                   Leaderboard
                 </h3>
                 <p className="text-[11px] text-[#8E8E93]">
-                  Ranked by mastered verbs & active streak
+                  Ranked by mastered verbs & active streak • prod learners to keep going
                 </p>
               </div>
             </div>
@@ -471,6 +499,35 @@ export const StreakStatsModal: React.FC<StreakStatsModalProps> = ({
                           <span>{row.currentStreak}d streak</span>
                         </div>
                       </div>
+                      {!isMe && (
+                        <button
+                          type="button"
+                          onClick={() => handleProd(row)}
+                          className="h-8 px-3 rounded-full text-[11px] font-bold flex items-center gap-1.5 cursor-pointer border transition-colors"
+                          style={{
+                            color:
+                              prodFeedbackForUser === row.username.toLowerCase()
+                                ? 'var(--tr-green)'
+                                : 'var(--tr-cyan)',
+                            borderColor:
+                              prodFeedbackForUser === row.username.toLowerCase()
+                                ? 'rgba(50, 215, 75, 0.55)'
+                                : 'rgba(0, 229, 229, 0.55)',
+                            backgroundColor:
+                              prodFeedbackForUser === row.username.toLowerCase()
+                                ? 'rgba(50, 215, 75, 0.12)'
+                                : 'rgba(0, 229, 229, 0.12)',
+                          }}
+                          title={`Prod ${row.displayName} to keep going`}
+                        >
+                          <Zap className="w-3.5 h-3.5" />
+                          <span>
+                            {prodFeedbackForUser === row.username.toLowerCase()
+                              ? 'Prodded'
+                              : 'Prod'}
+                          </span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
