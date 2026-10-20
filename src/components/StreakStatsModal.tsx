@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Award,
   Calendar,
+  Check,
   ChevronLeft,
   ChevronRight,
   Flame,
+  Hand,
   Trophy,
   Users,
   X,
@@ -17,6 +19,7 @@ import {
   VERB_MAP,
 } from '../lib/priorityQueue';
 import { fetchLeaderboard } from '../lib/api';
+import { sendLeaderboardNudge } from '../lib/notifications';
 
 interface StreakStatsModalProps {
   session: AuthUserSession;
@@ -59,6 +62,24 @@ export const StreakStatsModal: React.FC<StreakStatsModalProps> = ({
   );
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loadingBoard, setLoadingBoard] = useState(true);
+  const [nudgingUser, setNudgingUser] = useState<string | null>(null);
+  const [nudgedUsers, setNudgedUsers] = useState<Record<string, boolean>>({});
+  const [nudgeBanner, setNudgeBanner] = useState<string | null>(null);
+
+  const handleNudgePlayer = async (target: LeaderboardEntry) => {
+    const key = target.username.toLowerCase();
+    if (nudgingUser || nudgedUsers[key]) return;
+    setNudgingUser(key);
+    try {
+      await sendLeaderboardNudge(session, target.username, target.displayName);
+      setNudgedUsers((prev) => ({ ...prev, [key]: true }));
+      setNudgeBanner(
+        `Sent to ${target.displayName}: "${session.displayName} says you keep conjugating!"`
+      );
+    } finally {
+      setNudgingUser(null);
+    }
+  };
 
   const touchStartX = useRef<number | null>(null);
 
@@ -386,6 +407,27 @@ export const StreakStatsModal: React.FC<StreakStatsModalProps> = ({
             </span>
           </div>
 
+          {nudgeBanner && (
+            <div
+              className="px-3.5 py-2.5 rounded-2xl text-xs font-semibold flex items-center justify-between gap-2 border"
+              style={{
+                backgroundColor: 'rgba(0, 229, 229, 0.1)',
+                borderColor: 'rgba(0, 229, 229, 0.35)',
+                color: 'var(--tr-cyan)',
+              }}
+            >
+              <span>👋 {nudgeBanner}</span>
+              <button
+                type="button"
+                onClick={() => setNudgeBanner(null)}
+                className="text-[#8E8E93] hover:text-white cursor-pointer"
+                aria-label="Dismiss nudge message"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           {loadingBoard ? (
             <div className="py-6 text-center text-xs text-[#8E8E93]">
               Loading leaderboard…
@@ -393,8 +435,10 @@ export const StreakStatsModal: React.FC<StreakStatsModalProps> = ({
           ) : (
             <div className="space-y-2">
               {leaderboard.map((row, idx) => {
-                const isMe =
-                  row.username.toLowerCase() === session.username.toLowerCase();
+                const userKey = row.username.toLowerCase();
+                const isMe = userKey === session.username.toLowerCase();
+                const isNudged = Boolean(nudgedUsers[userKey]);
+                const isNudging = nudgingUser === userKey;
                 const rank = idx + 1;
 
                 return (
@@ -455,7 +499,45 @@ export const StreakStatsModal: React.FC<StreakStatsModalProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-2.5 shrink-0">
+                      {!isMe && (
+                        <button
+                          type="button"
+                          disabled={isNudged || isNudging}
+                          onClick={() => handleNudgePlayer(row)}
+                          title={`Nudge ${row.displayName} to keep conjugating`}
+                          className="h-8 px-2.5 rounded-full text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer active:scale-95 disabled:cursor-default border"
+                          style={
+                            isNudged
+                              ? {
+                                  backgroundColor: 'rgba(48, 209, 88, 0.14)',
+                                  borderColor: 'rgba(48, 209, 88, 0.45)',
+                                  color: 'var(--tr-green)',
+                                }
+                              : {
+                                  backgroundColor: '#18181B',
+                                  borderColor: 'rgba(255, 255, 255, 0.14)',
+                                  color: '#ffffff',
+                                }
+                          }
+                        >
+                          {isNudged ? (
+                            <>
+                              <Check className="w-3 h-3" />
+                              <span>Nudged</span>
+                            </>
+                          ) : (
+                            <>
+                              <Hand
+                                className="w-3 h-3"
+                                style={{ color: 'var(--tr-cyan)' }}
+                              />
+                              <span>{isNudging ? '…' : 'Nudge'}</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+
                       <div className="text-right">
                         <div
                           className="text-sm font-bold"

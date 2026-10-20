@@ -3,12 +3,24 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 
-// Register PWA Service Worker for instant iPhone Home Screen loading & offline support
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+// Register PWA Service Worker for iPhone Home Screen loading, offline support & Web Push notifications
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      // Ignore registration errors in restricted environments
-    });
+    navigator.serviceWorker
+      .register('/sw.js', { updateViaCache: 'none' })
+      .then((registration) => {
+        registration.update().catch(() => {});
+
+        // Automatically check for SW updates when user re-opens the Home Screen PWA
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            registration.update().catch(() => {});
+          }
+        });
+      })
+      .catch(() => {
+        // Ignore registration errors in restricted environments
+      });
   });
 }
 

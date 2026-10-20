@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  Bell,
   Bookmark,
   Flame,
   Languages,
@@ -7,6 +8,7 @@ import {
   List,
   LogOut,
   MoreHorizontal,
+  X,
 } from 'lucide-react';
 import { AuthUserSession, UserProgressBlob } from './types';
 import {
@@ -16,11 +18,21 @@ import {
   loadLocalProgress,
   syncUserProgress,
 } from './lib/api';
+import {
+  AppNotificationItem,
+  checkLocalDailyStreakReminder,
+  checkPendingNotifications,
+  getNotificationPermissionState,
+  NotificationPermissionState,
+  requestAndSubscribeNotifications,
+  sendTestNotification,
+} from './lib/notifications';
 import { AuthView } from './components/AuthView';
 import { TableTrainerView } from './components/TableTrainerView';
 import { FlashcardView } from './components/FlashcardView';
 import { CompletedListView } from './components/CompletedListView';
 import { IosInstallBanner } from './components/IosInstallBanner';
+import { NotificationPromptModal } from './components/NotificationPromptModal';
 import { StreakStatsModal } from './components/StreakStatsModal';
 import { ALL_VERBS, VERB_MAP } from './lib/priorityQueue';
 
@@ -41,6 +53,10 @@ export const App: React.FC = () => {
   const [showStreakModal, setShowStreakModal] = useState<boolean>(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
+  const [notifPermission, setNotifPermission] =
+    useState<NotificationPermissionState>(() => getNotificationPermissionState());
+  const [incomingNudge, setIncomingNudge] =
+    useState<AppNotificationItem | null>(null);
 
   const activeInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -103,6 +119,57 @@ export const App: React.FC = () => {
       cancelled = true;
     };
   }, [session]);
+
+  // Sync Web Push subscription, check pending nudges, and check 7:00 PM streak reminder
+  useEffect(() => {
+    if (!session || !progress) return;
+    let cancelled = false;
+
+    const runChecks = async () => {
+      setNotifPermission(getNotificationPermissionState());
+      const items = await checkPendingNotifications(session);
+      if (!cancelled && items.length > 0) {
+        setIncomingNudge(items[items.length - 1]);
+      }
+      await checkLocalDailyStreakReminder(progress);
+    };
+
+    runChecks();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        runChecks();
+      }
+    };
+
+    const handleSwMessage = (event: MessageEvent) => {
+      const data = event.data;
+      if (data && data.type === 'PUSH_NOTIFICATION_RECEIVED' && data.payload) {
+        setIncomingNudge({
+          id: `sw-${Date.now()}`,
+          title: data.payload.title || 'Čeština',
+          body: data.payload.body || '',
+          createdAt: new Date().toISOString(),
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', handleSwMessage);
+    }
+
+    const intervalId = window.setInterval(runChecks, 60_000);
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', handleSwMessage);
+      }
+      window.clearInterval(intervalId);
+    };
+  }, [session, progress]);
 
   const handleUpdateProgress = useCallback(
     (next: UserProgressBlob) => {
@@ -172,6 +239,10 @@ export const App: React.FC = () => {
       />
 
       <IosInstallBanner />
+      <NotificationPromptModal
+        session={session}
+        onPermissionChange={(perm) => setNotifPermission(perm)}
+      />
       {showStreakModal && (
         <StreakStatsModal
           session={session}
@@ -274,12 +345,56 @@ export const App: React.FC = () => {
                       />
                     </div>
 
-                    <div className="px-3.5 py-2 text-[13px] text-[#8E8E93] flex justify-between">
+                    <div className="px-3.5 py-2 text-[13px] text-[#8E8E93] flex justify-between tr-hairline-b">
                       <span>Mastered Verbs</span>
                       <strong className="text-white">
                         {completedCount} / {ALL_VERBS.length}
                       </strong>
                     </div>
+
+                    {notifPermission === 'granted' ? (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await sendTestNotification(session);
+                          setShowMoreMenu(false);
+                        }}
+                        className="w-full text-left px-3.5 py-2.5 rounded-[18px] text-[13px] font-semibold text-white hover:bg-white/5 flex items-center justify-between cursor-pointer"
+                      >
+                        <div>
+                          <div>Notifications On</div>
+                          <div className="text-[11px] font-normal text-[#8E8E93]">
+                            Tap to send test alert
+                          </div>
+                        </div>
+                        <Bell
+                          className="w-4 h-4"
+                          style={{ color: 'var(--tr-cyan)' }}
+                        />
+                      </button>
+                    ) : notifPermission === 'default' ? (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const { permission } =
+                            await requestAndSubscribeNotifications(session);
+                          setNotifPermission(permission);
+                          setShowMoreMenu(false);
+                        }}
+                        className="w-full text-left px-3.5 py-2.5 rounded-[18px] text-[13px] font-semibold text-white hover:bg-white/5 flex items-center justify-between cursor-pointer"
+                      >
+                        <div>
+                          <div>Enable Notifications</div>
+                          <div className="text-[11px] font-normal text-[#8E8E93]">
+                            7 PM streak & nudges
+                          </div>
+                        </div>
+                        <Bell
+                          className="w-4 h-4"
+                          style={{ color: 'var(--tr-cyan)' }}
+                        />
+                      </button>
+                    ) : null}
 
                     <button
                       type="button"
@@ -306,6 +421,33 @@ export const App: React.FC = () => {
         >
           {TAB_TITLES[activeTab]}
         </h1>
+
+        {incomingNudge && (
+          <div
+            className="mt-3 px-4 py-3 rounded-[22px] flex items-center justify-between gap-3 border"
+            style={{
+              backgroundColor: 'rgba(0, 229, 229, 0.12)',
+              borderColor: 'rgba(0, 229, 229, 0.45)',
+            }}
+          >
+            <div className="text-[13.5px] text-white">
+              <div className="font-bold" style={{ color: 'var(--tr-cyan)' }}>
+                {incomingNudge.title}
+              </div>
+              <div className="text-[12.5px] text-white/90">
+                {incomingNudge.body}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIncomingNudge(null)}
+              className="w-7 h-7 rounded-full flex items-center justify-center text-[#8E8E93] hover:text-white cursor-pointer shrink-0 bg-black/50"
+              aria-label="Dismiss notification"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Full-Bleed Main Content Area */}
