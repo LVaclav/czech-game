@@ -1,5 +1,5 @@
 import { AuthUserSession, UserProgressBlob } from '../types';
-import { getEffectiveActivityMap } from './priorityQueue';
+import { getActiveStreak, getEffectiveActivityMap } from './priorityQueue';
 
 export const DEFAULT_VAPID_PUBLIC_KEY =
   (import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined) ||
@@ -312,11 +312,15 @@ export async function checkPendingNotifications(
 export async function sendLeaderboardNudge(
   session: AuthUserSession,
   targetUsername: string,
-  targetDisplayName: string
+  targetDisplayName: string,
+  targetActiveStreak: number = 0
 ): Promise<{ ok: boolean; message: string }> {
   const cleanTarget = targetUsername.trim().toLowerCase();
   const title = `👋 Nudge from ${session.displayName}!`;
-  const body = `${session.displayName} says you keep conjugating!`;
+  const body =
+    targetActiveStreak > 0
+      ? `${session.displayName} says you keep conjugating! Keep your ${targetActiveStreak}-day streak alive!`
+      : `${session.displayName} says you keep conjugating! You have no active streak — complete a verb table to start one today!`;
 
   if (!session.token.startsWith('local-dev-token:')) {
     try {
@@ -367,7 +371,8 @@ export async function sendLeaderboardNudge(
  * Sends a test notification so the user can immediately verify native notifications on iPhone.
  */
 export async function sendTestNotification(
-  session: AuthUserSession
+  session: AuthUserSession,
+  progress?: UserProgressBlob | null
 ): Promise<boolean> {
   if (getNotificationPermissionState() !== 'granted') {
     const { permission } = await requestAndSubscribeNotifications(session);
@@ -395,8 +400,14 @@ export async function sendTestNotification(
     }
   }
 
+  const activeStreak = progress ? getActiveStreak(progress) : 0;
+  const body =
+    activeStreak > 0
+      ? `${session.displayName} says you keep conjugating! Your 7:00 PM reminder will help keep your ${activeStreak}-day streak alive.`
+      : `${session.displayName} says you keep conjugating! No active streak right now — your 7:00 PM reminder will help you start a new one.`;
+
   return showNativeNotification('Čeština Notifications Active 🔔', {
-    body: `${session.displayName} says you keep conjugating! Your 7:00 PM streak reminder is ready.`,
+    body,
     tag: 'czech-trainer-test',
     url: '/',
   });
@@ -440,15 +451,15 @@ export async function checkLocalDailyStreakReminder(
     // Ignore storage errors
   }
 
-  const currentStreak = progress.stats.currentStreak || 0;
+  const activeStreak = getActiveStreak(progress, now);
   const title =
-    currentStreak > 0
-      ? `🔥 Keep your ${currentStreak}-day Czech streak alive!`
-      : '🇨🇿 Time for your daily Czech verb!';
+    activeStreak > 0
+      ? `🔥 Keep your ${activeStreak}-day Czech streak alive!`
+      : '🇨🇿 Start a new Czech streak today!';
   const body =
-    currentStreak > 0
+    activeStreak > 0
       ? "It's past 7:00 PM and you haven't practiced yet today. Complete a quick verb table to save your streak!"
-      : "It's 7:00 PM — practice a quick 3×2 verb table or flashcard set today!";
+      : "It's past 7:00 PM and you have no active streak. Complete a quick 3×2 verb table today to start a new streak!";
 
   return showNativeNotification(title, {
     body,

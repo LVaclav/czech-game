@@ -14,6 +14,134 @@ interface LeaderboardRow {
   lastActiveDate: string | null;
 }
 
+interface StoredProgressBlob {
+  username?: string;
+  stats?: {
+    currentStreak?: number;
+    longestStreak?: number;
+    totalTablesCompleted?: number;
+    tablesCompletedToday?: number;
+    lastActiveDate?: string | null;
+    activityByDate?: Record<string, number>;
+  };
+  verbs?: Record<
+    string,
+    {
+      completed?: boolean;
+      firstCompletedAt?: string;
+      lastTableCompletedAt?: string;
+      flashcards?: {
+        lastReviewedAt?: string | null;
+      };
+    }
+  >;
+}
+
+function getCalendarDayDiff(earlierDateKey: string, laterDateKey: string): number {
+  const cleanEarlier = earlierDateKey.slice(0, 10);
+  const cleanLater = laterDateKey.slice(0, 10);
+  const t1 = new Date(`${cleanEarlier}T00:00:00Z`).getTime();
+  const t2 = new Date(`${cleanLater}T00:00:00Z`).getTime();
+  if (Number.isNaN(t1) || Number.isNaN(t2)) return Infinity;
+  return Math.round((t2 - t1) / (1000 * 60 * 60 * 24));
+}
+
+function isDateActiveForStreak(
+  dateKey: string | null | undefined,
+  utcToday: string
+): boolean {
+  if (!dateKey) return false;
+  const diff = getCalendarDayDiff(dateKey.slice(0, 10), utcToday);
+  return diff >= -1 && diff <= 1;
+}
+
+function computeProgressStreaks(
+  p: StoredProgressBlob,
+  utcToday: string
+): { activeStreak: number; longestStreak: number; latestActiveDate: string | null } {
+  const activityMap: Record<string, number> = {
+    ...(p.stats?.activityByDate || {}),
+  };
+
+  if (p.stats?.lastActiveDate) {
+    const d = p.stats.lastActiveDate.slice(0, 10);
+    activityMap[d] = Math.max(activityMap[d] || 0, p.stats.tablesCompletedToday || 1);
+  }
+
+  for (const rec of Object.values(p.verbs || {})) {
+    if (rec?.firstCompletedAt) {
+      const d = rec.firstCompletedAt.slice(0, 10);
+      activityMap[d] = Math.max(activityMap[d] || 0, 1);
+    }
+    if (rec?.lastTableCompletedAt) {
+      const d = rec.lastTableCompletedAt.slice(0, 10);
+      activityMap[d] = Math.max(activityMap[d] || 0, 1);
+    }
+    if (rec?.flashcards?.lastReviewedAt) {
+      const d = rec.flashcards.lastReviewedAt.slice(0, 10);
+      activityMap[d] = Math.max(activityMap[d] || 0, 1);
+    }
+  }
+
+  const dates = Object.keys(activityMap)
+    .filter((d) => activityMap[d] > 0)
+    .sort();
+
+  let bestFromDates = 0;
+  let currentRun = 0;
+  for (let i = 0; i < dates.length; i++) {
+    if (i > 0) {
+      const diff = getCalendarDayDiff(dates[i - 1], dates[i]);
+      if (diff === 1) {
+        currentRun += 1;
+      } else if (diff > 1) {
+        currentRun = 1;
+      }
+    } else {
+      currentRun = 1;
+    }
+    if (currentRun > bestFromDates) {
+      bestFromDates = currentRun;
+    }
+  }
+
+  const storedStreak = p.stats?.currentStreak || 0;
+  const lastActiveDate = p.stats?.lastActiveDate || (dates.length > 0 ? dates[dates.length - 1] : null);
+  const storedActiveStreak = isDateActiveForStreak(p.stats?.lastActiveDate, utcToday)
+    ? storedStreak
+    : 0;
+
+  let activeRunFromDates = 0;
+  if (dates.length > 0) {
+    const mostRecentDate = dates[dates.length - 1];
+    if (isDateActiveForStreak(mostRecentDate, utcToday)) {
+      activeRunFromDates = 1;
+      for (let i = dates.length - 1; i > 0; i--) {
+        const diff = getCalendarDayDiff(dates[i - 1], dates[i]);
+        if (diff === 1) {
+          activeRunFromDates += 1;
+        } else if (diff > 1) {
+          break;
+        }
+      }
+    }
+  }
+
+  const activeStreak = Math.max(storedActiveStreak, activeRunFromDates);
+  const longestStreak = Math.max(
+    p.stats?.longestStreak || 0,
+    storedStreak,
+    bestFromDates,
+    activeStreak
+  );
+
+  return {
+    activeStreak,
+    longestStreak,
+    latestActiveDate: lastActiveDate,
+  };
+}
+
 export default async (req: Request, _context: Context): Promise<Response> => {
   const authHeader = req.headers.get('authorization');
   const username = verifySessionToken(authHeader);
@@ -25,6 +153,7 @@ export default async (req: Request, _context: Context): Promise<Response> => {
   const progressKey = `progress:${username}`;
   const store = getStore(STORE_NAME);
   const url = new URL(req.url);
+  const utcToday = new Date().toISOString().slice(0, 10);
 
   try {
     if (req.method === 'GET') {
@@ -63,37 +192,27 @@ export default async (req: Request, _context: Context): Promise<Response> => {
 
         await Promise.all(
           progressList.blobs.map(async (b) => {
-            const p = (await store.get(b.key, { type: 'json' })) as {
-              username?: string;
-              stats?: {
-                currentStreak?: number;
-                longestStreak?: number;
-                totalTablesCompleted?: number;
-                lastActiveDate?: string | null;
-              };
-              verbs?: Record<string, { completed?: boolean }>;
-            } | null;
+            const p = (await store.get(b.key, {
+              type: 'json',
+            })) as StoredProgressBlob | null;
 
             if (!p) return;
             const uname = (p.username || b.key.replace(/^progress:/, '')).toLowerCase();
             const masteredCount = Object.values(p.verbs || {}).filter((v) =>
               Boolean(v?.completed)
             ).length;
-            const currentStreak = p.stats?.currentStreak || 0;
-            const longestStreak = Math.max(
-              p.stats?.longestStreak || 0,
-              currentStreak
-            );
+            const { activeStreak, longestStreak, latestActiveDate } =
+              computeProgressStreaks(p, utcToday);
             const totalTablesCompleted = p.stats?.totalTablesCompleted || 0;
 
             rowsByUsername[uname] = {
               username: uname,
               displayName: displayNames[uname] || uname,
-              currentStreak,
+              currentStreak: activeStreak,
               longestStreak,
               masteredCount,
               totalTablesCompleted,
-              lastActiveDate: p.stats?.lastActiveDate || null,
+              lastActiveDate: latestActiveDate,
             };
           })
         );
@@ -111,7 +230,28 @@ export default async (req: Request, _context: Context): Promise<Response> => {
         return Response.json({ leaderboard });
       }
 
-      const data = await store.get(progressKey, { type: 'json' });
+      const data = (await store.get(progressKey, {
+        type: 'json',
+      })) as StoredProgressBlob | null;
+      if (data && data.stats) {
+        const { activeStreak, longestStreak } = computeProgressStreaks(
+          data,
+          utcToday
+        );
+        const isActiveToday =
+          data.stats.lastActiveDate?.slice(0, 10) === utcToday;
+        return Response.json({
+          ...data,
+          stats: {
+            ...data.stats,
+            currentStreak: activeStreak,
+            longestStreak,
+            tablesCompletedToday: isActiveToday
+              ? data.stats.tablesCompletedToday || 0
+              : 0,
+          },
+        });
+      }
       return Response.json(data || null);
     }
 

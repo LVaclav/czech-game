@@ -21,6 +21,106 @@ interface UserInboxBlob {
   items: InboxNotificationItem[];
 }
 
+interface StoredProgressSummary {
+  stats?: {
+    currentStreak?: number;
+    lastActiveDate?: string | null;
+    tablesCompletedToday?: number;
+    activityByDate?: Record<string, number>;
+  };
+  verbs?: Record<
+    string,
+    {
+      firstCompletedAt?: string;
+      lastTableCompletedAt?: string;
+      flashcards?: {
+        lastReviewedAt?: string | null;
+      };
+    }
+  >;
+}
+
+function getCalendarDayDiff(earlierDateKey: string, laterDateKey: string): number {
+  const cleanEarlier = earlierDateKey.slice(0, 10);
+  const cleanLater = laterDateKey.slice(0, 10);
+  const t1 = new Date(`${cleanEarlier}T00:00:00Z`).getTime();
+  const t2 = new Date(`${cleanLater}T00:00:00Z`).getTime();
+  if (Number.isNaN(t1) || Number.isNaN(t2)) return Infinity;
+  return Math.round((t2 - t1) / (1000 * 60 * 60 * 24));
+}
+
+function isDateActiveForStreak(
+  dateKey: string | null | undefined,
+  utcToday: string
+): boolean {
+  if (!dateKey) return false;
+  const diff = getCalendarDayDiff(dateKey.slice(0, 10), utcToday);
+  return diff >= -1 && diff <= 1;
+}
+
+function getActiveStreakFromProgress(
+  progress: StoredProgressSummary | null,
+  utcToday: string
+): number {
+  if (!progress || !progress.stats) return 0;
+
+  const storedActiveStreak = isDateActiveForStreak(
+    progress.stats.lastActiveDate,
+    utcToday
+  )
+    ? progress.stats.currentStreak || 0
+    : 0;
+
+  const activityMap: Record<string, number> = {
+    ...(progress.stats.activityByDate || {}),
+  };
+
+  if (progress.stats.lastActiveDate) {
+    const d = progress.stats.lastActiveDate.slice(0, 10);
+    activityMap[d] = Math.max(
+      activityMap[d] || 0,
+      progress.stats.tablesCompletedToday || 1
+    );
+  }
+
+  for (const rec of Object.values(progress.verbs || {})) {
+    if (rec?.firstCompletedAt) {
+      const d = rec.firstCompletedAt.slice(0, 10);
+      activityMap[d] = Math.max(activityMap[d] || 0, 1);
+    }
+    if (rec?.lastTableCompletedAt) {
+      const d = rec.lastTableCompletedAt.slice(0, 10);
+      activityMap[d] = Math.max(activityMap[d] || 0, 1);
+    }
+    if (rec?.flashcards?.lastReviewedAt) {
+      const d = rec.flashcards.lastReviewedAt.slice(0, 10);
+      activityMap[d] = Math.max(activityMap[d] || 0, 1);
+    }
+  }
+
+  const dates = Object.keys(activityMap)
+    .filter((d) => activityMap[d] > 0)
+    .sort();
+
+  let activeRunFromDates = 0;
+  if (dates.length > 0) {
+    const mostRecentDate = dates[dates.length - 1];
+    if (isDateActiveForStreak(mostRecentDate, utcToday)) {
+      activeRunFromDates = 1;
+      for (let i = dates.length - 1; i > 0; i--) {
+        const diff = getCalendarDayDiff(dates[i - 1], dates[i]);
+        if (diff === 1) {
+          activeRunFromDates += 1;
+        } else if (diff > 1) {
+          break;
+        }
+      }
+    }
+  }
+
+  return Math.max(storedActiveStreak, activeRunFromDates);
+}
+
 function isValidSubscription(sub: unknown): sub is PushSubscriptionRecord {
   if (!sub || typeof sub !== 'object') return false;
   const candidate = sub as Record<string, unknown>;
@@ -43,6 +143,7 @@ export default async (req: Request, _context: Context): Promise<Response> => {
   const store = getStore(STORE_NAME);
   const pushKey = `push:${username}`;
   const inboxKey = `inbox:${username}`;
+  const utcToday = new Date().toISOString().slice(0, 10);
 
   try {
     if (req.method === 'GET') {
@@ -149,7 +250,7 @@ export default async (req: Request, _context: Context): Promise<Response> => {
           );
         }
 
-        const [senderUser, targetPush, targetInbox] = await Promise.all([
+        const [senderUser, targetPush, targetInbox, targetProgress] = await Promise.all([
           store.get(`user:${username}`, { type: 'json' }) as Promise<StoredUserRecord | null>,
           store.get(`push:${targetUsername}`, {
             type: 'json',
@@ -157,14 +258,24 @@ export default async (req: Request, _context: Context): Promise<Response> => {
           store.get(`inbox:${targetUsername}`, {
             type: 'json',
           }) as Promise<UserInboxBlob | null>,
+          store.get(`progress:${targetUsername}`, {
+            type: 'json',
+          }) as Promise<StoredProgressSummary | null>,
         ]);
 
         const senderDisplayName = senderUser?.displayName || username;
         const nowIso = new Date().toISOString();
+        const targetActiveStreak = getActiveStreakFromProgress(
+          targetProgress,
+          utcToday
+        );
 
         const payload: PushNotificationPayload = {
           title: `👋 Nudge from ${senderDisplayName}!`,
-          body: `${senderDisplayName} says you keep conjugating!`,
+          body:
+            targetActiveStreak > 0
+              ? `${senderDisplayName} says you keep conjugating! Keep your ${targetActiveStreak}-day streak alive!`
+              : `${senderDisplayName} says you keep conjugating! You have no active streak — complete a verb table to start one today!`,
           tag: `nudge-${username}-${Date.now()}`,
           url: '/',
           type: 'nudge',
@@ -219,17 +330,24 @@ export default async (req: Request, _context: Context): Promise<Response> => {
       }
 
       if (action === 'test') {
-        const [senderUser, userPush] = await Promise.all([
+        const [senderUser, userPush, userProgress] = await Promise.all([
           store.get(`user:${username}`, { type: 'json' }) as Promise<StoredUserRecord | null>,
           store.get(pushKey, {
             type: 'json',
           }) as Promise<UserNotificationSettingsBlob | null>,
+          store.get(`progress:${username}`, {
+            type: 'json',
+          }) as Promise<StoredProgressSummary | null>,
         ]);
 
         const displayName = senderUser?.displayName || username;
+        const activeStreak = getActiveStreakFromProgress(userProgress, utcToday);
         const payload: PushNotificationPayload = {
           title: 'Čeština Notifications Active 🔔',
-          body: `${displayName} says you keep conjugating! Your 7:00 PM streak reminder is ready.`,
+          body:
+            activeStreak > 0
+              ? `${displayName} says you keep conjugating! Your 7:00 PM reminder will help keep your ${activeStreak}-day streak alive.`
+              : `${displayName} says you keep conjugating! No active streak right now — your 7:00 PM reminder will help you start a new one.`,
           tag: 'czech-trainer-test',
           url: '/',
           type: 'test',

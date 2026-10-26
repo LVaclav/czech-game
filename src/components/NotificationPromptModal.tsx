@@ -11,11 +11,13 @@ import {
 
 interface NotificationPromptModalProps {
   session: AuthUserSession;
+  activeStreak?: number;
   onPermissionChange?: (permission: NotificationPermissionState) => void;
 }
 
 export const NotificationPromptModal: React.FC<NotificationPromptModalProps> = ({
   session,
+  activeStreak = 0,
   onPermissionChange,
 }) => {
   const [visible, setVisible] = useState(false);
@@ -71,7 +73,9 @@ export const NotificationPromptModal: React.FC<NotificationPromptModalProps> = (
                 Enable Notifications
               </h2>
               <p className="text-[13px] text-[#8E8E93]">
-                Stay on top of your daily Czech verb streak.
+                {activeStreak > 0
+                  ? `Protect your ${activeStreak}-day Czech verb streak.`
+                  : 'Build and maintain your daily Czech verb habit.'}
               </p>
             </div>
           </div>
@@ -94,10 +98,14 @@ export const NotificationPromptModal: React.FC<NotificationPromptModalProps> = (
             />
             <div>
               <div className="font-semibold text-white">
-                7:00 PM Streak Reminder
+                {activeStreak > 0
+                  ? '7:00 PM Streak Reminder'
+                  : '7:00 PM Daily Practice Reminder'}
               </div>
               <div className="text-[12px] text-[#8E8E93]">
-                Only fires around 7 PM if you haven’t practiced yet that day.
+                {activeStreak > 0
+                  ? 'Fires around 7 PM if you haven’t practiced yet to keep your streak alive.'
+                  : 'Fires around 7 PM if you haven’t practiced yet to help you start a new streak.'}
               </div>
             </div>
           </div>

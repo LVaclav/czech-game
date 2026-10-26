@@ -137,9 +137,55 @@ export function createTableSessionForVerb(verb: VerbEntry): ActiveTableSession {
   };
 }
 
-function getTodayDateString(): string {
-  const now = new Date();
+function getTodayDateString(now: Date = new Date()): string {
   return now.toISOString().slice(0, 10);
+}
+
+function getLocalTodayDateString(now: Date = new Date()): string {
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function getCalendarDayDiff(
+  earlierDateKey: string,
+  laterDateKey: string
+): number {
+  const cleanEarlier = earlierDateKey.slice(0, 10);
+  const cleanLater = laterDateKey.slice(0, 10);
+  const t1 = new Date(`${cleanEarlier}T00:00:00Z`).getTime();
+  const t2 = new Date(`${cleanLater}T00:00:00Z`).getTime();
+  if (Number.isNaN(t1) || Number.isNaN(t2)) return Infinity;
+  return Math.round((t2 - t1) / (1000 * 60 * 60 * 24));
+}
+
+export function isDateToday(
+  dateKey: string | null | undefined,
+  now: Date = new Date()
+): boolean {
+  if (!dateKey) return false;
+  const clean = dateKey.slice(0, 10);
+  const utcToday = getTodayDateString(now);
+  const localToday = getLocalTodayDateString(now);
+  return clean === utcToday || clean === localToday;
+}
+
+/**
+ * Returns true if `dateKey` is today or yesterday (relative to UTC or local date),
+ * meaning a streak ending on `dateKey` is still active and has not been broken yet.
+ */
+export function isDateActiveForStreak(
+  dateKey: string | null | undefined,
+  now: Date = new Date()
+): boolean {
+  if (!dateKey) return false;
+  const clean = dateKey.slice(0, 10);
+  const utcToday = getTodayDateString(now);
+  const localToday = getLocalTodayDateString(now);
+  const diffUtc = getCalendarDayDiff(clean, utcToday);
+  const diffLocal = getCalendarDayDiff(clean, localToday);
+  return (diffUtc >= -1 && diffUtc <= 1) || (diffLocal >= -1 && diffLocal <= 1);
 }
 
 /**
@@ -175,6 +221,56 @@ export function getEffectiveActivityMap(
   }
 
   return map;
+}
+
+/**
+ * Computes the user's current active streak (in days).
+ * If the user has not practiced today or yesterday, their streak is broken and returns 0.
+ */
+export function getActiveStreak(
+  progress: UserProgressBlob,
+  now: Date = new Date()
+): number {
+  const lastActiveDate = progress.stats.lastActiveDate;
+  const storedActiveStreak = isDateActiveForStreak(lastActiveDate, now)
+    ? progress.stats.currentStreak || 0
+    : 0;
+
+  const map = getEffectiveActivityMap(progress);
+  const dates = Object.keys(map)
+    .filter((d) => map[d] > 0)
+    .sort();
+
+  let activeRunFromDates = 0;
+  if (dates.length > 0) {
+    const mostRecentDate = dates[dates.length - 1];
+    if (isDateActiveForStreak(mostRecentDate, now)) {
+      activeRunFromDates = 1;
+      for (let i = dates.length - 1; i > 0; i--) {
+        const diff = getCalendarDayDiff(dates[i - 1], dates[i]);
+        if (diff === 1) {
+          activeRunFromDates += 1;
+        } else if (diff > 1) {
+          break;
+        }
+      }
+    }
+  }
+
+  return Math.max(storedActiveStreak, activeRunFromDates);
+}
+
+/**
+ * Returns the number of verb tables completed today (0 if `lastActiveDate` is not today).
+ */
+export function getTablesCompletedToday(
+  progress: UserProgressBlob,
+  now: Date = new Date()
+): number {
+  if (!isDateToday(progress.stats.lastActiveDate, now)) {
+    return 0;
+  }
+  return progress.stats.tablesCompletedToday || 0;
 }
 
 /**
@@ -217,6 +313,37 @@ export function getLongestStreak(progress: UserProgressBlob): number {
 }
 
 /**
+ * Ensures `stats.currentStreak`, `stats.longestStreak`, and `stats.tablesCompletedToday`
+ * reflect whether a streak has expired, while preserving any prior streak in `longestStreak`.
+ */
+export function normalizeUserProgress(
+  progress: UserProgressBlob,
+  now: Date = new Date()
+): UserProgressBlob {
+  const longestStreak = getLongestStreak(progress);
+  const activeStreak = getActiveStreak(progress, now);
+  const tablesToday = getTablesCompletedToday(progress, now);
+
+  if (
+    progress.stats.currentStreak === activeStreak &&
+    progress.stats.longestStreak === longestStreak &&
+    progress.stats.tablesCompletedToday === tablesToday
+  ) {
+    return progress;
+  }
+
+  return {
+    ...progress,
+    stats: {
+      ...progress.stats,
+      currentStreak: activeStreak,
+      longestStreak,
+      tablesCompletedToday: tablesToday,
+    },
+  };
+}
+
+/**
  * Marks a verb's 3x2x3 table (18/18 cells) as completed:
  * - Adds/keeps it in `completed`
  * - Clears `inMatrixQueue` and resets relapse priority back to normal
@@ -229,6 +356,7 @@ export function recordTableCompletion(
   const nowIso = new Date().toISOString();
   const today = getTodayDateString();
   const existing = progress.verbs[verbId] || createEmptyVerbRecord(verbId);
+  const previousLongest = getLongestStreak(progress);
 
   const updatedVerb: VerbUserRecord = {
     ...existing,
@@ -262,6 +390,7 @@ export function recordTableCompletion(
     lastActiveDate = today;
   } else {
     tablesCompletedToday += 1;
+    currentStreak = Math.max(currentStreak || 0, 1);
   }
 
   totalTablesCompleted += 1;
@@ -273,7 +402,7 @@ export function recordTableCompletion(
   };
 
   const longestStreak = Math.max(
-    getLongestStreak(progress),
+    previousLongest,
     currentStreak
   );
 
@@ -326,6 +455,7 @@ export function recordFlashcardAttempt(
   isCorrect: boolean
 ): { updatedProgress: UserProgressBlob; triggeredRelapse: boolean } {
   const nowIso = new Date().toISOString();
+  const previousLongest = getLongestStreak(progress);
   const existing = progress.verbs[verbId] || {
     ...createEmptyVerbRecord(verbId),
     completed: true,
@@ -378,7 +508,7 @@ export function recordFlashcardAttempt(
     [today]: Math.max(prevActivity[today] || 0, 1),
   };
 
-  const updatedProgress: UserProgressBlob = {
+  const draftProgress: UserProgressBlob = {
     ...progress,
     updatedAt: nowIso,
     stats: {
@@ -388,6 +518,19 @@ export function recordFlashcardAttempt(
     verbs: {
       ...progress.verbs,
       [verbId]: updatedVerb,
+    },
+  };
+
+  const activeStreak = getActiveStreak(draftProgress);
+  const longestStreak = Math.max(previousLongest, activeStreak);
+
+  const updatedProgress: UserProgressBlob = {
+    ...draftProgress,
+    stats: {
+      ...draftProgress.stats,
+      currentStreak: activeStreak,
+      longestStreak,
+      tablesCompletedToday: getTablesCompletedToday(draftProgress),
     },
   };
 

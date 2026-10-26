@@ -1,5 +1,11 @@
 import { AuthUserSession, LeaderboardEntry, UserProgressBlob } from '../types';
-import { getLongestStreak, VERB_MAP } from './priorityQueue';
+import {
+  getActiveStreak,
+  getLongestStreak,
+  isDateActiveForStreak,
+  normalizeUserProgress,
+  VERB_MAP,
+} from './priorityQueue';
 
 const SESSION_STORAGE_KEY = 'czech_trainer_auth_session_v1';
 const LOCAL_USERS_DB_KEY = 'czech_trainer_local_users_v1';
@@ -148,7 +154,11 @@ export function loadLocalProgress(username: string): UserProgressBlob {
     if (!raw) return createInitialProgress(username);
     const parsed = JSON.parse(raw) as UserProgressBlob;
     if (parsed && parsed.version === 1 && parsed.verbs) {
-      return parsed;
+      const normalized = normalizeUserProgress(parsed);
+      if (normalized !== parsed) {
+        saveLocalProgress(normalized);
+      }
+      return normalized;
     }
     return createInitialProgress(username);
   } catch {
@@ -193,11 +203,13 @@ export async function fetchUserProgress(
       return { progress: local, syncedWithCloud: false };
     }
 
-    const remote = (await res.json()) as UserProgressBlob | null;
-    if (!remote || !remote.verbs) {
+    const remoteRaw = (await res.json()) as UserProgressBlob | null;
+    if (!remoteRaw || !remoteRaw.verbs) {
       await syncUserProgress(session, local);
       return { progress: local, syncedWithCloud: true };
     }
+
+    const remote = normalizeUserProgress(remoteRaw);
 
     // Choose whichever has more completed tables or newer timestamp
     const localCount = local.stats.totalTablesCompleted || 0;
@@ -208,6 +220,9 @@ export async function fetchUserProgress(
       (remoteCount === localCount && remote.updatedAt >= local.updatedAt)
     ) {
       saveLocalProgress(remote);
+      if (remote !== remoteRaw) {
+        await syncUserProgress(session, remote);
+      }
       return { progress: remote, syncedWithCloud: true };
     } else {
       // Push newer local state up to cloud
@@ -226,7 +241,8 @@ export async function syncUserProgress(
   session: AuthUserSession,
   progress: UserProgressBlob
 ): Promise<boolean> {
-  saveLocalProgress(progress);
+  const normalized = normalizeUserProgress(progress);
+  saveLocalProgress(normalized);
 
   if (session.token.startsWith('local-dev-token:')) {
     return false;
@@ -239,7 +255,7 @@ export async function syncUserProgress(
         'Content-Type': 'application/json',
         Authorization: `Bearer ${session.token}`,
       },
-      body: JSON.stringify(progress),
+      body: JSON.stringify(normalized),
     });
     return res.ok;
   } catch {
@@ -259,11 +275,28 @@ function progressToLeaderboardEntry(
   return {
     username: username.toLowerCase(),
     displayName,
-    currentStreak: progress.stats.currentStreak || 0,
+    currentStreak: getActiveStreak(progress),
     longestStreak: getLongestStreak(progress),
     masteredCount,
     totalTablesCompleted: progress.stats.totalTablesCompleted || 0,
     lastActiveDate: progress.stats.lastActiveDate || null,
+  };
+}
+
+function sanitizeRemoteLeaderboardEntry(
+  entry: LeaderboardEntry
+): LeaderboardEntry {
+  const rawStreak = entry.currentStreak || 0;
+  const longestStreak = Math.max(entry.longestStreak || 0, rawStreak);
+  const hasActiveStreak =
+    entry.lastActiveDate !== null &&
+    entry.lastActiveDate !== undefined &&
+    isDateActiveForStreak(entry.lastActiveDate);
+
+  return {
+    ...entry,
+    currentStreak: hasActiveStreak ? rawStreak : 0,
+    longestStreak,
   };
 }
 
@@ -308,7 +341,8 @@ export async function fetchLeaderboard(
       if (res.ok && contentType.includes('application/json')) {
         const data = (await res.json()) as { leaderboard?: LeaderboardEntry[] };
         if (Array.isArray(data.leaderboard)) {
-          for (const remoteEntry of data.leaderboard) {
+          for (const rawRemoteEntry of data.leaderboard) {
+            const remoteEntry = sanitizeRemoteLeaderboardEntry(rawRemoteEntry);
             const uname = remoteEntry.username.toLowerCase();
             if (uname === session.username.toLowerCase()) {
               // Keep live currentProgress if it has >= masteredCount / tables

@@ -14,6 +14,7 @@ import {
 import { AuthUserSession, LeaderboardEntry, UserProgressBlob } from '../types';
 import {
   ALL_VERBS,
+  getActiveStreak,
   getEffectiveActivityMap,
   getLongestStreak,
   VERB_MAP,
@@ -71,10 +72,17 @@ export const StreakStatsModal: React.FC<StreakStatsModalProps> = ({
     if (nudgingUser || nudgedUsers[key]) return;
     setNudgingUser(key);
     try {
-      await sendLeaderboardNudge(session, target.username, target.displayName);
+      await sendLeaderboardNudge(
+        session,
+        target.username,
+        target.displayName,
+        target.currentStreak
+      );
       setNudgedUsers((prev) => ({ ...prev, [key]: true }));
       setNudgeBanner(
-        `Sent to ${target.displayName}: "${session.displayName} says you keep conjugating!"`
+        target.currentStreak > 0
+          ? `Sent to ${target.displayName}: "${session.displayName} says you keep conjugating! Keep your ${target.currentStreak}-day streak alive!"`
+          : `Sent to ${target.displayName}: "${session.displayName} says you keep conjugating! Start a new streak today!"`
       );
     } finally {
       setNudgingUser(null);
@@ -85,7 +93,7 @@ export const StreakStatsModal: React.FC<StreakStatsModalProps> = ({
 
   const activityMap = useMemo(() => getEffectiveActivityMap(progress), [progress]);
   const longestStreak = useMemo(() => getLongestStreak(progress), [progress]);
-  const currentStreak = progress.stats.currentStreak || 0;
+  const currentStreak = useMemo(() => getActiveStreak(progress), [progress]);
   const masteredCount = useMemo(
     () =>
       Object.values(progress.verbs).filter(
@@ -181,7 +189,9 @@ export const StreakStatsModal: React.FC<StreakStatsModalProps> = ({
           <div className="flex items-center gap-2.5">
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center bg-[#18181B]"
-              style={{ color: 'var(--tr-cyan)' }}
+              style={{
+                color: currentStreak > 0 ? 'var(--tr-cyan)' : '#8E8E93',
+              }}
             >
               <Flame className="w-5 h-5" />
             </div>
@@ -211,17 +221,23 @@ export const StreakStatsModal: React.FC<StreakStatsModalProps> = ({
             <div className="flex items-center justify-center gap-1 text-xs font-semibold text-[#8E8E93]">
               <Flame
                 className="w-3.5 h-3.5"
-                style={{ color: 'var(--tr-cyan)' }}
+                style={{
+                  color: currentStreak > 0 ? 'var(--tr-cyan)' : '#8E8E93',
+                }}
               />
               <span>Current</span>
             </div>
             <div
               className="font-display text-2xl sm:text-3xl"
-              style={{ color: 'var(--tr-cyan)' }}
+              style={{
+                color: currentStreak > 0 ? 'var(--tr-cyan)' : '#8E8E93',
+              }}
             >
-              {currentStreak}d
+              {currentStreak > 0 ? `${currentStreak}d` : '0d'}
             </div>
-            <div className="text-[11px] text-[#8E8E93]">Active streak</div>
+            <div className="text-[11px] text-[#8E8E93]">
+              {currentStreak > 0 ? 'Active streak' : 'No active streak'}
+            </div>
           </div>
 
           <div className="tr-card p-4 text-center space-y-1">
@@ -545,13 +561,23 @@ export const StreakStatsModal: React.FC<StreakStatsModalProps> = ({
                         >
                           {row.masteredCount} mastered
                         </div>
-                        <div className="text-xs font-semibold text-white flex items-center justify-end gap-1">
-                          <Flame
-                            className="w-3.5 h-3.5"
-                            style={{ color: 'var(--tr-cyan)' }}
-                          />
-                          <span>{row.currentStreak}d streak</span>
-                        </div>
+                        {row.currentStreak > 0 ? (
+                          <div className="text-xs font-semibold text-white flex items-center justify-end gap-1">
+                            <Flame
+                              className="w-3.5 h-3.5"
+                              style={{ color: 'var(--tr-cyan)' }}
+                            />
+                            <span>{row.currentStreak}d active streak</span>
+                          </div>
+                        ) : (
+                          <div className="text-xs font-semibold text-[#8E8E93] flex items-center justify-end gap-1">
+                            <Flame
+                              className="w-3.5 h-3.5"
+                              style={{ color: '#8E8E93' }}
+                            />
+                            <span>No active streak</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

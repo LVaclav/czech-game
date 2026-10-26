@@ -34,7 +34,12 @@ import { CompletedListView } from './components/CompletedListView';
 import { IosInstallBanner } from './components/IosInstallBanner';
 import { NotificationPromptModal } from './components/NotificationPromptModal';
 import { StreakStatsModal } from './components/StreakStatsModal';
-import { ALL_VERBS, VERB_MAP } from './lib/priorityQueue';
+import {
+  ALL_VERBS,
+  getActiveStreak,
+  getTablesCompletedToday,
+  VERB_MAP,
+} from './lib/priorityQueue';
 
 type ActiveTab = 'table' | 'flashcards' | 'completed';
 
@@ -223,6 +228,8 @@ export const App: React.FC = () => {
   const relapsedCount = Object.values(progress.verbs).filter(
     (v) => v.completed && v.inMatrixQueue && VERB_MAP[v.verbId]
   ).length;
+  const activeStreak = getActiveStreak(progress);
+  const tablesCompletedToday = getTablesCompletedToday(progress);
 
   const TAB_TITLES: Record<ActiveTab, string> = {
     table: 'Conjugate',
@@ -241,6 +248,7 @@ export const App: React.FC = () => {
       <IosInstallBanner />
       <NotificationPromptModal
         session={session}
+        activeStreak={activeStreak}
         onPermissionChange={(perm) => setNotifPermission(perm)}
       />
       {showStreakModal && (
@@ -299,12 +307,22 @@ export const App: React.FC = () => {
             >
               <Flame
                 className="w-4 h-4"
-                style={{ color: 'var(--tr-cyan)' }}
+                style={{
+                  color: activeStreak > 0 ? 'var(--tr-cyan)' : '#8E8E93',
+                }}
               />
-              <span>{progress.stats.currentStreak}d</span>
-              <span className="text-[#8E8E93] hidden sm:inline">
-                • {progress.stats.tablesCompletedToday} today
-              </span>
+              {activeStreak > 0 ? (
+                <>
+                  <span>{activeStreak}d</span>
+                  <span className="text-[#8E8E93] hidden sm:inline">
+                    • {tablesCompletedToday} today
+                  </span>
+                </>
+              ) : (
+                <span className="text-[#8E8E93] text-[13px] font-semibold">
+                  No active streak
+                </span>
+              )}
             </button>
 
             <div className="relative">
@@ -356,7 +374,7 @@ export const App: React.FC = () => {
                       <button
                         type="button"
                         onClick={async () => {
-                          await sendTestNotification(session);
+                          await sendTestNotification(session, progress);
                           setShowMoreMenu(false);
                         }}
                         className="w-full text-left px-3.5 py-2.5 rounded-[18px] text-[13px] font-semibold text-white hover:bg-white/5 flex items-center justify-between cursor-pointer"
@@ -386,7 +404,9 @@ export const App: React.FC = () => {
                         <div>
                           <div>Enable Notifications</div>
                           <div className="text-[11px] font-normal text-[#8E8E93]">
-                            7 PM streak & nudges
+                            {activeStreak > 0
+                              ? '7 PM streak & nudges'
+                              : '7 PM daily reminders & nudges'}
                           </div>
                         </div>
                         <Bell

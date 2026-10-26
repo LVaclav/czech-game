@@ -16,6 +16,102 @@ interface StoredProgressSummary {
     tablesCompletedToday?: number;
     activityByDate?: Record<string, number>;
   };
+  verbs?: Record<
+    string,
+    {
+      firstCompletedAt?: string;
+      lastTableCompletedAt?: string;
+      flashcards?: {
+        lastReviewedAt?: string | null;
+      };
+    }
+  >;
+}
+
+function getCalendarDayDiff(earlierDateKey: string, laterDateKey: string): number {
+  const cleanEarlier = earlierDateKey.slice(0, 10);
+  const cleanLater = laterDateKey.slice(0, 10);
+  const t1 = new Date(`${cleanEarlier}T00:00:00Z`).getTime();
+  const t2 = new Date(`${cleanLater}T00:00:00Z`).getTime();
+  if (Number.isNaN(t1) || Number.isNaN(t2)) return Infinity;
+  return Math.round((t2 - t1) / (1000 * 60 * 60 * 24));
+}
+
+function isDateActiveForStreak(
+  dateKey: string | null | undefined,
+  localDateKey: string,
+  utcDateKey: string
+): boolean {
+  if (!dateKey) return false;
+  const clean = dateKey.slice(0, 10);
+  const diffLocal = getCalendarDayDiff(clean, localDateKey);
+  const diffUtc = getCalendarDayDiff(clean, utcDateKey);
+  return (diffLocal >= -1 && diffLocal <= 1) || (diffUtc >= -1 && diffUtc <= 1);
+}
+
+function getActiveStreak(
+  progress: StoredProgressSummary | null,
+  localDateKey: string,
+  utcDateKey: string
+): number {
+  if (!progress || !progress.stats) return 0;
+
+  const storedActiveStreak = isDateActiveForStreak(
+    progress.stats.lastActiveDate,
+    localDateKey,
+    utcDateKey
+  )
+    ? progress.stats.currentStreak || 0
+    : 0;
+
+  const activityMap: Record<string, number> = {
+    ...(progress.stats.activityByDate || {}),
+  };
+
+  if (progress.stats.lastActiveDate) {
+    const d = progress.stats.lastActiveDate.slice(0, 10);
+    activityMap[d] = Math.max(
+      activityMap[d] || 0,
+      progress.stats.tablesCompletedToday || 1
+    );
+  }
+
+  for (const rec of Object.values(progress.verbs || {})) {
+    if (rec?.firstCompletedAt) {
+      const d = rec.firstCompletedAt.slice(0, 10);
+      activityMap[d] = Math.max(activityMap[d] || 0, 1);
+    }
+    if (rec?.lastTableCompletedAt) {
+      const d = rec.lastTableCompletedAt.slice(0, 10);
+      activityMap[d] = Math.max(activityMap[d] || 0, 1);
+    }
+    if (rec?.flashcards?.lastReviewedAt) {
+      const d = rec.flashcards.lastReviewedAt.slice(0, 10);
+      activityMap[d] = Math.max(activityMap[d] || 0, 1);
+    }
+  }
+
+  const dates = Object.keys(activityMap)
+    .filter((d) => activityMap[d] > 0)
+    .sort();
+
+  let activeRunFromDates = 0;
+  if (dates.length > 0) {
+    const mostRecentDate = dates[dates.length - 1];
+    if (isDateActiveForStreak(mostRecentDate, localDateKey, utcDateKey)) {
+      activeRunFromDates = 1;
+      for (let i = dates.length - 1; i > 0; i--) {
+        const diff = getCalendarDayDiff(dates[i - 1], dates[i]);
+        if (diff === 1) {
+          activeRunFromDates += 1;
+        } else if (diff > 1) {
+          break;
+        }
+      }
+    }
+  }
+
+  return Math.max(storedActiveStreak, activeRunFromDates);
 }
 
 function hasPracticedToday(
@@ -89,16 +185,16 @@ export default async (req: Request): Promise<Response> => {
           return;
         }
 
-        const currentStreak = progress?.stats?.currentStreak || 0;
+        const activeStreak = getActiveStreak(progress, localDateKey, utcDateKey);
         const payload: PushNotificationPayload = {
           title:
-            currentStreak > 0
-              ? `🔥 Keep your ${currentStreak}-day Czech streak alive!`
-              : '🇨🇿 Time for your daily Czech verb!',
+            activeStreak > 0
+              ? `🔥 Keep your ${activeStreak}-day Czech streak alive!`
+              : '🇨🇿 Start a new Czech streak today!',
           body:
-            currentStreak > 0
+            activeStreak > 0
               ? "It's 7:00 PM and you haven't practiced yet today. Complete a quick verb table to save your streak!"
-              : "It's 7:00 PM — practice a quick 3×2 verb table or flashcard set today!",
+              : "It's 7:00 PM and you have no active streak. Complete a quick 3×2 verb table today to start a new streak!",
           tag: `daily-streak-reminder-${localDateKey}`,
           url: '/',
           type: 'streak-reminder',
